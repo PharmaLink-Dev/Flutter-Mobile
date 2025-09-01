@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ocr_homepage.dart';
+import '../features/scan/ocr_homepage.dart';
+
 
 void main() {
   runApp(const MyApp());
