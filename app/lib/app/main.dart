@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../features/scan/ocr_homepage.dart';
-
+import 'package:go_router/go_router.dart';
+import 'app_routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,14 +11,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'OCR Scanner App',
+    return MaterialApp.router(
+      routerConfig: appRouter,
+      title: 'PhamaLink',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const OcrHomepage(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
