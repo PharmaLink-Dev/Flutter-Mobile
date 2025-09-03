@@ -1,21 +1,28 @@
+//material app routes using go_router with stateful shell route
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// Screens
 import 'features/home/presentation/home_screen.dart';
 import 'features/scan/presentation/scan_screen.dart';
 import 'features/history/presentation/history_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
 
+/// App Router using GoRouter with StatefulShellRoute
+/// -------------------------------------------------
+/// Manages bottom navigation and page switching.
 final GoRouter appRouter = GoRouter(
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
-          _ShellScaffold(navigationShell: navigationShell),
+          ShellScaffold(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/',
-              builder: (_, __) => const HomeScreen(),
+              path: '/',builder: (_, __) => const HomeScreen(),
+              //routes: [GoRoute(path: '/seeAll', builder: (_, __) => const HomeScreen())],
               // ตัวอย่างหน้าลูกของ Home (เพิ่มได้ตามต้องการ):
               // routes: [GoRoute(path: 'detail', builder: ...)],
             ),
@@ -41,15 +48,18 @@ final GoRouter appRouter = GoRouter(
   ],
 );
 
-class _ShellScaffold extends StatefulWidget {
+/// ShellScaffold
+/// -------------------------------------------------
+/// Wraps navigation shell with a Scaffold and a BottomNavigationBar.
+class ShellScaffold extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
-  const _ShellScaffold({required this.navigationShell});
+  const ShellScaffold({super.key, required this.navigationShell});
 
   @override
-  State<_ShellScaffold> createState() => _ShellScaffoldState();
+  State<ShellScaffold> createState() => _ShellScaffoldState();
 }
 
-class _ShellScaffoldState extends State<_ShellScaffold> {
+class _ShellScaffoldState extends State<ShellScaffold> {
   int get _currentIndex => widget.navigationShell.currentIndex;
 
   void _onTap(int index) {
@@ -63,17 +73,24 @@ class _ShellScaffoldState extends State<_ShellScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  body: widget.navigationShell,
-  bottomNavigationBar: NavigationBar(
-    selectedIndex: _currentIndex,
-    onDestinationSelected: _onTap,
-    destinations: const [
-      NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-      NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: 'Scan'),
-      NavigationDestination(icon: Icon(Icons.history), label: 'History'),
-      NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
-    ],
-  ),
-);
+      body: widget.navigationShell,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onTap,
+        items: const [
+          BottomNavigationBarItem(
+              icon: FaIcon(FontAwesomeIcons.house), label: "Home"),
+          BottomNavigationBarItem(
+              icon: FaIcon(FontAwesomeIcons.qrcode), label: "Scan"),
+          BottomNavigationBarItem(
+              icon: FaIcon(FontAwesomeIcons.clockRotateLeft), label: "History"),
+          BottomNavigationBarItem(
+              icon: FaIcon(FontAwesomeIcons.user), label: "Profile"),
+        ],
+      ),
+    );
   }
 }
