@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:app/shared/app_colors.dart'; // เพิ่ม import สี
 
 /**
  * HeaderSection Widget
@@ -20,18 +21,25 @@ class HeaderSection extends StatelessWidget {
           children: const [
             Text(
               "Hello, Mr. Somchai!", // greeting message
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text, // ใช้สีจาก app_colors.dart
+              ),
             ),
             Text(
               "Age 65 • Stay healthy today!", // sub message
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(
+                color: AppColors.textSecondary, // ใช้สีจาก app_colors.dart
+                fontSize: 15,
+              ),
             ),
           ],
         ),
         const CircleAvatar( // CircleAvatar: circular profile icon
           radius: 24,
-          backgroundColor: Colors.blue,
-          child: FaIcon(FontAwesomeIcons.user, color: Colors.white, size: 22),
+          backgroundColor: AppColors.primary, // ใช้สีจาก app_colors.dart
+          child: FaIcon(FontAwesomeIcons.user, color: AppColors.surface, size: 22), // ใช้สีจาก app_colors.dart
         ),
       ],
     );

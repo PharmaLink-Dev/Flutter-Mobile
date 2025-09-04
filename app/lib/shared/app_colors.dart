@@ -10,6 +10,12 @@ class AppColors {
   static const Color primaryDark = Color(0xFF0FAE8F);
   static const Color primaryLight = Color(0xFF66E0CC);
 
+  // New colors
+  static const Color aqua = Color(0xFF1DCEDF); // bright cyan-green (new)
+  static const Color aquaLight = Color(0xFF9CF6FB); // light cyan (new)
+  static const Color mint = Color(0xFF78FFD6); // mint green (new)
+  static const Color tealBright = Color(0xFF00C9A7); // bright teal (new)
+
   // Neutrals / Text
   static const Color text = Color(0xFF22303C); // deep slate for titles
   static const Color textSecondary = Color(0xFF6B7B8A); // muted gray for body
@@ -56,5 +62,24 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [Color(0xFF19C7A5), Color(0xFF0BBF95)],
+  );
+
+  // New gradients
+  static const LinearGradient scanLabel = LinearGradient(
+    colors: [AppColors.primary, AppColors.tealBright], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient fdaNumber = LinearGradient(
+    colors: [AppColors.aquaLight, AppColors.aqua], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient mintBlue = LinearGradient(
+    colors: [AppColors.mint, AppColors.aqua], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }
