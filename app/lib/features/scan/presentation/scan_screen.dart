@@ -1,3 +1,4 @@
+import 'package:app/features/ingredient/presentation/confirmation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
 
@@ -78,7 +79,14 @@ class ScanScreen extends StatelessWidget {
                   ),
                 ),
                 child: ElevatedButton(
-                  onPressed: null, // demo → ยังไม่ทำงาน
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ConfirmationPage(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(20),
