@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dotted_border/dotted_border.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -22,12 +23,17 @@ class ScanScreen extends StatelessWidget {
 
           // กรอบเล็งตรงกลาง (overlay)
           Center(
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.greenAccent, width: 3),
-                borderRadius: BorderRadius.circular(12),
+            child: DottedBorder(
+              borderType: BorderType.Rect,
+              color: Colors.white,
+              strokeWidth: 3,
+              dashPattern: const [8, 4], // ความยาวเส้น/ช่องว่าง
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                ),
               ),
             ),
           ),
