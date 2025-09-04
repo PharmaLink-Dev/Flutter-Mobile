@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:app/models/ingredient.dart';
 import 'package:app/utils/warning_dialog.dart';
 import 'ingredient_detail_page.dart';
-import 'package:app/constants/app_colors.dart';
+import 'package:app/shared/app_colors.dart';
+import 'package:app/constants/ingredient_data.dart';
 
 class ResultPage extends StatefulWidget {
   const ResultPage({super.key});
@@ -39,7 +40,7 @@ class _ResultPageState extends State<ResultPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('ผลการวิเคราะห์')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +67,7 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       alignment: Alignment.center,
       child: Column(
         children: const [
@@ -105,7 +106,7 @@ class _ResultPageState extends State<ResultPage> {
         statusColor = AppColors.red;
         break;
       case 'เสี่ยง':
-        statusColor = AppColors.yellow;
+        statusColor = AppColors.orange;
         break;
       default:
         statusColor = AppColors.green;
@@ -122,7 +123,11 @@ class _ResultPageState extends State<ResultPage> {
           ),
           child: Text(
             ingredient.status,
-            style: TextStyle(color: statusColor, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: statusColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
           ),
         ),
         onTap: () {

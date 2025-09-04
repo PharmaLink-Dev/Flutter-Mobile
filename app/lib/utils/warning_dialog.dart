@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
+import '../shared/app_colors.dart';
 
 void showWarningDialog(
   BuildContext context, {
@@ -58,7 +58,10 @@ void showWarningDialog(
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
-              child: const Text('รับทราบ'),
+              child: const Text(
+                'รับทราบ',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ],

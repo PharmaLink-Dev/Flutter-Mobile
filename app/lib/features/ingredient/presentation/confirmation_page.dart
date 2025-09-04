@@ -57,7 +57,10 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     });
                   },
                 ),
-                const Text('ข้อมูลทั้งหมดถูกต้องและครบถ้วน'),
+                const Text(
+                  'ข้อมูลทั้งหมดถูกต้องและครบถ้วน',
+                  style: TextStyle(fontSize: 18),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -69,11 +72,21 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         MaterialPageRoute(builder: (context) => ResultPage()),
                       );
                     }
-                  : null,
+                  : null, // disabled ถ้า isConfirmed = false
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 60),
+                backgroundColor: isConfirmed
+                    ? Colors.green
+                    : Colors.grey, // สีปุ่ม
+                foregroundColor: Colors.white, // สีข้อความ
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12), // ปรับมุมโค้ง
+                ),
               ),
-              child: const Text('วิเคราะห์ผล'),
+              child: const Text(
+                'วิเคราะห์ผล',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),

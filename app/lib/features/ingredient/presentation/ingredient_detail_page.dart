@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app/models/ingredient.dart';
-import 'package:app/constants/app_colors.dart';
+import 'package:app/shared/app_colors.dart';
 
 class IngredientDetailPage extends StatelessWidget {
   final Ingredient ingredient;
@@ -54,7 +54,7 @@ class IngredientDetailPage extends StatelessWidget {
             'รุนแรง',
             AppColors.red,
           ),
-          _buildRiskItem('กล้ามเนื้ออ่อนแรง', 'ปานกลาง', AppColors.yellow),
+          _buildRiskItem('กล้ามเนื้ออ่อนแรง', 'ปานกลาง', AppColors.orange),
           const SizedBox(height: 20),
           const Text(
             'ข้อแนะนำ',
@@ -109,7 +109,7 @@ class IngredientDetailPage extends StatelessWidget {
           _buildRiskItem(
             'ยาลดความดันกลุ่ม ACEI/ARBs',
             'ปานกลาง',
-            AppColors.yellow,
+            AppColors.orange,
           ),
         ],
       ),

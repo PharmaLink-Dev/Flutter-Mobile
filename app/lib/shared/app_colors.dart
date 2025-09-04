@@ -28,6 +28,17 @@ class AppColors {
   // Extras
   static const Color outline = Color(0xFFE3F0EC);
   static const Color overlay = Color(0x3317C5A3); // 20% primary
+
+  static const red = Colors.red;
+  static const green = Colors.green;
+  static const orange = Colors.orange;
+  static const yellow = Color.fromARGB(255, 132, 119, 4);
+  static const white = Colors.white;
+  static const black = Colors.black;
+
+  static const grey = Colors.grey;
+  static const lightGrey = Color(0xFFF5F5F5);
+  static const darkGrey = Color(0xFF616161);
 }
 
 class AppGradients {
@@ -37,20 +48,13 @@ class AppGradients {
   static const LinearGradient background = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      AppColors.bgMintLight,
-      AppColors.bgMintLighter,
-    ],
+    colors: [AppColors.bgMintLight, AppColors.bgMintLighter],
   );
 
   /// CTA button gradient
   static const LinearGradient button = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF19C7A5),
-      Color(0xFF0BBF95),
-    ],
+    colors: [Color(0xFF19C7A5), Color(0xFF0BBF95)],
   );
 }
-
