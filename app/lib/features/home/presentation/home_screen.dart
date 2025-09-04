@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/shared/app_colors.dart'; // เพิ่ม import สี
 
 // Import custom widgets
 import '../widgets/header_section.dart';
@@ -30,6 +31,7 @@ class HomeScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
+          color: AppColors.background, // ใช้สี background จาก app_colors.dart
         ),
 
         // Clip for rounded screen edges
@@ -37,6 +39,7 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           child: Container(
             padding: const EdgeInsets.all(20),
+            color: AppColors.surface, // ใช้สีพื้นหลังหน้าจอ mockup
             child: ListView(
               children: const [
                 HeaderSection(),       // greeting + avatar

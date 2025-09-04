@@ -1,7 +1,7 @@
 //material app routes using go_router with stateful shell route
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:app/shared/app_colors.dart';
 
 // Screens
 import 'features/home/presentation/home_screen.dart';
@@ -77,18 +77,30 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: AppColors.primary,      // ✅ ใช้สีเขียวแบรนด์
+        unselectedItemColor: AppColors.textSecondary, // ✅ สีเทาอ่อน
         onTap: _onTap,
         items: const [
           BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.house), label: "Home"),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home), // ✅ filled เมื่อ active
+            label: "Home",
+          ),
           BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.qrcode), label: "Scan"),
+            icon: Icon(Icons.qr_code_scanner_outlined),
+            activeIcon: Icon(Icons.qr_code_scanner),
+            label: "Scan",
+          ),
           BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.clockRotateLeft), label: "History"),
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: "History",
+          ),
           BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.user), label: "Profile"),
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: "Profile",
+          ),
         ],
       ),
     );
