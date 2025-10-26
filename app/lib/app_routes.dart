@@ -14,6 +14,13 @@ import 'features/profile/presentation/profile_screen.dart';
 /// Manages bottom navigation and page switching.
 final GoRouter appRouter = GoRouter(
   routes: [
+    // แยก Scan ออกมาเป็น route แยก (ไม่อยู่ใน StatefulShellRoute)
+    GoRoute(
+      path: '/scan',
+      pageBuilder: (context, state) {
+        return MaterialPage(key: state.pageKey, child: const ScanScreen());
+      },
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           ShellScaffold(navigationShell: navigationShell),
@@ -21,26 +28,29 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/',builder: (_, __) => const HomeScreen(),
+              path: '/',
+              builder: (_, __) => const HomeScreen(),
               //routes: [GoRoute(path: '/seeAll', builder: (_, __) => const HomeScreen())],
               // ตัวอย่างหน้าลูกของ Home (เพิ่มได้ตามต้องการ):
               // routes: [GoRoute(path: 'detail', builder: ...)],
             ),
           ],
         ),
+
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
+            GoRoute(
+              path: '/history',
+              builder: (_, __) => const HistoryScreen(),
+            ),
           ],
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/history', builder: (_, __) => const HistoryScreen()),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
+            GoRoute(
+              path: '/profile',
+              builder: (_, __) => const ProfileScreen(),
+            ),
           ],
         ),
       ],
@@ -67,7 +77,7 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       index,
       initialLocation: index == _currentIndex,
     );
-    setState(() {}); 
+    setState(() {});
   }
 
   @override
@@ -77,7 +87,7 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,      // ✅ ใช้สีเขียวแบรนด์
+        selectedItemColor: AppColors.primary, // ✅ ใช้สีเขียวแบรนด์
         unselectedItemColor: AppColors.textSecondary, // ✅ สีเทาอ่อน
         onTap: _onTap,
         items: const [

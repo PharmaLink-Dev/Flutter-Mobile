@@ -1,107 +1,228 @@
-import 'package:app/features/ingredient/presentation/confirmation_page.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
+import 'package:go_router/go_router.dart'; // Added for navigation
 
-class ScanScreen extends StatelessWidget {
+class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
 
   @override
+  State<ScanScreen> createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  CameraController? _controller;
+  Future<void>? _initializeControllerFuture;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint("🔄 ScanScreen initState called");
+    _initCamera();
+  }
+
+  Future<void> _initCamera() async {
+    try {
+      // Dispose existing controller if any
+      await _controller?.dispose();
+      _controller = null;
+      _initializeControllerFuture = null;
+
+      final cameras = await availableCameras();
+
+      if (cameras.isEmpty) {
+        setState(() {
+          _errorMessage = "No camera found (emulator may not support it)";
+        });
+        return;
+      }
+
+      final backCamera = cameras.firstWhere(
+        (cam) => cam.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+
+      _controller = CameraController(
+        backCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
+
+      _initializeControllerFuture = _controller!.initialize();
+      await _initializeControllerFuture;
+
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint("Camera init error: $e");
+      if (mounted) {
+        setState(() {
+          _errorMessage = "Cannot open camera: $e";
+        });
+      }
+    }
+  }
+
+  Future<void> _takePicture() async {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      _showError("Camera is not ready");
+      return;
+    }
+
+    try {
+      final image = await _controller!.takePicture();
+      if (mounted) {
+        context.go("/"); // Navigate back to home
+      }
+    } catch (e) {
+      debugPrint("Take picture error: $e");
+      _showError("Failed to take picture: $e");
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _closeCameraAndExit() async {
+    try {
+      await _controller?.dispose();
+      _controller = null;
+    } catch (e) {
+      debugPrint("Error disposing camera: $e");
+    }
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) return;
+    context.go('/');
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Show error if any
+    if (_errorMessage != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white, size: 64),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => context.pop(), // Go back
+                child: const Text("Back"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Loading
+    if (_controller == null || _initializeControllerFuture == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text("Opening camera...", style: TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Barcode'), centerTitle: true),
-      body: Stack(
-        children: [
-          // พื้นหลังกล้อง (ตอนนี้ยังเป็นสีดำแทนกล้อง)
-          Container(
-            color: Colors.black, //จะสามารถเปลี่ยนเป็นกล้องได้ตรงนี้ในอนาคต
-            child: const Center(
-              child: Text(
-                'Camera Preview Placeholder',
-                style: TextStyle(color: Colors.white54),
-              ),
-            ),
-          ),
-
-          // กรอบเล็งตรงกลาง (overlay)
-          Center(
-            child: DottedBorder(
-              borderType: BorderType.Rect,
-              color: Colors.white,
-              strokeWidth: 3,
-              dashPattern: const [8, 4], // ความยาวเส้น/ช่องว่าง
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
+      backgroundColor: Colors.black,
+      body: FutureBuilder(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, color: Colors.red, size: 64),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Error occurred: ${snapshot.error}",
+                      style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _closeCameraAndExit,
+                      child: const Text("Back"),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
+              );
+            }
 
-          // ปุ่มแฟลช
-          Positioned(
-            top: 20,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.flash_on, color: Colors.white, size: 30),
-              onPressed: null, // function เปิด-ปิดแฟลช (demo → ยังไม่ทำงาน)
-            ),
-          ),
+            return Stack(
+              children: [
+                Positioned.fill(child: CameraPreview(_controller!)),
 
-          // ปุ่มสลับกล้อง
-          Positioned(
-            top: 80,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(
-                Icons.cameraswitch,
-                color: Colors.white,
-                size: 30,
-              ),
-              onPressed:
-                  null, // function สลับกล้องหน้า-หลัง (demo → ยังไม่ทำงาน)
-            ),
-          ),
-
-          // ปุ่มถ่ายรูปตรงล่าง
-          Positioned(
-            bottom: 40,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white, // สีขอบ
-                    width: 2, // ความหนาของขอบ
-                  ),
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ConfirmationPage(),
+                // Cancel button
+                SafeArea(
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.black.withOpacity(0.5),
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: _closeCameraAndExit,
+                        ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(20),
-                    backgroundColor: Colors.white24,
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt,
-                    size: 40,
-                    color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
-        ],
+
+                // Take picture button
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: FloatingActionButton(
+                      onPressed: _takePicture,
+                      backgroundColor: Colors.white,
+                      child: const Icon(Icons.camera, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            );
+          }
+        },
       ),
     );
   }
