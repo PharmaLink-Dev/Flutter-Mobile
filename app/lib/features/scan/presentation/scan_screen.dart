@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // Added for navigation
+import 'package:dotted_border/dotted_border.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -185,6 +186,23 @@ class _ScanScreenState extends State<ScanScreen> {
             return Stack(
               children: [
                 Positioned.fill(child: CameraPreview(_controller!)),
+
+                // Center dotted frame
+                Center(
+                  child: DottedBorder(
+                    borderType: BorderType
+                        .RRect, // ใช้ RRect เพื่อให้ corner radius ทำงาน
+                    radius: const Radius.circular(22),
+                    color: Colors.white,
+                    strokeWidth: 3,
+                    dashPattern: const [8, 4], // length of dash / gap
+                    child: Container(
+                      width: 280,
+                      height: 420,
+                      color: Colors.transparent, // ใส่โปร่งใส
+                    ),
+                  ),
+                ),
 
                 // Cancel button
                 SafeArea(
