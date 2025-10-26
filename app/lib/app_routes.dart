@@ -36,7 +36,11 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
+          ],
+        ),
         StatefulShellBranch(
           routes: [
             GoRoute(
