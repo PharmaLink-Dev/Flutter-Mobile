@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>ต้องการใช้กล้องเพื่อถ่ายภาพสำหรับ OCR</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ต้องการเข้าถึงรูปภาพเพื่อเลือกและครอบภาพ</string>
 </dict>
 </plist>
