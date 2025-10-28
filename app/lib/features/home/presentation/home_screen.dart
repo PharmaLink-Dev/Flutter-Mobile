@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:app/shared/app_colors.dart'; // เพิ่ม import สี
 
 // Import custom widgets
-import '../widgets/header_section.dart';
 import '../widgets/search_bar.dart';
 import '../widgets/quick_actions.dart';
 import '../widgets/recent_scans_title.dart';
@@ -13,7 +12,6 @@ import '../widgets/recent_scan_list.dart';
  * ----------------
  * Main demo content for the Home tab.
  * Displays:
- * - Greeting + avatar
  * - Search bar
  * - Quick actions
  * - Recent scans
@@ -26,33 +24,19 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      // Phone mockup container (fixed width & height)
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: AppColors.background, // ใช้สี background จาก app_colors.dart
-        ),
-
-        // Clip for rounded screen edges
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            color: AppColors.surface, // ใช้สีพื้นหลังหน้าจอ mockup
-            child: ListView(
-              children: const [
-                HeaderSection(),       // greeting + avatar
-                SizedBox(height: 20),
-                SearchBarWidget(),     // search bar
-                SizedBox(height: 20),
-                QuickActions(),        // grid of shortcuts
-                SizedBox(height: 20),
-                RecentScansTitle(),    // "Recent Scans" title
-                RecentScanList(),      // mock list
-              ],
-            ),
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: const [
+            SearchBarWidget(),     // search bar
+            SizedBox(height: 20),
+            QuickActions(),        // grid of shortcuts
+            SizedBox(height: 20),
+            RecentScansTitle(),    // "Recent Scans" title
+            RecentScanList(),      // mock list
+          ],
         ),
       ),
     );
