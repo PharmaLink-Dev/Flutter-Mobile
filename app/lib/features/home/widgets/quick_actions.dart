@@ -9,6 +9,29 @@ class QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // List of action cards
+    final actionCards = [
+      ActionCard(
+        gradient: AppGradients.scanLabel, // สีพื้นหลังแบบ gradient
+        icon: FontAwesomeIcons.camera, // ไอคอนกล้อง
+        title: "Scan Label", // ชื่อปุ่ม
+        subtitle: "Camera scan", // คำอธิบาย
+        onTap: () => context.go('/scan'), // นำทางไปหน้า /scan
+      ),
+      ActionCard(
+        gradient: AppGradients.fdaNumber, // สีพื้นหลังแบบ gradient
+        icon: FontAwesomeIcons.qrcode, // ไอคอน QR
+        title: "FDA Number", // ชื่อปุ่ม
+        subtitle: "Quick lookup", // คำอธิบาย
+        onTap: () {
+          // แสดง SnackBar แจ้งว่าฟีเจอร์ยังไม่เปิดใช้งาน
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Coming soon: FDA Number page")),
+          );
+        },
+      ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -24,36 +47,39 @@ class QuickActions extends StatelessWidget {
             ),
           ),
         ),
-        // GridView สำหรับแสดงปุ่มลัด 2 ปุ่ม
-        GridView.count(
-          crossAxisCount: 2, // จำนวนคอลัมน์
-          shrinkWrap: true, // ให้ GridView ขยายตามเนื้อหา
-          physics: const NeverScrollableScrollPhysics(), // ไม่ให้ scroll
-          crossAxisSpacing: 12, // ระยะห่างระหว่างคอลัมน์
-          mainAxisSpacing: 12, // ระยะห่างระหว่างแถว
-          children: [
-            // ปุ่ม Scan Label (ไปหน้า /scan)
-            ActionCard(
-              gradient: AppGradients.scanLabel, // สีพื้นหลังแบบ gradient
-              icon: FontAwesomeIcons.camera, // ไอคอนกล้อง
-              title: "Scan Label", // ชื่อปุ่ม
-              subtitle: "Camera scan", // คำอธิบาย
-              onTap: () => context.go('/scan'), // นำทางไปหน้า /scan
-            ),
-            // ปุ่ม FDA Number (ยังไม่เปิดใช้งาน)
-            ActionCard(
-              gradient: AppGradients.fdaNumber, // สีพื้นหลังแบบ gradient
-              icon: FontAwesomeIcons.qrcode, // ไอคอน QR
-              title: "FDA Number", // ชื่อปุ่ม
-              subtitle: "Quick lookup", // คำอธิบาย
-              onTap: () {
-                // แสดง SnackBar แจ้งว่าฟีเจอร์ยังไม่เปิดใช้งาน
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Coming soon: FDA Number page")),
-                );
-              },
-            ),
-          ],
+        // Use LayoutBuilder to build a responsive layout
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Define a fixed width for each card
+            const cardWidth = 160.0;
+            // Calculate the number of columns that can fit
+            final crossAxisCount = (constraints.maxWidth / cardWidth).floor();
+
+            // If it can fit more than one column, use a Row/Wrap like layout.
+            // Otherwise, use a Column.
+            if (crossAxisCount > 1) {
+              return Wrap(
+                spacing: 12, // Horizontal spacing
+                runSpacing: 12, // Vertical spacing
+                alignment: WrapAlignment.spaceEvenly,
+                children: actionCards
+                    .map((card) => SizedBox(
+                          width: cardWidth,
+                          child: card,
+                        ))
+                    .toList(),
+              );
+            } else {
+              return Column(
+                children: actionCards
+                    .map((card) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: card,
+                        ))
+                    .toList(),
+              );
+            }
+          },
         ),
       ],
     );
@@ -83,7 +109,7 @@ class ActionCard extends StatefulWidget {
 
 class _ActionCardState extends State<ActionCard> {
   bool _hover = false; // state สำหรับ hover (mouse over)
-  bool _tap = false;   // state สำหรับ tap (คลิก)
+  bool _tap = false; // state สำหรับ tap (คลิก)
 
   /// ฟังก์ชันสำหรับ animate ตอน tap (ย่อ scale แล้วกลับมา)
   void _animateTap(VoidCallback action) async {

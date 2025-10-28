@@ -7,7 +7,6 @@ import 'package:app/shared/app_colors.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/scan/presentation/scan_screen.dart';
 import 'features/history/presentation/history_screen.dart';
-import 'features/profile/presentation/profile_screen.dart';
 
 /// App Router using GoRouter with StatefulShellRoute
 /// -------------------------------------------------
@@ -36,11 +35,6 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(path: '/history', builder: (_, __) => const HistoryScreen()),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
           ],
         ),
       ],
@@ -95,11 +89,6 @@ class _ShellScaffoldState extends State<ShellScaffold> {
             icon: Icon(Icons.history_outlined),
             activeIcon: Icon(Icons.history),
             label: "History",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: "Profile",
           ),
         ],
       ),
