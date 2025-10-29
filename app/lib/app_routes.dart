@@ -1,11 +1,11 @@
 //material app routes using go_router with stateful shell route
+import 'package:app/features/scan/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';
 
 // Screens
 import 'features/home/presentation/home_screen.dart';
-import 'features/scan/presentation/scan_screen.dart';
 import 'features/history/presentation/history_screen.dart';
 
 /// App Router using GoRouter with StatefulShellRoute
@@ -13,6 +13,7 @@ import 'features/history/presentation/history_screen.dart';
 /// Manages bottom navigation and page switching.
 final GoRouter appRouter = GoRouter(
   routes: [
+    // Bottom tabs (Home, History) are kept alive in a shell.
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           ShellScaffold(navigationShell: navigationShell),
@@ -20,16 +21,8 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/',builder: (_, __) => const HomeScreen(),
-              //routes: [GoRoute(path: '/seeAll', builder: (_, __) => const HomeScreen())],
-              // ตัวอย่างหน้าลูกของ Home (เพิ่มได้ตามต้องการ):
-              // routes: [GoRoute(path: 'detail', builder: ...)],
+              path: '/', builder: (_, __) => const HomeScreen(),
             ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
           ],
         ),
         StatefulShellBranch(
@@ -39,6 +32,8 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
+    // Scan is OUTSIDE the shell so it will be disposed when leaving.
+    GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
   ],
 );
 
@@ -57,11 +52,17 @@ class _ShellScaffoldState extends State<ShellScaffold> {
   int get _currentIndex => widget.navigationShell.currentIndex;
 
   void _onTap(int index) {
+    if (index == 1) {
+      // Open Scan as a standalone route (no bottom bar); it will dispose on exit.
+      context.go('/scan');
+      return;
+    }
+    final mappedIndex = index == 0 ? 0 : 1; // map Home=0, History=1 to branches
     widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == _currentIndex,
+      mappedIndex,
+      initialLocation: mappedIndex == _currentIndex,
     );
-    setState(() {}); 
+    setState(() {});
   }
 
   @override

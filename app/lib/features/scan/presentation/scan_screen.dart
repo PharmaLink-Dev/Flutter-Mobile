@@ -2,8 +2,11 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
+import 'package:app/shared/app_colors.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
+import 'package:app/features/scan/presentation/widgets/aurora_bg.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -16,14 +19,15 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = const [];
   int _cameraIndex = 0;
-  bool _initializing = true;
+  bool _initializing = false;
   bool _isTorchOn = false;
+  bool _openingCamera = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initCamera();
+
   }
 
   @override
@@ -63,24 +67,37 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   Future<void> _initSelectedCamera() async {
     if (_cameras.isEmpty) return;
     setState(() => _initializing = true);
-    final selected = _cameras[_cameraIndex];
-    final controller = CameraController(
-      selected,
-      ResolutionPreset.high,
-      enableAudio: false,
-      imageFormatGroup: ImageFormatGroup.jpeg,
-    );
-    await controller.initialize();
     try {
-      await controller.setFlashMode(FlashMode.off);
-      _isTorchOn = false;
-    } catch (_) {}
-    if (!mounted) return;
-    setState(() {
-      _controller?.dispose();
-      _controller = controller;
-      _initializing = false;
-    });
+      final selected = _cameras[_cameraIndex];
+      final controller = CameraController(
+        selected,
+        ResolutionPreset.high,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+      );
+      await controller.initialize();
+      try {
+        await controller.setFlashMode(FlashMode.off);
+        _isTorchOn = false;
+      } catch (_) {}
+      if (!mounted) return;
+      setState(() {
+        _controller?.dispose();
+        _controller = controller;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      // หากเปิดกล้องล้มเหลว ให้ยกเลิกสถานะโหลดและไม่แสดง preview
+      setState(() {
+        _controller?.dispose();
+        _controller = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('เปิดกล้องไม่สำเร็จ: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _initializing = false);
+    }
   }
 
   Future<void> _toggleTorch() async {
@@ -93,11 +110,7 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
     } catch (_) {}
   }
 
-  Future<void> _switchCamera() async {
-    if (_cameras.length < 2) return;
-    _cameraIndex = (_cameraIndex + 1) % _cameras.length;
-    await _initSelectedCamera();
-  }
+
 
   Future<void> _captureAndProceed() async {
     final c = _controller;
@@ -137,57 +150,125 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final preview = _buildPreview();
     return Scaffold(
+      // พื้นหลังโปร่งใส ใช้ AuroraBackground ใน Stack
+      backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('สแกนฉลาก/บาร์โค้ด'),
+        leading: _RoundIconButton(icon: Icons.arrow_back, onTap: () => context.go('/')),
         backgroundColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: _RoundIconButton(
+              icon: _isTorchOn ? Icons.flash_on : Icons.flash_off,
+              onTap: (_controller != null && _controller!.value.isInitialized)
+                  ? _toggleTorch
+                  : null,
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
+          const Positioned.fill(child: AuroraBackground()),
           Positioned.fill(child: preview),
+          // Overlay with frame + animated scanning line
           const Positioned.fill(child: ScanOverlay()),
+          // Top guide card
+          // Bottom instruction, tips, and buttons
           Positioned(
-            top: 24,
+            left: 16,
             right: 16,
-            child: Column(
-              children: [
-                _CircleIconButton(
-                  icon: _isTorchOn ? Icons.flash_on : Icons.flash_off,
-                  onTap: _toggleTorch,
-                ),
-                const SizedBox(height: 12),
-                _CircleIconButton(
-                  icon: Icons.cameraswitch,
-                  onTap: _switchCamera,
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 32,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _CircleIconButton(icon: Icons.photo_library, onTap: _pickFromGallery),
-                const SizedBox(width: 24),
-                GestureDetector(
-                  onTap: _captureAndProceed,
-                  child: Container(
-                    width: 74,
-                    height: 74,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white70, width: 3),
-                      color: Colors.white24,
+            bottom: 16,
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    'วางฉลากให้อยู่ในกรอบ',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      shadows: [Shadow(color: Colors.black54, blurRadius: 6)],
                     ),
-                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 36),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  // Primary gradient button
+                  Container(
+                    height: 54,
+                    decoration: BoxDecoration(
+                      gradient: AppGradients.scanLabel,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black38, blurRadius: 12, offset: Offset(0, 4)),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () async {
+                          final ready = _controller != null && _controller!.value.isInitialized;
+                          if (!ready) {
+                            setState(() => _openingCamera = true);
+                            await _initCamera();
+                            if (!mounted) return;
+                            setState(() => _openingCamera = false);
+                          } else {
+                            await _captureAndProceed();
+                          }
+                        },
+                        child: const Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _PrimaryButtonIcon(),
+                              SizedBox(width: 8),
+                              _PrimaryButtonLabel(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Secondary upload button
+                  Container(
+                    height: 54,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.white24),
+                      gradient: const LinearGradient(
+                        colors: [Color(0x335E6A75), Color(0x115E6A75)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: _openingCamera ? null : _pickFromGallery,
+                        child: const Center(
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.upload, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text('อัพโหลดรูปภาพ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -198,27 +279,55 @@ class _ScanScreenState extends State<ScanScreen> with WidgetsBindingObserver {
   Widget _buildPreview() {
     if (_initializing) {
       return const ColoredBox(
-        color: Colors.black,
+        color: AppColors.background,
         child: Center(child: CircularProgressIndicator()),
       );
     }
     final c = _controller;
     if (c == null || !c.value.isInitialized) {
-      return const ColoredBox(
-        color: Colors.black,
-        child: Center(
-          child: Text('ไม่สามารถเปิดกล้องได้', style: TextStyle(color: Colors.white70)),
-        ),
-      );
+      // ยังไม่เริ่มสแกน: ไม่แสดง preview
+      return const SizedBox.shrink();
     }
     return CameraPreview(c);
   }
 }
 
-class _CircleIconButton extends StatelessWidget {
+class _PrimaryButtonLabel extends StatelessWidget {
+  const _PrimaryButtonLabel();
+  @override
+  Widget build(BuildContext context) {
+    final st = context.findAncestorStateOfType<_ScanScreenState>();
+    final bool ready = st?._controller != null && st!._controller!.value.isInitialized;
+    final bool opening = st?._openingCamera == true;
+    return Text(
+      opening ? 'กำลังเปิดกล้อง…' : (ready ? 'ถ่ายภาพ' : 'เริ่มสแกน'),
+      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+    );
+  }
+}
+
+class _PrimaryButtonIcon extends StatelessWidget {
+  const _PrimaryButtonIcon();
+  @override
+  Widget build(BuildContext context) {
+    final st = context.findAncestorStateOfType<_ScanScreenState>();
+    final bool ready = st?._controller != null && st!._controller!.value.isInitialized;
+    final bool opening = st?._openingCamera == true;
+    if (opening) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+      );
+    }
+    return Icon(ready ? Icons.camera : Icons.camera_alt, color: Colors.white);
+  }
+}
+
+class _RoundIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
-  const _CircleIconButton({required this.icon, this.onTap});
+  const _RoundIconButton({required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -226,12 +335,16 @@ class _CircleIconButton extends StatelessWidget {
       onTap: onTap,
       customBorder: const CircleBorder(),
       child: Container(
-        width: 52,
-        height: 52,
+        margin: const EdgeInsets.all(8),
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.black38,
+          color: Colors.white.withOpacity(0.08),
           border: Border.all(color: Colors.white24),
+          boxShadow: const [
+            BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
+          ],
         ),
         child: Icon(icon, color: Colors.white),
       ),
