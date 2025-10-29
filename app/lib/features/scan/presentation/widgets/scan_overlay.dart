@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:app/shared/app_colors.dart';
 
 class ScanOverlay extends StatefulWidget {
-  final double boxSize;
-  const ScanOverlay({super.key, this.boxSize = 300});
+  final double? width;
+  final double? height;
+  final double? boxSize; // backward compat
+  const ScanOverlay({super.key, this.width, this.height, this.boxSize});
 
   @override
   State<ScanOverlay> createState() => _ScanOverlayState();
@@ -30,7 +32,8 @@ class _ScanOverlayState extends State<ScanOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final double box = widget.boxSize;
+    final double boxW = widget.width ?? widget.boxSize ?? 300;
+    final double boxH = widget.height ?? widget.boxSize ?? 300;
     const double radius = 24;
 
     return Stack(
@@ -66,8 +69,8 @@ class _ScanOverlayState extends State<ScanOverlay>
         // Center scanning box
         Center(
           child: SizedBox(
-            width: box,
-            height: box,
+            width: boxW,
+            height: boxH,
             child: Stack(
               children: [
                 // Outer subtle border
@@ -96,7 +99,7 @@ class _ScanOverlayState extends State<ScanOverlay>
                   animation: _controller,
                   builder: (context, _) {
                     final double padding = 18;
-                    final double track = box - padding * 2 - 2; // travel area
+                    final double track = boxH - padding * 2 - 2; // travel area
                     final double y = padding + track * _controller.value;
                     return Positioned(
                       left: 24,

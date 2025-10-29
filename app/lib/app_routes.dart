@@ -3,6 +3,7 @@ import 'package:app/features/scan/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';
+import 'package:app/features/fda_scan/presentation/fda_scan_screen.dart';
 
 // Screens
 import 'features/home/presentation/home_screen.dart';
@@ -34,6 +35,8 @@ final GoRouter appRouter = GoRouter(
     ),
     // Scan is OUTSIDE the shell so it will be disposed when leaving.
     GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
+    // FDA Scan: duplicate flow like Scan
+    GoRoute(path: '/scan-fda', builder: (_, __) => const FdaScanScreen()),
   ],
 );
 

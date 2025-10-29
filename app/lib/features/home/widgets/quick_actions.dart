@@ -23,12 +23,7 @@ class QuickActions extends StatelessWidget {
         icon: FontAwesomeIcons.barcode, // à¹„à¸­à¸„à¸­à¸™ QR
         title: "ค้นหา FDA", // à¸Šà¸·à¹ˆà¸­à¸›à¸¸à¹ˆà¸¡
         subtitle: "ตรวจสอบใบอนุญาต", // à¸„à¸³à¸­à¸˜à¸´à¸šà¸²à¸¢
-        onTap: () {
-          // à¹à¸ªà¸”à¸‡ SnackBar à¹à¸ˆà¹‰à¸‡à¸§à¹ˆà¸²à¸Ÿà¸µà¹€à¸ˆà¸­à¸£à¹Œà¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸›à¸´à¸”à¹ƒà¸Šà¹‰à¸‡à¸²à¸™
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Coming soon: FDA Number page")),
-          );
-        },
+        onTap: () => context.go('/scan-fda'),
       ),
     ];
 
