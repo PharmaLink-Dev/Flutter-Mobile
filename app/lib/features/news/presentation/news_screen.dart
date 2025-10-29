@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+
+class NewsScreen extends StatelessWidget {
+  const NewsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Recent News'),
+      ),
+      body: const Center(
+        child: Text('ข่าวเด็ดวันนี้! ตะวันเป็นเกย์'),
+      ),
+    );
+  }
+}
