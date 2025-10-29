@@ -1,6 +1,7 @@
-
+import 'dart:io';
+import 'package:app/features/history/data/scan_history.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -10,21 +11,50 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  bool _isIngredientSelected = true;
+  final _historyBox = Hive.box<ScanHistory>('history');
+  bool _isIngredientSelected = true; // For future use with FDA scans
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('History'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: () async {
+              await _historyBox.clear();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("History cleared!")),
+              );
+            },
+            tooltip: 'Clear History',
+          )
+        ],
       ),
       body: Column(
         children: [
           _buildToggleButtons(),
           Expanded(
-            child: _isIngredientSelected
-                ? _buildHistoryList(_ingredientScanHistory)
-                : _buildHistoryList(_fdaScanHistory),
+            child: ValueListenableBuilder(
+              valueListenable: _historyBox.listenable(),
+              builder: (context, Box<ScanHistory> box, _) {
+                if (box.values.isEmpty) {
+                  return const Center(
+                    child: Text('No history yet. Go to the Test Screen to add data.'),
+                  );
+                }
+                final historyItems = box.values.toList().reversed.toList();
+
+                // For now, we only have one type of history
+                if (_isIngredientSelected) {
+                  return _buildHistoryList(historyItems);
+                } else {
+                  // Placeholder for FDA History
+                  return const Center(child: Text('FDA History (coming soon)'));
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -32,6 +62,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildToggleButtons() {
+    // ... (This widget remains the same as before)
     return Row(
       children: [
         Expanded(
@@ -56,7 +87,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildHistoryList(List<Map<String, dynamic>> history) {
+  Widget _buildHistoryList(List<ScanHistory> history) {
     return ListView.builder(
       itemCount: history.length,
       itemBuilder: (context, index) {
@@ -64,18 +95,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
-            leading: item['leading'] as Widget,
-            title: Text(item['name'] as String),
-            subtitle: Text('Scanned on: ${item['date']}'),
+            leading: Image.file(
+              File(item.imagePath),
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.error, color: Colors.red);
+              },
+            ),
+            title: Text(
+              item.ingredients.map((e) => e.name).join(', '),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text('Scanned on: ${item.scanDate.toShortString()}'),
             trailing: IconButton(
               icon: Icon(
-                (item['isFavorite'] as bool) ? Icons.favorite : Icons.favorite_border,
-                color: (item['isFavorite'] as bool) ? Colors.red : null,
+                item.isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: item.isFavorite ? Colors.red : null,
               ),
               onPressed: () {
-                // Mock favorite toggle
                 setState(() {
-                  history[index]['isFavorite'] = !(item['isFavorite'] as bool);
+                  item.isFavorite = !item.isFavorite;
+                  item.save(); // Save the change back to Hive
                 });
               },
             ),
@@ -84,53 +127,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       },
     );
   }
+}
 
-  // Mock Data
-  final List<Map<String, dynamic>> _ingredientScanHistory = [
-    {
-      'id': '1',
-      'name': 'Cosmetic Ingredient',
-      'date': '2024-07-28',
-      'isFavorite': false,
-      'leading': Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.green[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const FaIcon(FontAwesomeIcons.leaf, color: Colors.green),
-      ),
-    },
-    {
-      'id': '2',
-      'name': 'Skincare Ingredient',
-      'date': '2024-07-27',
-      'isFavorite': true,
-      'leading': Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.green[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const FaIcon(FontAwesomeIcons.leaf, color: Colors.green),
-      ),
-    },
-  ];
-
-  final List<Map<String, dynamic>> _fdaScanHistory = [
-    {
-      'id': '3',
-      'name': 'FDA Product 1',
-      'date': '2024-07-26',
-      'isFavorite': false,
-      'leading': Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange[100],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const FaIcon(FontAwesomeIcons.pills, color: Colors.orange),
-      ),
-    },
-  ];
+extension on DateTime {
+  String toShortString() {
+    return "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+  }
 }

@@ -1,4 +1,5 @@
 //material app routes using go_router with stateful shell route
+import 'package:app/features/history/presentation/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';
@@ -20,11 +21,14 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/',builder: (_, __) => const HomeScreen(),
-              //routes: [GoRoute(path: '/seeAll', builder: (_, __) => const HomeScreen())],
-              // ตัวอย่างหน้าลูกของ Home (เพิ่มได้ตามต้องการ):
-              // routes: [GoRoute(path: 'detail', builder: ...)],
-            ),
+                path: '/',
+                builder: (_, __) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'test', // Added route for the test screen
+                    builder: (_, __) => const TestScreen(),
+                  ),
+                ]),
           ],
         ),
         StatefulShellBranch(
@@ -61,7 +65,7 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       index,
       initialLocation: index == _currentIndex,
     );
-    setState(() {}); 
+    setState(() {});
   }
 
   @override
@@ -71,7 +75,7 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,      // ✅ ใช้สีเขียวแบรนด์
+        selectedItemColor: AppColors.primary, // ✅ ใช้สีเขียวแบรนด์
         unselectedItemColor: AppColors.textSecondary, // ✅ สีเทาอ่อน
         onTap: _onTap,
         items: const [
