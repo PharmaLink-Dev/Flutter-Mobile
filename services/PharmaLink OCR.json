@@ -1,0 +1,203 @@
+{
+  "name": "PharmaLink OCR",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=python -c \"import sys, os; os.environ['TYPHOON_OCR_API_KEY'] = 'sk-GxmfOD7yJ2QM1WIq1iFQ5FbaQRGEEl6bbXlCGTLkrDF3qZfP'; from typhoon_ocr import ocr_document; sys.stdout.reconfigure(encoding='utf-8'); input_path = sys.argv[1]; text = ocr_document(input_path); print(text)\" \"{{ $json.fileName }}\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "f9ace9db-899c-4ae4-98ea-35095767a5e4",
+      "name": "typhoon OCR"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=คุณคือโมเดล AI ที่ทำหน้าที่แยกข้อมูลจากผล OCR ของฉลากยา/อาหารเสริม\n\n**เป้าหมาย**:\n- ดึงเฉพาะชื่อสาร (ingredient) ทั้งหมดจากหัวข้อ \"Active Ingredients\" ในข้อความ OCR\n- ถ้าพบเปอร์เซ็นต์ ให้เก็บไว้ด้วย\n- สามารถแก้ไขตัวสะกดเล็กน้อยจาก OCR error แต่ห้ามเพิ่มข้อมูลใหม่ที่ไม่มี\n- คงลำดับรายการตามที่พบในฉลาก\n- ห้ามใส่ code block (` ``` `) หรือข้อความอื่น\n- ห้ามใส่ escape เช่น `\\n` หรือ `\\\"`\n- จัดรูปแบบ indent 2 ช่อง\n\n**รูปแบบผลลัพธ์**:\nให้ตอบกลับในรูปแบบ JSON เท่านั้น โดยมีโครงสร้างดังนี้\n\n```json\n{\n  \"ingredients\": [\n    { \"name\": \"ชื่อสาร\", \"mg\": \"ตัวเลขหรือ null\" }\n  ]\n}\n{{ $json.stdout }}",
+        "needsFallback": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        832,
+        0
+      ],
+      "id": "81ae28ff-da04-472a-aeff-d48989a4fd85",
+      "name": "LLM Generate JSON"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json[\"text\"] || \"\";\n\n// ดึง JSON ออกจากข้อความ (รองรับ ```json ... ``` หรือไม่มี)\nconst match = raw.match(/```json\\s*([\\s\\S]*?)```/);\nconst cleaned = match ? match[1].trim() : raw.replace(/```json\\n?|```/g, \"\").trim();\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (err) {\n  throw new Error(\"JSON parsing failed: \" + err.message);\n}\n\n// แปลง ingredients → list สวย ๆ\nconst ingredients_list = (parsed.ingredients || []).map(item => ({\n  name: item.name?.trim() || \"\",\n  mg: item.mg\n    ? parseFloat(item.mg.replace(\"%\", \"\").trim())\n    : null\n}));\n\nreturn { ingredients_list };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "4dbe795f-920d-4d22-acc6-d1a495a452bf",
+      "name": "Data Cleansing"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        160
+      ],
+      "id": "5c159a23-06fb-4b66-b1fd-5ce24838b4e4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "JnOwMJ7cmo3wQzP9",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pharmalink/ocr",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        144,
+        0
+      ],
+      "id": "d0c69576-b2d4-42f1-b160-8bbf3d3e92e3",
+      "name": "Webhook",
+      "webhookId": "aee5f57a-f721-4801-9ab0-d12ed319f14d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        160
+      ],
+      "id": "a107855c-958c-4b4d-a2db-ef21c6155129",
+      "name": "Google Gemini Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MdeXBKubKA4q3H94",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "7af4bb94-7eb4-4cdb-bbdc-8211e451c10f.jpeg",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "60d6cd6f-401b-47c7-b5d1-0a35f5008e07",
+      "name": "Read/Write Files from Disk"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "typhoon OCR": {
+      "main": [
+        [
+          {
+            "node": "LLM Generate JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Generate JSON": {
+      "main": [
+        [
+          {
+            "node": "Data Cleansing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Generate JSON",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Generate JSON",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "typhoon OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "455623ec-a0fd-4872-98c6-dd1200659fc8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4986c18849e390dc9992785ed2fa06f1d9ca897085771d748df539bf88b795b1"
+  },
+  "id": "qXiBInCV775d1tWN",
+  "tags": []
+}

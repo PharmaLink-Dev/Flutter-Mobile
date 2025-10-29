@@ -10,6 +10,12 @@ class AppColors {
   static const Color primaryDark = Color(0xFF0FAE8F);
   static const Color primaryLight = Color(0xFF66E0CC);
 
+  // New colors
+  static const Color aqua = Color(0xFF1DCEDF); // bright cyan-green (new)
+  static const Color aquaLight = Color(0xFF9CF6FB); // light cyan (new)
+  static const Color mint = Color(0xFF78FFD6); // mint green (new)
+  static const Color tealBright = Color(0xFF00C9A7); // bright teal (new)
+
   // Neutrals / Text
   static const Color text = Color(0xFF22303C); // deep slate for titles
   static const Color textSecondary = Color(0xFF6B7B8A); // muted gray for body
@@ -28,6 +34,17 @@ class AppColors {
   // Extras
   static const Color outline = Color(0xFFE3F0EC);
   static const Color overlay = Color(0x3317C5A3); // 20% primary
+
+  static const red = Colors.red;
+  static const green = Colors.green;
+  static const orange = Colors.orange;
+  static const yellow = Color.fromARGB(255, 132, 119, 4);
+  static const white = Colors.white;
+  static const black = Colors.black;
+
+  static const grey = Colors.grey;
+  static const lightGrey = Color(0xFFF5F5F5);
+  static const darkGrey = Color(0xFF616161);
 }
 
 class AppGradients {
@@ -37,20 +54,32 @@ class AppGradients {
   static const LinearGradient background = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      AppColors.bgMintLight,
-      AppColors.bgMintLighter,
-    ],
+    colors: [AppColors.bgMintLight, AppColors.bgMintLighter],
   );
 
   /// CTA button gradient
   static const LinearGradient button = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF19C7A5),
-      Color(0xFF0BBF95),
-    ],
+    colors: [Color(0xFF19C7A5), Color(0xFF0BBF95)],
+  );
+
+  // New gradients
+  static const LinearGradient scanLabel = LinearGradient(
+    colors: [AppColors.primary, AppColors.tealBright], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient fdaNumber = LinearGradient(
+    colors: [AppColors.aquaLight, AppColors.aqua], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient mintBlue = LinearGradient(
+    colors: [AppColors.mint, AppColors.aqua], // (new)
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }
-
