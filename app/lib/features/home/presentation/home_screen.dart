@@ -4,7 +4,7 @@ import 'package:app/shared/app_colors.dart';
 import 'package:go_router/go_router.dart';
 
 // Import custom widgets
-import '../widgets/search_bar.dart';
+import '../widgets/top_summary_card.dart';
 import '../widgets/quick_actions.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -23,8 +23,8 @@ class HomeScreen extends StatelessWidget {
               onPressed: () => context.go('/test'),
               child: const Text('Go to Test Screen'),
             ),
-            const SizedBox(height: 20),
-            const SearchBarWidget(), // search bar
+            const SizedBox(heigth: 20),
+            const TopSummaryCard(),
             const SizedBox(height: 20),
             const QuickActions(), // grid of shortcuts
             const SizedBox(height: 20),

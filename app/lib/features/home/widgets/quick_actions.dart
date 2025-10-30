@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';
 
-/// QuickActions: A responsive grid of two action buttons.
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
 
@@ -14,27 +12,22 @@ class QuickActions extends StatelessWidget {
       ActionCard(
         gradient: AppGradients.scanLabel,
         icon: FontAwesomeIcons.camera,
-        title: "Scan Label",
-        subtitle: "Camera scan",
+        title: "สแกนฉลาก",
+        subtitle: "วิเคราะห์ส่วนผสม",
         onTap: () => context.go('/scan'),
       ),
       ActionCard(
         gradient: AppGradients.fdaNumber,
-        icon: FontAwesomeIcons.qrcode,
-        title: "FDA Number",
-        subtitle: "Quick lookup",
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Coming soon: FDA Number page")),
-          );
-        },
+        icon: FontAwesomeIcons.barcode,
+        title: "ค้นหา FDA",
+        subtitle: "ตรวจสอบใบอนุญาต",
+        onTap: () => context.go('/scan-fda'),
       ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
         const Padding(
           padding: EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
@@ -46,22 +39,35 @@ class QuickActions extends StatelessWidget {
             ),
           ),
         ),
-        // Use a GridView for a simple, responsive 2-column layout
-        GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.2, // Adjust for a pleasant card shape (width / height)
-          children: actionCards,
+        // Use LayoutBuilder to create a fully responsive card size
+        LayoutBuilder(
+          builder: (context, constraints) {
+            const double spacing = 12.0;
+            // Calculate the ideal card width based on available space,
+            // then clamp it to our desired min/max size.
+            final double cardWidth = ((constraints.maxWidth - spacing) / 2).clamp(140.0, 165.0);
+
+            return Center(
+              child: Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                alignment: WrapAlignment.center,
+                children: actionCards.map((card) {
+                  // Apply the calculated width to each card.
+                  return SizedBox(
+                    width: cardWidth,
+                    child: card,
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 }
 
-/// ActionCard: An individual, responsive action button.
 class ActionCard extends StatefulWidget {
   final LinearGradient gradient;
   final IconData icon;
@@ -83,80 +89,79 @@ class ActionCard extends StatefulWidget {
 }
 
 class _ActionCardState extends State<ActionCard> {
-  bool _hover = false;
-  bool _tap = false;
+  bool _isTapped = false;
 
-  void _animateTap(VoidCallback action) async {
-    setState(() => _tap = true);
-    await Future.delayed(const Duration(milliseconds: 120));
-    setState(() => _tap = false);
-    action();
+  void _handleTap() async {
+    setState(() => _isTapped = true);
+    await Future.delayed(const Duration(milliseconds: 150));
+    setState(() => _isTapped = false);
+    widget.onTap();
   }
 
   @override
   Widget build(BuildContext context) {
-    final scale = _tap ? 0.95 : (_hover ? 1.05 : 1.0);
+    final scale = _isTapped ? 0.95 : 1.0;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      cursor: SystemMouseCursors.click,
-      child: AnimatedScale(
-        scale: scale,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
-          child: InkWell(
-            onTap: () => _animateTap(widget.onTap),
-            borderRadius: BorderRadius.circular(18),
-            splashColor: Colors.white24,
-            highlightColor: Colors.white10,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: widget.gradient,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.overlay.withOpacity(0.5),
-                    blurRadius: _hover ? 12 : 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              child: LayoutBuilder(builder: (context, constraints) {
-                // Show text only if the card is wide enough
+    return AnimatedScale(
+      scale: scale,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      // The ConstrainedBox is removed from here to allow dynamic sizing.
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: _handleTap,
+          borderRadius: BorderRadius.circular(20),
+          splashColor: Colors.white24,
+          highlightColor: Colors.white10,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 140), // Ensure a nice aspect ratio
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.overlay,
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
                 final bool showText = constraints.maxWidth > 100;
 
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(widget.icon, color: Colors.white, size: 28),
+                    Icon(widget.icon, color: Colors.white, size: showText ? 28 : 32),
                     if (showText) ...[
                       const SizedBox(height: 12),
                       Text(
                         widget.title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         widget.subtitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.white.withOpacity(0.85)),
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
-                    ]
+                    ],
                   ],
                 );
-              }),
+              },
             ),
           ),
         ),
