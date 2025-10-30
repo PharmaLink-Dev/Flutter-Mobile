@@ -1,4 +1,5 @@
 //material app routes using go_router with stateful shell route
+import 'package:app/features/history/presentation/test_screen.dart';
 import 'package:app/features/scan/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +24,14 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/', builder: (_, __) => const HomeScreen(),
-            ),
+                path: '/',
+                builder: (_, __) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'test', // Added route for the test screen
+                    builder: (_, __) => const TestScreen(),
+                  ),
+                ]),
           ],
         ),
         StatefulShellBranch(

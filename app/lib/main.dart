@@ -1,7 +1,25 @@
+import 'package:app/features/history/data/ingredient.dart';
+import 'package:app/features/history/data/scan_history.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'app_routes.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+
+  // Register both adapters
+  Hive.registerAdapter(IngredientAdapter()); // Register Ingredient first
+  Hive.registerAdapter(ScanHistoryAdapter());
+
+  // Open the boxes
+  await Hive.openBox<Ingredient>('ingredients'); // Good practice to have a box for them
+  await Hive.openBox<ScanHistory>('history');
+
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

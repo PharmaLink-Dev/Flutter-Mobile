@@ -1,12 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:app/features/home/widgets/recent_scan_list.dart';
+import 'package:flutter/material.dart';
 import 'package:app/shared/app_colors.dart';
+import 'package:go_router/go_router.dart';
 
-// Home sections
+// Import custom widgets
 import '../widgets/top_summary_card.dart';
 import '../widgets/quick_actions.dart';
 
-/// HomeScreen
-/// หน้าแรกสรุป + ปุ่มลัด ตามดีไซน์ที่ให้มา
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,12 +16,21 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           children: [
-            TopSummaryCard(),
-            SizedBox(height: 20),
-            QuickActions(),
-            SizedBox(height: 8),
+            // Temporary button to access the test screen
+            ElevatedButton(
+              onPressed: () => context.go('/test'),
+              child: const Text('Go to Test Screen'),
+            ),
+            const SizedBox(heigth: 20),
+            const TopSummaryCard(),
+            const SizedBox(height: 20),
+            const QuickActions(), // grid of shortcuts
+            const SizedBox(height: 20),
+            const RecentScanList(scanType: ScanType.ingredient),
+            const SizedBox(height: 20),
+            const RecentScanList(scanType: ScanType.fda),
           ],
         ),
       ),
