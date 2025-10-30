@@ -171,13 +171,20 @@ class _ShieldCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white30, width: 1),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0), // Added horizontal padding
       child: const Center(
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center, // Center the content
           children: [
-            Icon(Icons.shield_outlined, color: Colors.white),
-            SizedBox(width: 8),
-            Text('ปลอดภัย', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            Icon(Icons.shield_outlined, color: Colors.white, size: 22), // Slightly smaller icon
+            SizedBox(width: 6),
+            Flexible( // Use Flexible to allow the text to wrap or shrink
+              child: Text(
+                'ปลอดภัย',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13), // Slightly smaller text
+                overflow: TextOverflow.ellipsis, // Prevent overflow
+              ),
+            ),
           ],
         ),
       ),
