@@ -8,6 +8,7 @@ import 'package:app/features/fda_scan/presentation/fda_scan_screen.dart';
 // Screens
 import 'features/home/presentation/home_screen.dart';
 import 'features/history/presentation/history_screen.dart';
+import 'features/news/presentation/news_screen.dart';
 
 /// App Router using GoRouter with StatefulShellRoute
 /// -------------------------------------------------
@@ -31,6 +32,11 @@ final GoRouter appRouter = GoRouter(
             GoRoute(path: '/history', builder: (_, __) => const HistoryScreen()),
           ],
         ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/news', builder: (_, __) => const NewsScreen())
+          ]
+        )
       ],
     ),
     // Scan is OUTSIDE the shell so it will be disposed when leaving.
@@ -94,6 +100,11 @@ class _ShellScaffoldState extends State<ShellScaffold> {
             activeIcon: Icon(Icons.history),
             label: "History",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.newspaper_outlined),
+            activeIcon: Icon(Icons.newspaper),
+            label: "News"
+          )
         ],
       ),
     );
