@@ -6,8 +6,14 @@ import 'package:app/features/scan/data/ocr_uploader.dart';
 class CropImageScreen extends StatefulWidget {
   final Uint8List imageBytes;
   final String fileName;
+  final Future<void> Function(Uint8List cropped)? onCropped;
 
-  const CropImageScreen({super.key, required this.imageBytes, this.fileName = 'image.jpg'});
+  const CropImageScreen({
+    super.key,
+    required this.imageBytes,
+    this.fileName = 'image.jpg',
+    this.onCropped,
+  });
 
   @override
   State<CropImageScreen> createState() => _CropImageScreenState();
@@ -20,19 +26,27 @@ class _CropImageScreenState extends State<CropImageScreen> {
   Future<void> _onCropped(Uint8List cropped) async {
     setState(() => _isUploading = true);
     try {
-      final uploader = OcrUploader();
-      final resp = await uploader.uploadImageBytes(cropped, filename: widget.fileName);
-      final ok = resp.statusCode >= 200 && resp.statusCode < 300;
+      if (widget.onCropped != null) {
+        await widget.onCropped!(cropped);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OCR เสร็จสิ้น (ดู log)')),
+        );
+      } else {
+        final uploader = OcrUploader();
+        final resp = await uploader.uploadImageBytes(cropped, filename: widget.fileName);
+        final ok = resp.statusCode >= 200 && resp.statusCode < 300;
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ok ? 'อัปโหลดสำเร็จ' : 'อัปโหลดไม่สำเร็จ (${resp.statusCode})')),
-      );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ok ? 'อัปโหลดสำเร็จ' : 'อัปโหลดไม่สำเร็จ (${resp.statusCode})')),
+        );
+      }
       Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == 'Scan');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('เกิดข้อผิดพลาดในการอัปโหลด: $e')),
+        SnackBar(content: Text('เกิดข้อผิดพลาด: $e')),
       );
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -81,4 +95,3 @@ class _CropImageScreenState extends State<CropImageScreen> {
     );
   }
 }
-
