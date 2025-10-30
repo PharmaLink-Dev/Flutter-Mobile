@@ -11,6 +11,96 @@ import 'package:app/features/fda_scan/data/fda_search_service.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
+  // UI helpers
+  void _showSnack(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _showFdaResultDialog(
+    BuildContext context,
+    Map<String, String?> data,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (_) {
+        final entries = data.entries
+            .map((e) => '${e.key}: ${e.value ?? '-'}')
+            .join('\n');
+        return AlertDialog(
+          title: const Text('ผลการค้นหา FDA'),
+          content: SingleChildScrollView(child: Text(entries)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('ปิด'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showFdaNotFoundDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text('ไม่พบเลข FDA'),
+        content: Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+      ),
+    );
+  }
+
+  Future<void> _fetchAndPresentFda(BuildContext context, String fda) async {
+    try {
+      final service = FdaSearchService();
+      final map = await service.fetchByFdpdtno(fda);
+      if (!context.mounted) return;
+      await _showFdaResultDialog(context, map);
+    } catch (e) {
+      if (!context.mounted) return;
+      _showSnack(context, 'ดึงข้อมูลไม่สำเร็จ: $e');
+    }
+  }
+
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    const textStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white24),
+        gradient: const LinearGradient(
+          colors: [Color(0x335E6A75), Color(0x115E6A75)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(label, style: textStyle),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _goToCrop(BuildContext context, Uint8List bytes, String fileName) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -20,49 +110,15 @@ class FdaScanScreen extends StatelessWidget {
           onCropped: (cropped) async {
             final ocr = FdaOcr();
             final result = await ocr.recognize(cropped);
-            if (!context.mounted) return null;
+            if (!context.mounted) return;
 
             final fda = result.fdaNumber;
             if (fda == null) {
-              await showDialog(
-                context: context,
-                builder: (_) => const AlertDialog(
-                  title: Text('ไม่พบเลข FDA'),
-                  content: Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
-                ),
-              );
-              return null;
+              await _showFdaNotFoundDialog(context);
+              return;
             }
 
-            try {
-              final service = FdaSearchService();
-              final map = await service.fetchByFdpdtno(fda);
-              if (!context.mounted) return null;
-              await showDialog(
-                context: context,
-                builder: (_) {
-                  final entries = map.entries
-                      .map((e) => '${e.key}: ${e.value ?? '-'}')
-                      .join('\n');
-                  return AlertDialog(
-                    title: const Text('ผลการค้นหา FDA'),
-                    content: SingleChildScrollView(child: Text(entries)),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('ปิด'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            } catch (e) {
-              if (!context.mounted) return null;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('ดึงข้อมูลไม่สำเร็จ: $e')),
-              );
-            }
-            return null;
+            await _fetchAndPresentFda(context, fda);
           },
         ),
       ),
@@ -80,113 +136,34 @@ class FdaScanScreen extends StatelessWidget {
       }
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('เลือกภาพไม่สำเร็จ: $e')),
-      );
+      _showSnack(context, 'เลือกภาพไม่สำเร็จ: $e');
     }
   }
 
   Future<void> _openFdaInputDialog(BuildContext context) async {
     final result = await showFdaInputDialog(context);
-    try {
-      final service = FdaSearchService();
-      if (result == null || result.trim().isEmpty) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('กรุณากรอกเลข FDA')),
-        );
-        return;
-      }
-      final map = await service.fetchByFdpdtno(result);
-
+    if (result == null || result.trim().isEmpty) {
       if (!context.mounted) return;
-      await showDialog(
-        context: context,
-        builder: (_) {
-          final entries = map.entries
-              .map((e) => '${e.key}: ${e.value ?? '-'}')
-              .join('\n');
-          return AlertDialog(
-            title: const Text('ผลการค้นหา FDA'),
-            content: SingleChildScrollView(child: Text(entries)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('ปิด'),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ดึงข้อมูลไม่สำเร็จ: $e')),
-      );
+      _showSnack(context, 'กรุณากรอกเลข FDA');
+      return;
     }
+    if (!context.mounted) return;
+    await _fetchAndPresentFda(context, result);
   }
 
   Widget _fdaInputButton(BuildContext context) {
-    return Container(
-      height: 54,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
-        gradient: const LinearGradient(
-          colors: [Color(0x335E6A75), Color(0x115E6A75)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => _openFdaInputDialog(context),
-          child: const Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.edit, color: Colors.white),
-                SizedBox(width: 8),
-                Text('กรอกเลข FDA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _actionButton(
+      icon: Icons.edit,
+      label: 'กรอกเลข FDA',
+      onTap: () => _openFdaInputDialog(context),
     );
   }
 
   Widget _debugUploadButton(BuildContext context) {
-    return Container(
-      height: 54,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
-        gradient: const LinearGradient(
-          colors: [Color(0x335E6A75), Color(0x115E6A75)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () => _pickFromGalleryDebug(context),
-          child: const Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.upload, color: Colors.white),
-                SizedBox(width: 8),
-                Text('อัปโหลดรูป (debug)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return _actionButton(
+      icon: Icons.upload,
+      label: 'อัปโหลดรูป (debug)',
+      onTap: () => _pickFromGalleryDebug(context),
     );
   }
 

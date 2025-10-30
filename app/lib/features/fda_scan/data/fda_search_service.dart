@@ -6,10 +6,6 @@ class FdaSearchService {
   static const _base =
       'https://porta.fda.moph.go.th/FDA_SEARCH_ALL/PRODUCT/FRM_PRODUCT_FOOD.aspx';
 
-  /// Minimal fixed fetch for quick testing
-  Future<Map<String, String?>> fetchFixed() {
-    return fetchByFdpdtno('1310044910142');
-  }
 
   /// Returns a map of selected fields, or null values if not found
   Future<Map<String, String?>> fetchByFdpdtno(String raw) async {
