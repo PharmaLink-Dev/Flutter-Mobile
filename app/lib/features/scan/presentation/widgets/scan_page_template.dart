@@ -14,6 +14,7 @@ class ScanPageTemplate extends StatefulWidget {
   final OnCaptured onCaptured;
   final bool showGalleryUpload;
   final Widget? customSecondaryButton;
+  final String headerTitle;
 
   const ScanPageTemplate({
     super.key,
@@ -22,6 +23,7 @@ class ScanPageTemplate extends StatefulWidget {
     required this.onCaptured,
     this.showGalleryUpload = true,
     this.customSecondaryButton,
+    this.headerTitle = 'สแกน',
   });
 
   @override
@@ -143,26 +145,27 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        leading: _RoundIconButton(icon: Icons.arrow_back, onTap: () => context.go('/')),
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: _RoundIconButton(
-              icon: _isTorchOn ? Icons.flash_on : Icons.flash_off,
-              onTap: (_controller != null && _controller!.value.isInitialized) ? _toggleTorch : null,
-            ),
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           const Positioned.fill(child: AuroraBackground()),
           Positioned.fill(child: preview),
           Positioned.fill(child: widget.overlay),
+          // Glass header with back + flash controls
+          Positioned(
+            left: 16,
+            right: 16,
+            child: SafeArea(
+              bottom: false,
+              child: _PlainHeader(
+                title: widget.headerTitle,
+                isTorchOn: _isTorchOn,
+                onBack: () => context.go('/'),
+                onToggleTorch: (_controller != null && _controller!.value.isInitialized)
+                    ? _toggleTorch
+                    : null,
+              ),
+            ),
+          ),
           Positioned(
             left: 16,
             right: 16,
@@ -305,11 +308,7 @@ class _RoundIconButton extends StatelessWidget {
         height: 38,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.08),
-          border: Border.all(color: Colors.white24),
-          boxShadow: const [
-            BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 2)),
-          ],
+          color: Color(0x335E6A75),
         ),
         child: Icon(icon, color: Colors.white),
       ),
@@ -317,3 +316,49 @@ class _RoundIconButton extends StatelessWidget {
   }
 }
 
+class _PlainHeader extends StatelessWidget {
+  final String title;
+  final bool isTorchOn;
+  final VoidCallback onBack;
+  final VoidCallback? onToggleTorch;
+
+  const _PlainHeader({
+    required this.title,
+    required this.isTorchOn,
+    required this.onBack,
+    required this.onToggleTorch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0x335E6A75),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        children: [
+          _RoundIconButton(icon: Icons.arrow_back, onTap: onBack),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          _RoundIconButton(
+            icon: isTorchOn ? Icons.flash_on : Icons.flash_off,
+            onTap: onToggleTorch,
+          ),
+        ],
+      ),
+    );
+  }
+}

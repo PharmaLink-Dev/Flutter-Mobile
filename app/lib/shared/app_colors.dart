@@ -83,4 +83,11 @@ class AppGradients {
     end: Alignment.bottomRight,
   );
   
+  /// Header gradient used on scan pages (darker tone, keeps theme)
+  static const LinearGradient headerOrange = LinearGradient(
+    colors: [Color(0xFF3F5AE6), Color(0xFF1F8FDB), Color(0xFF009E8A)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+  
 }

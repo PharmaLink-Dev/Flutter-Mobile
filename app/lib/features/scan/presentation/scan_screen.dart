@@ -18,6 +18,7 @@ class ScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScanPageTemplate(
+      headerTitle: 'สแกนสาร',
       overlay: const ScanOverlay(width: 300, height: 300),
       guideText: 'วางฉลากให้อยู่ในกรอบ',
       showGalleryUpload: true,
@@ -25,4 +26,3 @@ class ScanScreen extends StatelessWidget {
     );
   }
 }
-

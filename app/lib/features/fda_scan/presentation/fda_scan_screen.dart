@@ -59,6 +59,7 @@ class FdaScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScanPageTemplate(
+      headerTitle: 'สแกนเลข FDA',
       overlay: const ScanOverlay(width: 360, height: 100),
       guideText: 'วางเลข FDA ในกรอบ',
       showGalleryUpload: false,
