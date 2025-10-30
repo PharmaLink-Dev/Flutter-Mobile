@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () => context.go('/test'),
               child: const Text('Go to Test Screen'),
             ),
-            const SizedBox(heigth: 20),
+            const SizedBox(height: 20),
             const TopSummaryCard(),
             const SizedBox(height: 20),
             const QuickActions(), // grid of shortcuts
