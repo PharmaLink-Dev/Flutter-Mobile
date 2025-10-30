@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../components/news_list.dart';
 
 class NewsScreen extends StatelessWidget {
   const NewsScreen({super.key});
@@ -9,8 +10,9 @@ class NewsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Recent News'),
       ),
-      body: const Center(
-        child: Text('ข่าวเด็ดวันนี้! ตะวันเป็นเกย์'),
+      body: const SafeArea(
+        child: 
+            NewsList()
       ),
     );
   }
