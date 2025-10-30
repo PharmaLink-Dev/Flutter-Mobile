@@ -6,19 +6,23 @@ class NewsList extends StatelessWidget {
   const NewsList({super.key}): newsArticles = const [
     {
       'title': 'Flutter 3.24 Released!',
-      'url': 'https://flutter.dev/docs/whats-new'
+      'url': 'https://flutter.dev/docs/whats-new',
+      'description': "This page contains current and recent announcements of what's new on the flutter website"
     },
     {
-      'title': 'Dart 3.5 Introduces Records and Patterns',
-      'url': 'https://dart.dev'
+      'title': 'ข่าวล่าสุด ข่าวด่วน ประเด็นร้อน ข่าวไทยรัฐ',
+      'url': 'https://www.thairath.co.th',
+      'description': "ไทยรัฐ ทันทุกเหตุการณ์ ข่าวล่าสุด กีฬา บันเทิง สุขภาพ กิน เที่ยว หวย ดวง คอลัมน์ เรื่องย่อละคร ดูไทยรัฐทีวีสดและย้อนหลัง และอีกมากมาย."
     },
     {
       'title': 'Google I/O 2025 Highlights',
-      'url': 'https://io.google'
+      'url': 'https://io.google',
+      'description': "Check out the highlights and anything you might have missed"
     },
     {
-      'title': 'Top 5 Big Black Men',
-      'url': 'https://www.youtube.com/watch?v=n0E3fNgIjWM'
+      'title': 'Top 5 Big Black Man',
+      'url': 'https://www.youtube.com/watch?v=n0E3fNgIjWM',
+      'description': "Very educational"
     }
   ];
 
@@ -39,6 +43,7 @@ class NewsList extends StatelessWidget {
       itemBuilder: (context, index) {
         final article = newsArticles[index];
         return ListTile(
+          leading: FlutterLogo(size: 72.0),
           title: Text(
             article['title']!,
             style: const TextStyle(
@@ -47,6 +52,9 @@ class NewsList extends StatelessWidget {
               color: Colors.blueAccent,
             ),
           ),
+          subtitle: Text(
+            article['description']!,
+            ),
           trailing: const Icon(Icons.open_in_new, color: Colors.grey),
           onTap: () => _openUrl(article['url']!),
         );
