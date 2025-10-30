@@ -125,21 +125,6 @@ class FdaScanScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _pickFromGalleryDebug(BuildContext context) async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery);
-      if (picked == null) return;
-      final bytes = await picked.readAsBytes();
-      if (context.mounted) {
-        _goToCrop(context, bytes, picked.name);
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      _showSnack(context, 'เลือกภาพไม่สำเร็จ: $e');
-    }
-  }
-
   Future<void> _openFdaInputDialog(BuildContext context) async {
     final result = await showFdaInputDialog(context);
     if (result == null || result.trim().isEmpty) {
@@ -156,14 +141,6 @@ class FdaScanScreen extends StatelessWidget {
       icon: Icons.edit,
       label: 'กรอกเลข FDA',
       onTap: () => _openFdaInputDialog(context),
-    );
-  }
-
-  Widget _debugUploadButton(BuildContext context) {
-    return _actionButton(
-      icon: Icons.upload,
-      label: 'อัปโหลดรูป (debug)',
-      onTap: () => _pickFromGalleryDebug(context),
     );
   }
 
