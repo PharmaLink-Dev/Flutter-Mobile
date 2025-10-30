@@ -6,6 +6,7 @@ import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 import 'widgets/fda_input_dialog.dart';
 import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:app/features/fda_scan/data/fda_search_service.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
@@ -59,9 +60,37 @@ class FdaScanScreen extends StatelessWidget {
 
   Future<void> _openFdaInputDialog(BuildContext context) async {
     final result = await showFdaInputDialog(context);
-    if (result != null && result.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('ค้นหา: $result')));
-      // TODO: นำทางไปหน้าผลลัพธ์หรือเรียก API ตรวจสอบ
+    try {
+      final service = FdaSearchService();
+      // Minimal: use fixed number for now if input is empty
+      final map = (result == null || result.trim().isEmpty)
+          ? await service.fetchFixed()
+          : await service.fetchByFdpdtno(result);
+
+      if (!context.mounted) return;
+      await showDialog(
+        context: context,
+        builder: (_) {
+          final entries = map.entries
+              .map((e) => '${e.key}: ${e.value ?? '-'}')
+              .join('\n');
+          return AlertDialog(
+            title: const Text('ผลการค้นหา FDA'),
+            content: SingleChildScrollView(child: Text(entries)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('ปิด'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ดึงข้อมูลไม่สำเร็จ: $e')),
+      );
     }
   }
 
