@@ -21,19 +21,47 @@ class FdaScanScreen extends StatelessWidget {
             final ocr = FdaOcr();
             final result = await ocr.recognize(cropped);
             if (!context.mounted) return null;
-            await showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: Text('OCR (${result.duration.inMilliseconds} ms)'),
-                content: Text(result.fdaNumber ?? '(ไม่พบเลข FDA)'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('ปิด'),
-                  ),
-                ],
-              ),
-            );
+
+            final fda = result.fdaNumber;
+            if (fda == null) {
+              await showDialog(
+                context: context,
+                builder: (_) => const AlertDialog(
+                  title: Text('ไม่พบเลข FDA'),
+                  content: Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+                ),
+              );
+              return null;
+            }
+
+            try {
+              final service = FdaSearchService();
+              final map = await service.fetchByFdpdtno(fda);
+              if (!context.mounted) return null;
+              await showDialog(
+                context: context,
+                builder: (_) {
+                  final entries = map.entries
+                      .map((e) => '${e.key}: ${e.value ?? '-'}')
+                      .join('\n');
+                  return AlertDialog(
+                    title: const Text('ผลการค้นหา FDA'),
+                    content: SingleChildScrollView(child: Text(entries)),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('ปิด'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            } catch (e) {
+              if (!context.mounted) return null;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('ดึงข้อมูลไม่สำเร็จ: $e')),
+              );
+            }
             return null;
           },
         ),
@@ -62,10 +90,14 @@ class FdaScanScreen extends StatelessWidget {
     final result = await showFdaInputDialog(context);
     try {
       final service = FdaSearchService();
-      // Minimal: use fixed number for now if input is empty
-      final map = (result == null || result.trim().isEmpty)
-          ? await service.fetchFixed()
-          : await service.fetchByFdpdtno(result);
+      if (result == null || result.trim().isEmpty) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณากรอกเลข FDA')),
+        );
+        return;
+      }
+      final map = await service.fetchByFdpdtno(result);
 
       if (!context.mounted) return;
       await showDialog(

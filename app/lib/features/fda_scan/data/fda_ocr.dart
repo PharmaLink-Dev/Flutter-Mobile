@@ -31,8 +31,7 @@ class FdaOcr {
       final normalized = _normalizeDigitsAndDashes(text);
       final fda = _extractFdaNumber(normalized) ?? _extractFdaNumber(text);
       sw.stop();
-      // ignore: avoid_print
-      print('FDA OCR OUTPUT (in ${sw.elapsedMilliseconds} ms):\n$text');
+      // Removed verbose OCR log for release
       return FdaOcrResult(
         fullText: text,
         fdaNumber: fda,
