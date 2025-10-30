@@ -19,7 +19,7 @@ class ScanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScanPageTemplate(
       headerTitle: 'สแกนสาร',
-      overlay: const ScanOverlay(width: 300, height: 500),
+      overlay: const ScanOverlay(width: 320, height: 320),
       guideText: 'วางฉลากให้อยู่ในกรอบ',
       showGalleryUpload: true,
       onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
