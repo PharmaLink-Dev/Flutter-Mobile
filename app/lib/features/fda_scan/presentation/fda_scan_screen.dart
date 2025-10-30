@@ -156,7 +156,6 @@ class FdaScanScreen extends StatelessWidget {
         children: [
           _fdaInputButton(context),
           const SizedBox(height: 10),
-          _debugUploadButton(context),
         ],
       ),
       onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
