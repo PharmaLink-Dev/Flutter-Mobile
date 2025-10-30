@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:app/features/fda_scan/data/fda_search_service.dart';
+import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/ingredient.dart';
 import 'package:app/features/history/data/scan_history.dart';
 import 'package:flutter/material.dart';
@@ -18,67 +20,105 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   final _historyBox = Hive.box<ScanHistory>('history');
+  final _fdaScanBox = Hive.box<FdaScan>('fda_scans');
   final _imagePicker = ImagePicker();
   bool _isLoading = false;
 
-  // --- Core Logic (accepts image bytes) ---
-  Future<void> _runFlow({required Uint8List imageBytes, required String source}) async {
+  // --- Button Handlers ---
+
+  Future<void> _handleIngredientUploadTest() async {
+    final XFile? pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+    final bytes = await pickedFile.readAsBytes();
+    await _runIngredientFlow(imageBytes: bytes, source: "Uploaded Image");
+  }
+
+  Future<void> _handleIngredientMockTest() async {
+    final Uint8List mockImageBytes = _createMockImage();
+    await _runIngredientFlow(imageBytes: mockImageBytes, source: "Mock Image");
+  }
+
+  /// New combined FDA Test: Upload image, then fetch data for a hardcoded FDA number.
+  Future<void> _handleFdaUploadAndSaveTest() async {
+    final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image selection cancelled.")));
+      return;
+    }
+
     setState(() => _isLoading = true);
+    const fdaNumber = '1310044910142'; // Hardcoded FDA number for the test
 
     try {
-      final List<Ingredient> mockIngredients = [
-        Ingredient(name: "Source: $source", description: "Test Data", safetyLevel: "Safe"),
-        Ingredient(name: "Glycerin", description: "Humectant", safetyLevel: "Safe"),
-        Ingredient(name: "Phenoxyethanol", description: "Preservative", safetyLevel: "Warning"),
-      ];
-
-      // CRITICAL STEP: Save image to cache and get the path
-      final String? imagePath = await _saveImageToCache(imageBytes);
+      final imageBytes = await pickedFile.readAsBytes();
+      final imagePath = await _saveImageToCache(imageBytes);
       if (imagePath == null) throw Exception("Failed to save image.");
 
-      // LOG aS REQUESTED: Print the file path to the console
-      print("✅ Image saved to cache at: $imagePath");
+      final data = await FdaSearchService().fetchByFdpdtno(fdaNumber);
+
+      final newFdaScan = FdaScan(
+        id: const Uuid().v4(),
+        fdaNumber: fdaNumber,
+        scanDate: DateTime.now(),
+        fdaData: data,
+        imagePath: imagePath, // Now we save the image path
+        scanName: "Test: $fdaNumber",
+      );
+
+      await _fdaScanBox.put(newFdaScan.id, newFdaScan);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ FDA Scan for $fdaNumber with image saved!")),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("FDA test flow failed: $e")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // --- Core Logic for Ingredients ---
+
+  Future<void> _runIngredientFlow(
+      {required Uint8List imageBytes, required String source}) async {
+    setState(() => _isLoading = true);
+    try {
+      final ingredients = [
+        Ingredient(name: "Source: $source", description: "Test Data", safetyLevel: "Safe"),
+        Ingredient(name: "Glycerin", description: "Humectant", safetyLevel: "Safe"),
+      ];
+      final imagePath = await _saveImageToCache(imageBytes);
+      if (imagePath == null) throw Exception("Failed to save image.");
 
       final newHistory = ScanHistory(
         id: const Uuid().v4(),
         imagePath: imagePath,
-        ingredients: mockIngredients,
+        ingredients: ingredients,
         scanDate: DateTime.now(),
       );
       await _historyBox.put(newHistory.id, newHistory);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Success! Saved from $source. Path: $imagePath")),
-      );
-
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Success! Saved from $source.")),
+        );
+      }
     } catch (e) {
-      print("❌ Flow Failed: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Flow Failed: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Flow Failed: $e")));
+      }
     } finally {
       setState(() => _isLoading = false);
     }
-  }
-
-  // --- Button Handlers ---
-
-  /// Runs the flow with a generated mock image
-  Future<void> _handleMockTest() async {
-    final Uint8List mockImageBytes = _createMockImage();
-    await _runFlow(imageBytes: mockImageBytes, source: "Mock Image");
-  }
-
-  /// Runs the flow with an image uploaded from the gallery
-  Future<void> _handleUploadTest() async {
-    final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) {
-      print("No image selected.");
-      return; // User cancelled the picker
-    }
-
-    final Uint8List uploadedImageBytes = await pickedFile.readAsBytes();
-    await _runFlow(imageBytes: uploadedImageBytes, source: "Uploaded Image");
   }
 
   // --- Helper Functions ---
@@ -102,17 +142,18 @@ class _TestScreenState extends State<TestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test Caching Flow'),
+        title: const Text('Test Screen'),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: () async {
               await _historyBox.clear();
+              await _fdaScanBox.clear();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Hive box cleared!")),
+                const SnackBar(content: Text("All Hive boxes cleared!")),
               );
             },
-            tooltip: 'Clear Hive Box',
+            tooltip: 'Clear All Hive Boxes',
           )
         ],
       ),
@@ -122,78 +163,40 @@ class _TestScreenState extends State<TestScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElevatedButton(
-              onPressed: _isLoading ? null : _handleUploadTest,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text('1. Upload, Save & Test'),
+              onPressed: _isLoading ? null : _handleIngredientUploadTest,
+              child: const Text('1. Ingredient: Upload & Save'),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: _isLoading ? null : _handleMockTest,
-              child: const Text('2. Run with Mock Image'),
+              onPressed: _isLoading ? null : _handleIngredientMockTest,
+              child: const Text('2. Ingredient: Mock & Save'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _handleFdaUploadAndSaveTest,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade100),
+              child: const Text('3. FDA: Upload & Save Test'),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Data in Hive Box:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const Divider(),
             Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: _historyBox.listenable(),
-                builder: (context, Box<ScanHistory> box, _) {
-                  if (box.values.isEmpty) {
-                    return const Center(child: Text('Hive box is empty. Press a button to test.'));
-                  }
-                  final historyItems = box.values.toList().reversed.toList();
-                  return ListView.builder(
-                    itemCount: historyItems.length,
-                    itemBuilder: (context, index) {
-                      final item = historyItems[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              // CRITICAL TEST: Load image from file path
-                              Image.file(
-                                File(item.imagePath),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  print("❌ Error loading image for item ${item.id}: $error");
-                                  return const Icon(Icons.error, color: Colors.red, size: 40);
-                                },
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Scan from: ${item.scanDate.toShortString()}"),
-                                    const SizedBox(height: 4),
-                                    Wrap(
-                                      spacing: 4.0,
-                                      runSpacing: 4.0,
-                                      children: item.ingredients.map((ing) {
-                                        return Chip(
-                                          label: Text(ing.name, style: const TextStyle(fontSize: 12)),
-                                          backgroundColor: _getColorForSafety(ing.safetyLevel),
-                                          padding: EdgeInsets.zero,
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildSection(
+                      title: 'Ingredient Scans',
+                      box: _historyBox,
+                      builder: (box) => _buildHistoryListView(box.values.toList().reversed.toList()),
+                    ),
+                  ),
+                  const VerticalDivider(width: 20),
+                  Expanded(
+                    child: _buildSection(
+                      title: 'FDA Scans',
+                      box: _fdaScanBox,
+                      builder: (box) => _buildFdaScanListView(box.values.toList().reversed.toList()),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -202,22 +205,77 @@ class _TestScreenState extends State<TestScreen> {
     );
   }
 
-  Color _getColorForSafety(String safetyLevel) {
-    switch (safetyLevel) {
-      case "Safe":
-        return Colors.green.shade100;
-      case "Warning":
-        return Colors.orange.shade100;
-      case "Danger":
-        return Colors.red.shade200;
-      default:
-        return Colors.grey.shade200;
-    }
+  Widget _buildSection<T extends HiveObject>(
+      {required String title, required Box<T> box, required Widget Function(Box<T>) builder}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Divider(),
+        Expanded(
+          child: ValueListenableBuilder(
+            valueListenable: box.listenable(),
+            builder: (context, Box<T> box, _) {
+              if (box.values.isEmpty) return Center(child: Text('$title history is empty.'));
+              return builder(box);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  ListView _buildHistoryListView(List<ScanHistory> items) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Image.file(File(item.imagePath), width: 60, height: 60, fit: BoxFit.cover),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.scanDate.toShortString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Wrap(spacing: 4, children: item.ingredients.map((ing) => Chip(label: Text(ing.name, style: const TextStyle(fontSize: 10)))).toList()),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  ListView _buildFdaScanListView(List<FdaScan> items) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: ListTile(
+            leading: item.imagePath != null
+                ? Image.file(File(item.imagePath!), width: 50, height: 50, fit: BoxFit.cover)
+                : const Icon(Icons.document_scanner_outlined, size: 40),
+            title: Text(item.scanName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text("Product: $productName"),
+          ),
+        );
+      },
+    );
   }
 }
 
 extension on DateTime {
-  String toShortString() {
-    return "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
-  }
+  String toShortString() => "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
 }
