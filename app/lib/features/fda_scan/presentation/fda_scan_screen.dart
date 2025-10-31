@@ -8,6 +8,7 @@ import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app/features/fda_scan/data/fda_search_service.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
+import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
@@ -58,14 +59,26 @@ class FdaScanScreen extends StatelessWidget {
       final service = FdaSearchService();
       final map = await service.fetchByFdpdtno(fda);
       if (!context.mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FdaSuccessScreen(data: map),
-        ),
-      );
+      if (FdaSearchService.isValidResult(map)) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FdaSuccessScreen(data: map),
+          ),
+        );
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
+          ),
+        );
+      }
     } catch (e) {
       if (!context.mounted) return;
-      _showSnack(context, 'ดึงข้อมูลไม่สำเร็จ: $e');
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
+        ),
+      );
     }
   }
 

@@ -8,6 +8,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
     context: context,
     builder: (ctx) {
       return Dialog(
+        backgroundColor: Colors.white,
         insetPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: SizedBox(
