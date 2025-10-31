@@ -18,7 +18,7 @@ class FdaSuccessScreen extends StatelessWidget {
             width: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF38EF7D), Color(0xFF11998E)],
+                colors: [Color(0xFF34D399), Color(0xFF10B981)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
