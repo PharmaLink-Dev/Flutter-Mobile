@@ -73,17 +73,17 @@ class FdaSuccessScreen extends StatelessWidget {
             ),
           ),
 
-          // DraggableScrollable bottom sheet (scrollable)
-          DraggableScrollableSheet(
-            initialChildSize: 0.38,
-            minChildSize: 0.28,
-            maxChildSize: 0.9,
-            builder: (context, controller) {
-              return FdaResultBottomSheet(
-                data: data,
-                scrollController: controller,
-              );
-            },
+          // Fixed-position bottom sheet (not draggable)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.56,
+                child: FdaResultBottomSheet(data: data),
+              ),
+            ),
           ),
 
           // Back button
@@ -124,4 +124,3 @@ class _SoftShape {
         ),
       );
 }
-

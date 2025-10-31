@@ -71,7 +71,7 @@ class FdaResultBottomSheet extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onCopyAll ?? () => _copyToClipboard(context, allText),
                     icon: const Icon(Icons.copy, size: 18),
-                    label: const Text('คัดลอกทั้งหมด'),
+                    label: const Text('คัดลอก'),
                   ),
                 ],
               );
@@ -81,17 +81,6 @@ class FdaResultBottomSheet extends StatelessWidget {
             final value = (e.value == null || e.value!.trim().isEmpty) ? '-' : e.value!.trim();
             final isStatus = e.key == 'สถานะผลิตภัณฑ์';
             final isNameTh = e.key == 'ชื่อผลิตภัณฑ์(TH)';
-            final isNameEn = e.key == 'ชื่อผลิตภัณฑ์(EN)';
-            final allowCopy = e.key == 'เลขสารบบ' || isNameTh || isNameEn;
-
-            Widget? trailing;
-            if (allowCopy) {
-              trailing = IconButton(
-                icon: const Icon(Icons.copy, size: 18),
-                onPressed: () => _copyToClipboard(context, value),
-                tooltip: 'คัดลอก',
-              );
-            }
 
             TextStyle titleStyle = const TextStyle(fontWeight: FontWeight.w600);
             TextStyle subtitleStyle = const TextStyle();
@@ -109,8 +98,7 @@ class FdaResultBottomSheet extends StatelessWidget {
                 ],
               );
             } else if (isNameTh) {
-              titleStyle = const TextStyle(fontWeight: FontWeight.w700);
-              subtitleStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w800);
+              // Render like other rows (no extra emphasis)
               subtitleWidget = Text(value, style: subtitleStyle);
             } else {
               subtitleWidget = Text(value, style: subtitleStyle);
@@ -120,7 +108,7 @@ class FdaResultBottomSheet extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               title: Text(e.key, style: titleStyle),
               subtitle: subtitleWidget,
-              trailing: trailing,
+              trailing: null,
             );
           },
         ),
@@ -128,4 +116,3 @@ class FdaResultBottomSheet extends StatelessWidget {
     );
   }
 }
-
