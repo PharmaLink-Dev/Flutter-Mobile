@@ -13,13 +13,6 @@ import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  // UI helpers
-  void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
   Future<void> _showFdaResultDialog(
     BuildContext context,
     Map<String, String?> data,
@@ -146,8 +139,6 @@ class FdaScanScreen extends StatelessWidget {
   Future<void> _openFdaInputDialog(BuildContext context) async {
     final result = await showFdaInputDialog(context);
     if (result == null || result.trim().isEmpty) {
-      if (!context.mounted) return;
-      _showSnack(context, 'กรุณากรอกเลข FDA');
       return;
     }
     if (!context.mounted) return;
