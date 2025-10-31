@@ -13,9 +13,8 @@ class FdaSuccessScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF1ABC9C),
       body: Stack(
         children: [
-          // Top green success area with rounded bottom + soft decorations
           Container(
-            height: MediaQuery.of(context).size.height * 0.55,
+            height: MediaQuery.of(context).size.height * 0.50,
             width: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -52,7 +51,7 @@ class FdaSuccessScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'ผลิตภัณฑ์ผ่านการตรวจสอบ',
+                        'ผลิตภัณฑ์ขึ้นทะเบียน !',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontSize: 20,
@@ -61,7 +60,7 @@ class FdaSuccessScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'ดึงข้อมูลสำเร็จ พบเลขสารบบจาก API',
+                        'ข้อมูลตรวจสอบจากฐานข้อมูล\nสำนักงานคณะกรรมการอาหารและยา กระทรวงสาธารณสุข',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withOpacity(0.95),
