@@ -6,11 +6,16 @@ class FdaSearchService {
   static const _base =
       'https://porta.fda.moph.go.th/FDA_SEARCH_ALL/PRODUCT/FRM_PRODUCT_FOOD.aspx';
 
+  /// Build the FDA portal URL from any raw input containing digits.
+  static Uri buildUriForFdpdtno(String raw) {
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    return Uri.parse('$_base?fdpdtno=$digits');
+  }
+
 
   /// Returns a map of selected fields, or null values if not found
   Future<Map<String, String?>> fetchByFdpdtno(String raw) async {
-    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    final uri = Uri.parse('$_base?fdpdtno=$digits');
+    final uri = buildUriForFdpdtno(raw);
 
     final resp = await http
         .get(uri)
@@ -36,4 +41,3 @@ class FdaSearchService {
     });
   }
 }
-
