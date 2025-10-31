@@ -86,7 +86,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'เลขที่สแกนได้: ' + scannedRaw,
+                        'เลขที่ค้นหา: ' + scannedRaw,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withOpacity(0.95),
@@ -150,7 +150,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                                 const Text('ไม่พบข้อมูลผลิตภัณฑ์',
                                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF0B1F17))),
                                 const SizedBox(height: 4),
-                                Text('เลขที่สแกนได้: ' + scannedRaw,
+                                Text('เลขที่ค้นหา: ' + scannedRaw,
                                     style: const TextStyle(fontSize: 13, color: Color(0xFF3B4B52))),
                               ],
                             ),
