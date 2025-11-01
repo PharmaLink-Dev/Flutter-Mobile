@@ -19,6 +19,9 @@ class FdaScan extends HiveObject {
   @HiveField(4)
   late Map<String, String?> fdaData; // To store the fetched data
 
+  @HiveField(5)
+  bool isFavorite = false;
+
   FdaScan({
     required this.id,
     required this.fdaNumber,
