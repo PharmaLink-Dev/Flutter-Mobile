@@ -26,11 +26,36 @@ class _HistoryScreenState extends State<HistoryScreen> {
           IconButton(
             icon: const Icon(Icons.delete_forever),
             onPressed: () async {
-              await _historyBox.clear();
-              await _fdaScanBox.clear();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("All history cleared!")),
+              final shouldDelete = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Confirm Delete'),
+                  content: const Text(
+                    'Are you sure you want to delete all history?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
               );
+
+              if (shouldDelete ?? false) {
+                await _historyBox.clear();
+                await _fdaScanBox.clear();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("All history cleared!")),
+                );
+              }
             },
             tooltip: 'Clear All History',
           ),
