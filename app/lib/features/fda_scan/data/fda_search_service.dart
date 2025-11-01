@@ -6,11 +6,32 @@ class FdaSearchService {
   static const _base =
       'https://porta.fda.moph.go.th/FDA_SEARCH_ALL/PRODUCT/FRM_PRODUCT_FOOD.aspx';
 
+  /// Build the FDA portal URL from any raw input containing digits.
+  static Uri buildUriForFdpdtno(String raw) {
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    return Uri.parse('$_base?fdpdtno=$digits');
+  }
+
+  /// Heuristic to decide if parsed result looks valid.
+  /// Consider valid only when:
+  /// - FDA number has at least 10 digits (ignoring dashes/spaces), AND
+  /// - At least one of product name TH/EN or license holder is present.
+  static bool isValidResult(Map<String, String?> data) {
+    String norm(String? s) => (s ?? '').trim();
+    final idDigits = norm(data['เลขสารบบ']).replaceAll(RegExp(r'[^0-9]'), '');
+    final hasId = idDigits.length >= 10;
+    final hasNameOrHolder =
+        norm(data['ชื่อผลิตภัณฑ์(TH)']).isNotEmpty ||
+        norm(data['ชื่อผลิตภัณฑ์(EN)']).isNotEmpty ||
+        norm(data['ชื่อผู้รับอนุญาต']).isNotEmpty;
+
+    return hasId && hasNameOrHolder;
+  }
+
 
   /// Returns a map of selected fields, or null values if not found
   Future<Map<String, String?>> fetchByFdpdtno(String raw) async {
-    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
-    final uri = Uri.parse('$_base?fdpdtno=$digits');
+    final uri = buildUriForFdpdtno(raw);
 
     final resp = await http
         .get(uri)
@@ -36,4 +57,3 @@ class FdaSearchService {
     });
   }
 }
-

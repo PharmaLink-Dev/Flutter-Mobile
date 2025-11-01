@@ -7,16 +7,11 @@ import 'widgets/fda_input_dialog.dart';
 import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app/features/fda_scan/data/fda_search_service.dart';
+import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
+import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
-
-  // UI helpers
-  void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
 
   Future<void> _showFdaResultDialog(
     BuildContext context,
@@ -57,10 +52,26 @@ class FdaScanScreen extends StatelessWidget {
       final service = FdaSearchService();
       final map = await service.fetchByFdpdtno(fda);
       if (!context.mounted) return;
-      await _showFdaResultDialog(context, map);
+      if (FdaSearchService.isValidResult(map)) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FdaSuccessScreen(data: map),
+          ),
+        );
+      } else {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
+          ),
+        );
+      }
     } catch (e) {
       if (!context.mounted) return;
-      _showSnack(context, 'ดึงข้อมูลไม่สำเร็จ: $e');
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
+        ),
+      );
     }
   }
 
@@ -125,26 +136,9 @@ class FdaScanScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _pickFromGalleryDebug(BuildContext context) async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery);
-      if (picked == null) return;
-      final bytes = await picked.readAsBytes();
-      if (context.mounted) {
-        _goToCrop(context, bytes, picked.name);
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      _showSnack(context, 'เลือกภาพไม่สำเร็จ: $e');
-    }
-  }
-
   Future<void> _openFdaInputDialog(BuildContext context) async {
     final result = await showFdaInputDialog(context);
     if (result == null || result.trim().isEmpty) {
-      if (!context.mounted) return;
-      _showSnack(context, 'กรุณากรอกเลข FDA');
       return;
     }
     if (!context.mounted) return;
@@ -156,14 +150,6 @@ class FdaScanScreen extends StatelessWidget {
       icon: Icons.edit,
       label: 'กรอกเลข FDA',
       onTap: () => _openFdaInputDialog(context),
-    );
-  }
-
-  Widget _debugUploadButton(BuildContext context) {
-    return _actionButton(
-      icon: Icons.upload,
-      label: 'อัปโหลดรูป (debug)',
-      onTap: () => _pickFromGalleryDebug(context),
     );
   }
 
@@ -179,7 +165,6 @@ class FdaScanScreen extends StatelessWidget {
         children: [
           _fdaInputButton(context),
           const SizedBox(height: 10),
-          _debugUploadButton(context),
         ],
       ),
       onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),

@@ -29,7 +29,7 @@ class FdaOcr {
       final recognizedText = await textRecognizer.processImage(inputImage);
       final text = recognizedText.text;
       final normalized = _normalizeDigitsAndDashes(text);
-      final fda = _extractFdaNumber(normalized) ?? _extractFdaNumber(text);
+      final fda = _extractFdaNumber(normalized);
       sw.stop();
       // Removed verbose OCR log for release
       return FdaOcrResult(
@@ -61,17 +61,6 @@ class FdaOcr {
     final m = pattern.firstMatch(s);
     if (m != null) {
       return [m.group(1), m.group(2), m.group(3), m.group(4), m.group(5)].whereType<String>().join('-');
-    }
-    final digitsOnly = s.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digitsOnly.length >= 13) {
-      final segs = [
-        digitsOnly.substring(0, 2),
-        digitsOnly.substring(2, 3),
-        digitsOnly.substring(3, 8),
-        digitsOnly.substring(8, 9),
-        digitsOnly.substring(9, 13),
-      ];
-      return segs.join('-');
     }
     return null;
   }
