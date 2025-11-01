@@ -10,6 +10,10 @@ import 'package:app/features/fda_scan/data/fda_search_service.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
 import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 
+import 'package:uuid/uuid.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:app/features/history/data/fda_scan.dart';
+
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
@@ -53,24 +57,29 @@ class FdaScanScreen extends StatelessWidget {
       final map = await service.fetchByFdpdtno(fda);
       if (!context.mounted) return;
       if (FdaSearchService.isValidResult(map)) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FdaSuccessScreen(data: map),
-          ),
+        // บันทึกลง Hive
+        final fdaBox = Hive.box<FdaScan>('fda_scans');
+        final newScan = FdaScan(
+          id: const Uuid().v4(),
+          fdaNumber: fda,
+          scanDate: DateTime.now(),
+          fdaData: map,
         );
+        await fdaBox.add(newScan);
+
+        // ไปหน้าแสดงผล
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => FdaSuccessScreen(data: map)));
       } else {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
-          ),
+          MaterialPageRoute(builder: (_) => FdaNotFoundScreen(scannedRaw: fda)),
         );
       }
     } catch (e) {
       if (!context.mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
-        ),
+        MaterialPageRoute(builder: (_) => FdaNotFoundScreen(scannedRaw: fda)),
       );
     }
   }
@@ -80,7 +89,10 @@ class FdaScanScreen extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    const textStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+    const textStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
     return Container(
       height: 54,
       decoration: BoxDecoration(
@@ -162,12 +174,10 @@ class FdaScanScreen extends StatelessWidget {
       showGalleryUpload: false,
       customSecondaryButton: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          _fdaInputButton(context),
-          const SizedBox(height: 10),
-        ],
+        children: [_fdaInputButton(context), const SizedBox(height: 10)],
       ),
-      onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
+      onCaptured: (bytes, fileName) async =>
+          _goToCrop(context, bytes, fileName),
     );
   }
 }
