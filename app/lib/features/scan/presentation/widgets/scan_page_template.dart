@@ -38,6 +38,7 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
   bool _initializing = false;
   bool _isTorchOn = false;
   bool _openingCamera = false;
+  String? _cameraError;
 
   @override
   void initState() {
@@ -67,8 +68,19 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
       _cameras = await availableCameras();
       _cameraIndex = _preferBackCameraIndex(_cameras);
       await _initSelectedCamera();
-    } catch (_) {
-      if (mounted) setState(() => _initializing = false);
+    } catch (e) {
+      if (!mounted) return;
+      final errorText = 'ไม่สามารถเปิดกล้องได้: $e';
+      setState(() {
+        _initializing = false;
+        _cameraError = errorText;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorText),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -98,8 +110,19 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
         _controller = controller;
         _initializing = false;
       });
-    } catch (_) {
-      setState(() => _initializing = false);
+    } catch (e) {
+      if (!mounted) return;
+      final errorText = 'ไม่สามารถเปิดกล้องได้: $e';
+      setState(() {
+        _initializing = false;
+        _cameraError = errorText;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorText),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
