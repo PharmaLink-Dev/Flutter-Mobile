@@ -3,7 +3,7 @@ import 'package:app/models/ingredient.dart';
 import 'package:app/utils/warning_dialog.dart';
 import 'ingredient_detail_page.dart';
 import 'package:app/shared/app_colors.dart';
-import 'package:app/constants/ingredient_data.dart';
+
 
 class ResultPage extends StatefulWidget {
   const ResultPage({super.key});
