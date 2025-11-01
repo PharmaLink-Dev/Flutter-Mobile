@@ -3,6 +3,7 @@ import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/scan_history.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -32,7 +33,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               );
             },
             tooltip: 'Clear All History',
-          )
+          ),
         ],
       ),
       body: Column(
@@ -55,8 +56,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: TextButton(
             onPressed: () => setState(() => _isIngredientSelected = true),
             style: TextButton.styleFrom(
-              backgroundColor:
-                  _isIngredientSelected ? Colors.blue.withOpacity(0.1) : null,
+              backgroundColor: _isIngredientSelected
+                  ? Colors.blue.withOpacity(0.1)
+                  : null,
             ),
             child: const Text('Ingredient'),
           ),
@@ -65,8 +67,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           child: TextButton(
             onPressed: () => setState(() => _isIngredientSelected = false),
             style: TextButton.styleFrom(
-              backgroundColor:
-                  !_isIngredientSelected ? Colors.blue.withOpacity(0.1) : null,
+              backgroundColor: !_isIngredientSelected
+                  ? Colors.blue.withOpacity(0.1)
+                  : null,
             ),
             child: const Text('อย.'),
           ),
@@ -80,9 +83,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       valueListenable: _historyBox.listenable(),
       builder: (context, Box<ScanHistory> box, _) {
         if (box.values.isEmpty) {
-          return const Center(
-            child: Text('No ingredient scan history yet.'),
-          );
+          return const Center(child: Text('No ingredient scan history yet.'));
         }
         final items = box.values.toList().reversed.toList();
         return _buildHistoryList(items);
@@ -95,9 +96,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       valueListenable: _fdaScanBox.listenable(),
       builder: (context, Box<FdaScan> box, _) {
         if (box.values.isEmpty) {
-          return const Center(
-            child: Text('No FDA scan history yet.'),
-          );
+          return const Center(child: Text('No FDA scan history yet.'));
         }
         final items = box.values.toList().reversed.toList();
         return _buildFdaScanList(items);
@@ -136,7 +135,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               onPressed: () {
                 // This requires item to be a HiveObject
                 item.isFavorite = !item.isFavorite;
-                item.save(); 
+                item.save();
               },
             ),
           ),
@@ -151,15 +150,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
       itemBuilder: (context, index) {
         final item = fdaScans[index];
         final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
+        final fdaNumber = item.fdaData['เลขสารบบอาหาร'] ?? 'ไม่พบเลข อย.';
+
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
-            leading: item.imagePath != null
-                ? Image.file(File(item.imagePath!), width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.document_scanner_outlined, size: 40),
-            title: Text(item.scanName),
-            subtitle: Text("Product: $productName\nScanned on: ${item.scanDate.toShortString()}"),
+            title: Text(
+              item.scanName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              "Product: $productName\nScanned on: ${item.scanDate.toShortString()}",
+            ),
             isThreeLine: true,
+
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => FdaSuccessScreen(data: item.fdaData),
+                ),
+              );
+            },
           ),
         );
       },
