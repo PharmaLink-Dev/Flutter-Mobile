@@ -27,8 +27,9 @@ class _TestScreenState extends State<TestScreen> {
   // --- Button Handlers ---
 
   Future<void> _handleIngredientUploadTest() async {
-    final XFile? pickedFile =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
     if (pickedFile == null) return;
     final bytes = await pickedFile.readAsBytes();
     await _runIngredientFlow(imageBytes: bytes, source: "Uploaded Image");
@@ -41,9 +42,14 @@ class _TestScreenState extends State<TestScreen> {
 
   /// New combined FDA Test: Upload image, then fetch data for a hardcoded FDA number.
   Future<void> _handleFdaUploadAndSaveTest() async {
-    final XFile? pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
     if (pickedFile == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Image selection cancelled.")));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Image selection cancelled.")),
+        );
       return;
     }
 
@@ -62,7 +68,6 @@ class _TestScreenState extends State<TestScreen> {
         fdaNumber: fdaNumber,
         scanDate: DateTime.now(),
         fdaData: data,
-        imagePath: imagePath, // Now we save the image path
         scanName: "Test: $fdaNumber",
       );
 
@@ -70,14 +75,16 @@ class _TestScreenState extends State<TestScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("✅ FDA Scan for $fdaNumber with image saved!")),
+          SnackBar(
+            content: Text("✅ FDA Scan for $fdaNumber with image saved!"),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("FDA test flow failed: $e")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("FDA test flow failed: $e")));
       }
     } finally {
       if (mounted) {
@@ -88,13 +95,23 @@ class _TestScreenState extends State<TestScreen> {
 
   // --- Core Logic for Ingredients ---
 
-  Future<void> _runIngredientFlow(
-      {required Uint8List imageBytes, required String source}) async {
+  Future<void> _runIngredientFlow({
+    required Uint8List imageBytes,
+    required String source,
+  }) async {
     setState(() => _isLoading = true);
     try {
       final ingredients = [
-        Ingredient(name: "Source: $source", description: "Test Data", safetyLevel: "Safe"),
-        Ingredient(name: "Glycerin", description: "Humectant", safetyLevel: "Safe"),
+        Ingredient(
+          name: "Source: $source",
+          description: "Test Data",
+          safetyLevel: "Safe",
+        ),
+        Ingredient(
+          name: "Glycerin",
+          description: "Humectant",
+          safetyLevel: "Safe",
+        ),
       ];
       final imagePath = await _saveImageToCache(imageBytes);
       if (imagePath == null) throw Exception("Failed to save image.");
@@ -108,13 +125,15 @@ class _TestScreenState extends State<TestScreen> {
       await _historyBox.put(newHistory.id, newHistory);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Success! Saved from $source.")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Success! Saved from $source.")));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Flow Failed: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Flow Failed: $e")));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -154,7 +173,7 @@ class _TestScreenState extends State<TestScreen> {
               );
             },
             tooltip: 'Clear All Hive Boxes',
-          )
+          ),
         ],
       ),
       body: Padding(
@@ -174,7 +193,9 @@ class _TestScreenState extends State<TestScreen> {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: _isLoading ? null : _handleFdaUploadAndSaveTest,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade100),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade100,
+              ),
               child: const Text('3. FDA: Upload & Save Test'),
             ),
             const SizedBox(height: 20),
@@ -185,7 +206,9 @@ class _TestScreenState extends State<TestScreen> {
                     child: _buildSection(
                       title: 'Ingredient Scans',
                       box: _historyBox,
-                      builder: (box) => _buildHistoryListView(box.values.toList().reversed.toList()),
+                      builder: (box) => _buildHistoryListView(
+                        box.values.toList().reversed.toList(),
+                      ),
                     ),
                   ),
                   const VerticalDivider(width: 20),
@@ -193,7 +216,9 @@ class _TestScreenState extends State<TestScreen> {
                     child: _buildSection(
                       title: 'FDA Scans',
                       box: _fdaScanBox,
-                      builder: (box) => _buildFdaScanListView(box.values.toList().reversed.toList()),
+                      builder: (box) => _buildFdaScanListView(
+                        box.values.toList().reversed.toList(),
+                      ),
                     ),
                   ),
                 ],
@@ -205,18 +230,25 @@ class _TestScreenState extends State<TestScreen> {
     );
   }
 
-  Widget _buildSection<T extends HiveObject>(
-      {required String title, required Box<T> box, required Widget Function(Box<T>) builder}) {
+  Widget _buildSection<T extends HiveObject>({
+    required String title,
+    required Box<T> box,
+    required Widget Function(Box<T>) builder,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const Divider(),
         Expanded(
           child: ValueListenableBuilder(
             valueListenable: box.listenable(),
             builder: (context, Box<T> box, _) {
-              if (box.values.isEmpty) return Center(child: Text('$title history is empty.'));
+              if (box.values.isEmpty)
+                return Center(child: Text('$title history is empty.'));
               return builder(box);
             },
           ),
@@ -236,14 +268,34 @@ class _TestScreenState extends State<TestScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                Image.file(File(item.imagePath), width: 60, height: 60, fit: BoxFit.cover),
+                Image.file(
+                  File(item.imagePath),
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.scanDate.toShortString(), style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Wrap(spacing: 4, children: item.ingredients.map((ing) => Chip(label: Text(ing.name, style: const TextStyle(fontSize: 10)))).toList()),
+                      Text(
+                        item.scanDate.toShortString(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Wrap(
+                        spacing: 4,
+                        children: item.ingredients
+                            .map(
+                              (ing) => Chip(
+                                label: Text(
+                                  ing.name,
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
                     ],
                   ),
                 ),
@@ -261,13 +313,35 @@ class _TestScreenState extends State<TestScreen> {
       itemBuilder: (context, index) {
         final item = items[index];
         final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
+        final fdaNumber = item.fdaData['เลขสารบบอาหาร'] ?? 'ไม่พบเลข อย.';
+
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
-            leading: item.imagePath != null
-                ? Image.file(File(item.imagePath!), width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.document_scanner_outlined, size: 40),
-            title: Text(item.scanName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            // 🔹 แสดงเลข อย. แทนรูปภาพ
+            leading: Container(
+              width: 60,
+              height: 60,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                fdaNumber,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+
+            title: Text(
+              item.scanName,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Text("Product: $productName"),
           ),
         );
@@ -277,5 +351,6 @@ class _TestScreenState extends State<TestScreen> {
 }
 
 extension on DateTime {
-  String toShortString() => "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+  String toShortString() =>
+      "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
 }
