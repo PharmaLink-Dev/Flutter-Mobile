@@ -13,30 +13,6 @@ import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaResultDialog(
-    BuildContext context,
-    Map<String, String?> data,
-  ) async {
-    await showDialog(
-      context: context,
-      builder: (_) {
-        final entries = data.entries
-            .map((e) => '${e.key}: ${e.value ?? '-'}')
-            .join('\n');
-        return AlertDialog(
-          title: const Text('ผลการค้นหา FDA'),
-          content: SingleChildScrollView(child: Text(entries)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ปิด'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> _showFdaNotFoundDialog(BuildContext context, String rawText) async {
     await showDialog(
       context: context,
