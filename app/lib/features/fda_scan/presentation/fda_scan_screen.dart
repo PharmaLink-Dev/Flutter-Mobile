@@ -13,36 +13,30 @@ import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaResultDialog(
-    BuildContext context,
-    Map<String, String?> data,
-  ) async {
+  Future<void> _showFdaNotFoundDialog(BuildContext context, String rawText) async {
     await showDialog(
       context: context,
-      builder: (_) {
-        final entries = data.entries
-            .map((e) => '${e.key}: ${e.value ?? '-'}')
-            .join('\n');
-        return AlertDialog(
-          title: const Text('ผลการค้นหา FDA'),
-          content: SingleChildScrollView(child: Text(entries)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ปิด'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showFdaNotFoundDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (_) => const AlertDialog(
-        title: Text('ไม่พบเลข FDA'),
-        content: Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+      builder: (_) => AlertDialog(
+        title: const Text('ไม่พบเลข FDA'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+              const SizedBox(height: 12),
+              const Text('ผลลัพธ์การสแกน', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 6),
+              Text(rawText.isEmpty ? '-' : rawText),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('ปิด'),
+          ),
+        ],
       ),
     );
   }
@@ -50,7 +44,9 @@ class FdaScanScreen extends StatelessWidget {
   Future<void> _fetchAndPresentFda(BuildContext context, String fda) async {
     try {
       final service = FdaSearchService();
-      final map = await service.fetchByFdpdtno(fda);
+      // Fetch using digits-only (no dashes/spaces), same as manual entry flow
+      final query = fda.replaceAll(RegExp(r'[^0-9]'), '');
+      final map = await service.fetchByFdpdtno(query);
       if (!context.mounted) return;
       if (FdaSearchService.isValidResult(map)) {
         Navigator.of(context).push(
@@ -125,7 +121,7 @@ class FdaScanScreen extends StatelessWidget {
 
             final fda = result.fdaNumber;
             if (fda == null) {
-              await _showFdaNotFoundDialog(context);
+              await _showFdaNotFoundDialog(context, result.fullText);
               return;
             }
 
@@ -153,18 +149,43 @@ class FdaScanScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _pickFromGalleryAndGoToCrop(BuildContext context) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      if (!context.mounted) return;
+      _goToCrop(context, bytes, picked.name);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ไม่สามารถเลือกภาพ: $e')),
+      );
+    }
+  }
+
+  Widget _galleryUploadButton(BuildContext context) {
+    return _actionButton(
+      icon: Icons.upload,
+      label: 'อัปโหลดรูปภาพ',
+      onTap: () => _pickFromGalleryAndGoToCrop(context),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScanPageTemplate(
       headerTitle: 'สแกนเลข FDA',
       overlay: const ScanOverlay(width: 360, height: 100),
       guideText: 'วางเลข FDA ในกรอบ',
-      showGalleryUpload: false,
+      showGalleryUpload: true,
       customSecondaryButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _fdaInputButton(context),
           const SizedBox(height: 10),
+          _galleryUploadButton(context),
         ],
       ),
       onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),

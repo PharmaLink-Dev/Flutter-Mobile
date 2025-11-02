@@ -22,16 +22,15 @@ class CropImageScreen extends StatefulWidget {
 class _CropImageScreenState extends State<CropImageScreen> {
   final _controller = CropController();
   bool _isUploading = false;
+  bool _isReady = false;
 
   Future<void> _onCropped(Uint8List cropped) async {
     setState(() => _isUploading = true);
     try {
       if (widget.onCropped != null) {
+        // Delegate navigation to the caller (e.g. FDA flow will push Success/NotFound)
         await widget.onCropped!(cropped);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('OCR เสร็จสิ้น (ดู log)')),
-        );
       } else {
         final uploader = OcrUploader();
         final resp = await uploader.uploadImageBytes(cropped, filename: widget.fileName);
@@ -41,8 +40,9 @@ class _CropImageScreenState extends State<CropImageScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(ok ? 'อัปโหลดสำเร็จ' : 'อัปโหลดไม่สำเร็จ (${resp.statusCode})')),
         );
+        // In upload-only mode, return user to previous page after finishing
+        Navigator.of(context).maybePop();
       }
-      Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == 'Scan');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +60,18 @@ class _CropImageScreenState extends State<CropImageScreen> {
         title: const Text('ครอบภาพ'),
         actions: [
           IconButton(
-            onPressed: _isUploading ? null : () => _controller.crop(),
+            onPressed: _isUploading || !_isReady
+                ? null
+                : () {
+                    try {
+                      _controller.crop();
+                    } catch (e) {
+                      // ป้องกันเคส InvalidRectError จากไลบรารีเมื่อกรอบไม่พร้อม/ไม่ถูกต้อง
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('ไม่สามารถครอบภาพได้ กรุณาลองปรับกรอบแล้วกดใหม่')),
+                      );
+                    }
+                  },
             icon: const Icon(Icons.check),
           )
         ],
@@ -74,6 +85,10 @@ class _CropImageScreenState extends State<CropImageScreen> {
               baseColor: Colors.black,
               maskColor: Colors.black.withOpacity(0.5),
               onCropped: _onCropped,
+              // เปิดปุ่มเฉพาะเมื่อสถานะพร้อม เพื่อลดโอกาสเกิด InvalidRectError
+              onStatusChanged: (status) {
+                setState(() => _isReady = status == CropStatus.ready);
+              },
               withCircleUi: false,
               cornerDotBuilder: (size, edgeAlignment) => Container(
                 width: size,

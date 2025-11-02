@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app/features/fda_scan/data/fda_search_service.dart';
-import 'fda_success_screen.dart';
+import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 import 'widgets/fda_input_dialog.dart';
 
 class FdaNotFoundScreen extends StatelessWidget {
@@ -13,25 +12,7 @@ class FdaNotFoundScreen extends StatelessWidget {
 
     if (input == null || input.isEmpty || !context.mounted) return;
 
-    try {
-      final service = FdaSearchService();
-      final map = await service.fetchByFdpdtno(input);
-      if (!context.mounted) return;
-      if (FdaSearchService.isValidResult(map)) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => FdaSuccessScreen(data: map)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ไม่พบข้อมูลจากเลขที่กรอก')),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ดึงข้อมูลไม่สำเร็จ: $e')),
-      );
-    }
+    await FdaFlowService(context).fetchAndNavigate(input);
   }
 
   @override
