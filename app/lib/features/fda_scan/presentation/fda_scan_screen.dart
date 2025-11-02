@@ -49,7 +49,7 @@ class FdaScanScreen extends StatelessWidget {
             children: [
               const Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
               const SizedBox(height: 12),
-              const Text('OCR (raw):', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('ผลลัพธ์การสแกน', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               Text(rawText.isEmpty ? '-' : rawText),
             ],
