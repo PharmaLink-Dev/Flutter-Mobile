@@ -310,8 +310,19 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
       );
     }
     final c = _controller;
-    if (c == null || !c.value.isInitialized) return const SizedBox.shrink();
-    return CameraPreview(c);
+    if (c == null || !c.value.isInitialized) {
+      return const SizedBox.shrink();
+    }
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: c.value.previewSize!.height, 
+          height: c.value.previewSize!.width, 
+          child: CameraPreview(c),
+        ),
+      ),
+    );
   }
 }
 
