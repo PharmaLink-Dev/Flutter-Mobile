@@ -120,6 +120,7 @@ class FdaOcr {
       'b':'6',
       'B': '8', 'ß': '8',
       'g': '9', 'q': '9',
+      '.':'-', '·':'-', 'ˑ':'-', '·':'-', '・':'-',
     };
     final sb = StringBuffer();
     for (final r in s.runes) {
