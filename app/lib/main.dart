@@ -1,17 +1,17 @@
 import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/ingredient.dart';
 import 'package:app/features/history/data/scan_history.dart';
+import 'package:app/service/supabase_init.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'app_routes.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SupabaseService.init();
 
-  // Initialize Hive
   await Hive.initFlutter();
-
-  // Register all adapters
   Hive.registerAdapter(IngredientAdapter()); // typeId: 1
   Hive.registerAdapter(ScanHistoryAdapter()); // typeId: 0
   Hive.registerAdapter(FdaScanAdapter()); // typeId: 2
