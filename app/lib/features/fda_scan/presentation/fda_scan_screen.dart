@@ -11,8 +11,6 @@ import 'package:app/features/fda_scan/data/fda_search_service.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
 import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
@@ -152,31 +150,6 @@ class FdaScanScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _callEdgeFunction(BuildContext context) async {
-    try {
-      final res = await Supabase.instance.client.functions
-          .invoke('bright-action', body: {'name': 'Functions'});
-      final data = res.data;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Edge result: \\')),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Edge error: \\')),
-      );
-    }
-  }
-
-  Widget _edgeTestButton(BuildContext context) {
-    return _actionButton(
-      icon: Icons.flash_on,
-      label: 'Try Edge (bright-action)',
-      onTap: () => _callEdgeFunction(context),
-    );
-  }
-
   Future<void> _pickFromGalleryAndGoToCrop(BuildContext context) async {
     try {
       final picker = ImagePicker();
@@ -214,8 +187,6 @@ class FdaScanScreen extends StatelessWidget {
           _fdaInputButton(context),
           const SizedBox(height: 10),
           _galleryUploadButton(context),
-          const SizedBox(height: 10),
-          _edgeTestButton(context),
         ],
       ),
       onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
