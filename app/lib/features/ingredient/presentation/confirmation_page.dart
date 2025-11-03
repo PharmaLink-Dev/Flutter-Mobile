@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:app/models/ingredient.dart';
+import 'package:app/features/ingredient/data/ingredient.dart';
 import 'result_page.dart';
 
 class ConfirmationPage extends StatefulWidget {

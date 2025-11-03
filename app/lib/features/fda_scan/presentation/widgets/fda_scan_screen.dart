@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
-import 'widgets/fda_input_dialog.dart';
+
+import 'fda_input_dialog.dart';
 import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app/features/fda_scan/data/fda_search_service.dart';

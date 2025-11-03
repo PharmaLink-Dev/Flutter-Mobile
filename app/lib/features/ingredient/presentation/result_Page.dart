@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:app/models/ingredient.dart';
-import 'package:app/utils/warning_dialog.dart';
+import 'package:app/features/ingredient/data/ingredient.dart';
+import 'package:app/features/ingredient/presentation/warning_dialog.dart';
 import 'ingredient_detail_page.dart';
 import 'package:app/shared/app_colors.dart';
 
