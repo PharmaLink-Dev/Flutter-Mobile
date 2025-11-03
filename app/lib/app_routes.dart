@@ -1,6 +1,6 @@
 //material app routes using go_router with stateful shell route
 import 'package:app/features/history/presentation/test_screen.dart';
-import 'package:app/features/scan/presentation/scan_screen.dart';
+import 'package:app/features/ingredient/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'fda_result_bottom_sheet.dart';
+import 'widgets/fda_result_bottom_sheet.dart';
 
 class FdaSuccessScreen extends StatelessWidget {
   final Map<String, String?> data;
