@@ -19,12 +19,10 @@ class ScanScreen extends StatelessWidget {
           imageBytes: bytes,
           fileName: fileName,
           onCropped: (croppedBytes, originalFilename) async {
-            // 1. Generate a unique path for the image in Supabase Storage.
             final String path = 'public/${const Uuid().v4()}.png';
 
             try {
-              // 2. Upload the cropped image bytes.
-              await supabase.storage.from('image').uploadBinary(
+              final String storagePath = await supabase.storage.from('image').uploadBinary(
                     path,
                     croppedBytes,
                     fileOptions: const FileOptions(
@@ -32,12 +30,13 @@ class ScanScreen extends StatelessWidget {
                       upsert: false,
                     ),
                   );
+              
+              final String publicUrl = supabase.storage.from('image').getPublicUrl(storagePath);
+              print('✅ Upload successful! Image URL: $publicUrl');
 
               if (!context.mounted) return;
-              // 3. On success, navigate to the next page.
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ConfirmationPage()),
-              );
+             
+              // Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ConfirmationPage()));
             } catch (e) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
