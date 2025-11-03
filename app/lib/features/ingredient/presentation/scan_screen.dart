@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
+import 'package:app/service/supabase_init.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
+
+import 'confirmation_page.dart';
 
 class ScanScreen extends StatelessWidget {
   const ScanScreen({super.key});
@@ -10,7 +15,37 @@ class ScanScreen extends StatelessWidget {
   void _goToCrop(BuildContext context, Uint8List bytes, String fileName) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => CropImageScreen(imageBytes: bytes, fileName: fileName),
+        builder: (_) => CropImageScreen(
+          imageBytes: bytes,
+          fileName: fileName,
+          onCropped: (croppedBytes, originalFilename) async {
+            // 1. Generate a unique path for the image in Supabase Storage.
+            final String path = 'public/${const Uuid().v4()}.png';
+
+            try {
+              // 2. Upload the cropped image bytes.
+              await supabase.storage.from('image').uploadBinary(
+                    path,
+                    croppedBytes,
+                    fileOptions: const FileOptions(
+                      cacheControl: '3600',
+                      upsert: false,
+                    ),
+                  );
+
+              if (!context.mounted) return;
+              // 3. On success, navigate to the next page.
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ConfirmationPage()),
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Upload failed: $e')),
+              );
+            }
+          },
+        ),
       ),
     );
   }

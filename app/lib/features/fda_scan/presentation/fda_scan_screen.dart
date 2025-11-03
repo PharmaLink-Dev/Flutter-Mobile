@@ -115,7 +115,7 @@ class FdaScanScreen extends StatelessWidget {
         builder: (_) => CropImageScreen(
           imageBytes: bytes,
           fileName: fileName,
-          onCropped: (cropped) async {
+          onCropped: (cropped, _) async {
             final ocr = FdaOcr();
             final result = await ocr.recognize(cropped);
             if (!context.mounted) return;
