@@ -4,6 +4,7 @@ import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 
+import '../data/fda_ocr.dart';
 import 'widgets/fda_input_dialog.dart';
 import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,7 +15,7 @@ import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaNotFoundDialog(BuildContext context, String rawText) async {
+  Future<void> _showFdaNotFoundDialog(BuildContext context, FdaOcrResult result) async {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -26,9 +27,17 @@ class FdaScanScreen extends StatelessWidget {
             children: [
               const Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
               const SizedBox(height: 12),
-              const Text('ผลลัพธ์การสแกน', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('ผลลัพธ์การสแกน (ดิบ)', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
-              Text(rawText.isEmpty ? '-' : rawText),
+              Text(result.fullText.isEmpty ? '-' : result.fullText),
+              if (result.normalizedText != null && result.normalizedText != result.fullText) ...[
+                const SizedBox(height: 12),
+                const Text('ผลลัพธ์หลังปรับปรุง', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text(result.normalizedText!),
+              ],
+              const SizedBox(height: 12),
+              Text('ประมวลผลใน: ${result.duration.inMilliseconds}ms', style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
         ),
@@ -122,7 +131,7 @@ class FdaScanScreen extends StatelessWidget {
 
             final fda = result.fdaNumber;
             if (fda == null) {
-              await _showFdaNotFoundDialog(context, result.fullText);
+              await _showFdaNotFoundDialog(context, result);
               return;
             }
 

@@ -11,10 +11,12 @@ class FdaOcrResult {
   final String? fdaNumber; // เลข อย. ที่สกัดและจัดรูปแบบแล้ว (xx-x-xxxxx-x-xxxx)
   final Duration duration; // เวลาที่ใช้ประมวลผล
   final Uint8List processedBytes; // ภาพที่ผ่าน Pre-processing (Binarized)
+  final String? normalizedText;
 
   const FdaOcrResult({
     required this.fullText,
     required this.fdaNumber,
+    this.normalizedText,
     required this.duration,
     required this.processedBytes,
   });
@@ -47,10 +49,11 @@ class FdaOcr {
       // PASS 1: พยายามหาจาก "Text ดิบ" ก่อน (ไม่ Normalize)
       // นี่คือวิธีที่ปลอดภัยที่สุด ถ้าเจอคือจบ
       String? fda = _extractFdaNumber(text);
+      String? normalized;
 
       // PASS 2: ถ้า Pass 1 ไม่เจอ (fda == null)
       if (fda == null) {
-        final normalized = _normalizeDigitsAndDashes(text);
+        normalized = _normalizeDigitsAndDashes(text);
         fda = _extractFdaNumber(normalized);
       }
 
@@ -58,6 +61,7 @@ class FdaOcr {
       return FdaOcrResult(
         fullText: text, // คืนค่า text ดิบเสมอ
         fdaNumber: fda, // คืนค่า fda ที่หาเจอ
+        normalizedText: normalized,
         duration: sw.elapsed,
         processedBytes: processed,
       );
@@ -210,4 +214,3 @@ class FdaOcr {
     return threshold;
   }
 }
-
