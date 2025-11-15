@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 
+import 'confirmation_page.dart';
 import 'package:app/features/ingredient/data/typhoon-ocr.dart';
 
 class ScanScreen extends StatefulWidget {
@@ -30,7 +32,20 @@ class _ScanScreenState extends State<ScanScreen> {
               final scanResult =
                   await _scanService.uploadAndScanImage(croppedBytes);
               if (!context.mounted) return;
-             print(scanResult);
+
+              final List<dynamic> rawIngredients = scanResult['ingredients'] ?? [];
+              final List<Ingredient> ingredients = rawIngredients.map((item) {
+                return Ingredient(
+                  name: item['name'] ?? 'Unknown',
+                  status: item['status'] ?? '',
+                );
+              }).toList();
+
+              final String imagePath = scanResult['imagePath'] ?? '';
+
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ConfirmationPage(ingredients: ingredients, imagePath: imagePath),
+              ));
             } catch (e) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
