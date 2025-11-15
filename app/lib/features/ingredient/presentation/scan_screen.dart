@@ -8,14 +8,12 @@ import 'package:app/features/ingredient/data/typhoon-ocr.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
-
   @override
   State<ScanScreen> createState() => _ScanScreenState();
 }
 
 class _ScanScreenState extends State<ScanScreen> {
   bool _isLoading = false;
-
   final _scanService = TyphoonService();
 
   void _goToCrop(BuildContext context, Uint8List bytes, String fileName) {
@@ -31,10 +29,8 @@ class _ScanScreenState extends State<ScanScreen> {
             try {
               final scanResult =
                   await _scanService.uploadAndScanImage(croppedBytes);
-
               if (!context.mounted) return;
-
-             print('OCR Text: ${scanResult['ocrText']}');
+             print(scanResult);
             } catch (e) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
@@ -86,4 +82,3 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 }
-
