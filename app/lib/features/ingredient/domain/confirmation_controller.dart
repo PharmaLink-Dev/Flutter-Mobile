@@ -5,7 +5,12 @@ class ConfirmItem {
   final Ingredient ingredient;
   bool checked;
   final bool isManual;
-  ConfirmItem({required this.ingredient, this.checked = true, this.isManual = false});
+
+  ConfirmItem({
+    required this.ingredient,
+    this.checked = true,
+    this.isManual = false,
+  });
 }
 
 class ConfirmationController extends ChangeNotifier {
@@ -38,7 +43,13 @@ class ConfirmationController extends ChangeNotifier {
   void addManual(String name) {
     final n = name.trim();
     if (n.isEmpty) return;
-    _items.insert(0, ConfirmItem(ingredient: Ingredient(name: n, status: 'เพิ่มเอง'), checked: true, isManual: true));
+    _items.add(
+      ConfirmItem(
+        ingredient: Ingredient(name: n, status: 'เพิ่มเอง'),
+        checked: true,
+        isManual: true,
+      ),
+    );
     notifyListeners();
   }
 
