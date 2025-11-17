@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
+
+import '../data/fda_ocr.dart';
 import 'widgets/fda_input_dialog.dart';
-import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:app/features/fda_scan/data/fda_search_service.dart';
-import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
-import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
+import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaNotFoundDialog(BuildContext context, String rawText) async {
+  Future<void> _showFdaNotFoundDialog(BuildContext context, FdaOcrResult result) async {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -27,7 +26,15 @@ class FdaScanScreen extends StatelessWidget {
               const SizedBox(height: 12),
               const Text('ผลลัพธ์การสแกน', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
-              Text(rawText.isEmpty ? '-' : rawText),
+              Text(result.fullText.isEmpty ? '-' : result.fullText),
+              if (result.normalizedText != null ) ...[
+                const SizedBox(height: 12),
+                const Text('ผลลัพธ์หลังปรับปรุง', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 6),
+                Text(result.normalizedText!),
+              ],
+              const SizedBox(height: 12),
+              Text('ประมวลผลใน: ${result.duration.inMilliseconds}ms', style: const TextStyle(color: Colors.grey, fontSize: 12)),
             ],
           ),
         ),
@@ -39,36 +46,6 @@ class FdaScanScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _fetchAndPresentFda(BuildContext context, String fda) async {
-    try {
-      final service = FdaSearchService();
-      // Fetch using digits-only (no dashes/spaces), same as manual entry flow
-      final query = fda.replaceAll(RegExp(r'[^0-9]'), '');
-      final map = await service.fetchByFdpdtno(query);
-      if (!context.mounted) return;
-      if (FdaSearchService.isValidResult(map)) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FdaSuccessScreen(data: map),
-          ),
-        );
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
-          ),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => FdaNotFoundScreen(scannedRaw: fda),
-        ),
-      );
-    }
   }
 
   Widget _actionButton({
@@ -114,18 +91,18 @@ class FdaScanScreen extends StatelessWidget {
         builder: (_) => CropImageScreen(
           imageBytes: bytes,
           fileName: fileName,
-          onCropped: (cropped) async {
+          onCropped: (cropped, _) async {
             final ocr = FdaOcr();
             final result = await ocr.recognize(cropped);
             if (!context.mounted) return;
 
             final fda = result.fdaNumber;
             if (fda == null) {
-              await _showFdaNotFoundDialog(context, result.fullText);
+              await _showFdaNotFoundDialog(context, result);
               return;
             }
 
-            await _fetchAndPresentFda(context, fda);
+            await FdaFlowService(context).fetchAndNavigate(fda);
           },
         ),
       ),
@@ -138,7 +115,7 @@ class FdaScanScreen extends StatelessWidget {
       return;
     }
     if (!context.mounted) return;
-    await _fetchAndPresentFda(context, result);
+    await FdaFlowService(context).fetchAndNavigate(result);
   }
 
   Widget _fdaInputButton(BuildContext context) {

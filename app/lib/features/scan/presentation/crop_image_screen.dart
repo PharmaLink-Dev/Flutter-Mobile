@@ -1,18 +1,19 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-import 'package:app/features/scan/data/ocr_uploader.dart';
+
+typedef CropCallback = Future<void> Function(Uint8List croppedBytes, String originalFilename);
 
 class CropImageScreen extends StatefulWidget {
   final Uint8List imageBytes;
   final String fileName;
-  final Future<void> Function(Uint8List cropped)? onCropped;
+  final CropCallback onCropped;
 
   const CropImageScreen({
     super.key,
     required this.imageBytes,
-    this.fileName = 'image.jpg',
-    this.onCropped,
+    required this.fileName,
+    required this.onCropped,
   });
 
   @override
@@ -27,22 +28,7 @@ class _CropImageScreenState extends State<CropImageScreen> {
   Future<void> _onCropped(Uint8List cropped) async {
     setState(() => _isUploading = true);
     try {
-      if (widget.onCropped != null) {
-        // Delegate navigation to the caller (e.g. FDA flow will push Success/NotFound)
-        await widget.onCropped!(cropped);
-        if (!mounted) return;
-      } else {
-        final uploader = OcrUploader();
-        final resp = await uploader.uploadImageBytes(cropped, filename: widget.fileName);
-        final ok = resp.statusCode >= 200 && resp.statusCode < 300;
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ok ? 'อัปโหลดสำเร็จ' : 'อัปโหลดไม่สำเร็จ (${resp.statusCode})')),
-        );
-        // In upload-only mode, return user to previous page after finishing
-        Navigator.of(context).maybePop();
-      }
+      await widget.onCropped(cropped, widget.fileName);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

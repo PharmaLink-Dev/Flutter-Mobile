@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../shared/app_colors.dart';
+import '../../../../shared/app_colors.dart';
 
 void showWarningDialog(
   BuildContext context, {
