@@ -7,13 +7,6 @@ import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 import '../data/fda_ocr.dart';
 import 'widgets/fda_input_dialog.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:app/features/fda_scan/data/fda_search_service.dart';
-import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
-import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
-
-import 'package:uuid/uuid.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 
 class FdaScanScreen extends StatelessWidget {
@@ -65,39 +58,6 @@ class FdaScanScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _fetchAndPresentFda(BuildContext context, String fda) async {
-    try {
-      final service = FdaSearchService();
-      final map = await service.fetchByFdpdtno(fda);
-      if (!context.mounted) return;
-      if (FdaSearchService.isValidResult(map)) {
-        // บันทึกลง Hive
-        final fdaBox = Hive.box<FdaScan>('fda_scans');
-        final newScan = FdaScan(
-          id: const Uuid().v4(),
-          fdaNumber: fda,
-          scanDate: DateTime.now(),
-          fdaData: map,
-        );
-        await fdaBox.add(newScan);
-
-        // ไปหน้าแสดงผล
-        Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => FdaSuccessScreen(data: map)));
-      } else {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => FdaNotFoundScreen(scannedRaw: fda)),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => FdaNotFoundScreen(scannedRaw: fda)),
-      );
-    }
   }
 
   Widget _actionButton({
