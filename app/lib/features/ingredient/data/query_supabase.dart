@@ -58,7 +58,7 @@ class SupabaseQueryService {
         final explanation =
             (data['Explanation'] ?? '').toString().trim();
         final reference =
-            (data['Refference'] ?? '').toString().trim();
+            (data['Reference'] ?? '').toString().trim();
 
         final statusThai = _mapRiskLevelToThai(rawRiskLevel);
 
