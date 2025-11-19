@@ -8,7 +8,7 @@ class SupabaseQueryService {
     try {
 
       final response = await _supabase.rpc(
-        'search_ingredients',
+        'check_ingredients_status',
         params: {'search_terms': terms},
       );
 
@@ -16,17 +16,6 @@ class SupabaseQueryService {
 
       print('RPC call results: $results');
 
-      for (var item in results) {s
-        final String searchTerm = item['search_term'];
-        final String status = item['status']; 
-        final Map<String, dynamic>? data = item['data'];
-
-        if (status == 'found') {
-          print('เจอสาร: $searchTerm -> ข้อมูล: ${data?['Keyword']}');
-        } else {
-          print('ไม่เจอสาร: $searchTerm');
-        }
-      }
     } catch (e) {
       print('Error calling RPC: $e');
     }
