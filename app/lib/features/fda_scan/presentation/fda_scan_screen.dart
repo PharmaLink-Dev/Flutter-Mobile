@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
+
+import '../data/fda_ocr.dart';
 import 'widgets/fda_input_dialog.dart';
-import 'package:app/features/fda_scan/data/fda_ocr.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app/features/fda_scan/data/fda_search_service.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
@@ -13,40 +14,55 @@ import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:app/features/history/data/fda_scan.dart';
+import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaResultDialog(
+  Future<void> _showFdaNotFoundDialog(
     BuildContext context,
-    Map<String, String?> data,
+    FdaOcrResult result,
   ) async {
     await showDialog(
       context: context,
-      builder: (_) {
-        final entries = data.entries
-            .map((e) => '${e.key}: ${e.value ?? '-'}')
-            .join('\n');
-        return AlertDialog(
-          title: const Text('ผลการค้นหา FDA'),
-          content: SingleChildScrollView(child: Text(entries)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ปิด'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showFdaNotFoundDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (_) => const AlertDialog(
-        title: Text('ไม่พบเลข FDA'),
-        content: Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+      builder: (_) => AlertDialog(
+        title: const Text('ไม่พบเลข FDA'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
+              const SizedBox(height: 12),
+              const Text(
+                'ผลลัพธ์การสแกน',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(result.fullText.isEmpty ? '-' : result.fullText),
+              if (result.normalizedText != null) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'ผลลัพธ์หลังปรับปรุง',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Text(result.normalizedText!),
+              ],
+              const SizedBox(height: 12),
+              Text(
+                'ประมวลผลใน: ${result.duration.inMilliseconds}ms',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('ปิด'),
+          ),
+        ],
       ),
     );
   }
@@ -130,18 +146,18 @@ class FdaScanScreen extends StatelessWidget {
         builder: (_) => CropImageScreen(
           imageBytes: bytes,
           fileName: fileName,
-          onCropped: (cropped) async {
+          onCropped: (cropped, _) async {
             final ocr = FdaOcr();
             final result = await ocr.recognize(cropped);
             if (!context.mounted) return;
 
             final fda = result.fdaNumber;
             if (fda == null) {
-              await _showFdaNotFoundDialog(context);
+              await _showFdaNotFoundDialog(context, result);
               return;
             }
 
-            await _fetchAndPresentFda(context, fda);
+            await FdaFlowService(context).fetchAndNavigate(fda);
           },
         ),
       ),
@@ -154,7 +170,7 @@ class FdaScanScreen extends StatelessWidget {
       return;
     }
     if (!context.mounted) return;
-    await _fetchAndPresentFda(context, result);
+    await FdaFlowService(context).fetchAndNavigate(result);
   }
 
   Widget _fdaInputButton(BuildContext context) {
@@ -165,16 +181,44 @@ class FdaScanScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _pickFromGalleryAndGoToCrop(BuildContext context) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      if (!context.mounted) return;
+      _goToCrop(context, bytes, picked.name);
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('ไม่สามารถเลือกภาพ: $e')));
+    }
+  }
+
+  Widget _galleryUploadButton(BuildContext context) {
+    return _actionButton(
+      icon: Icons.upload,
+      label: 'อัปโหลดรูปภาพ',
+      onTap: () => _pickFromGalleryAndGoToCrop(context),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScanPageTemplate(
       headerTitle: 'สแกนเลข FDA',
       overlay: const ScanOverlay(width: 360, height: 100),
       guideText: 'วางเลข FDA ในกรอบ',
-      showGalleryUpload: false,
+      showGalleryUpload: true,
       customSecondaryButton: Column(
         mainAxisSize: MainAxisSize.min,
-        children: [_fdaInputButton(context), const SizedBox(height: 10)],
+        children: [
+          _fdaInputButton(context),
+          const SizedBox(height: 10),
+          _galleryUploadButton(context),
+        ],
       ),
       onCaptured: (bytes, fileName) async =>
           _goToCrop(context, bytes, fileName),

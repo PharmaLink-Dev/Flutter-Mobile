@@ -1,4 +1,4 @@
-import '../models/ingredient.dart';
+import 'package:app/features/ingredient/data/ingredient.dart';
 
 final List<Ingredient> sampleIngredients = [
   Ingredient(name: 'Vitamin B-Complex', status: 'ปลอดภัย', riskLevel: 'ต่ำ'),
