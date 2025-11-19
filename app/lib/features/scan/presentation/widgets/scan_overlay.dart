@@ -1,15 +1,44 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:app/shared/app_colors.dart';
 
-class ScanOverlay extends StatelessWidget {
-  final double boxSize;
-  const ScanOverlay({super.key, this.boxSize = 280});
+class ScanOverlay extends StatefulWidget {
+  final double? width;
+  final double? height;
+  final double? boxSize; // backward compat
+  const ScanOverlay({super.key, this.width, this.height, this.boxSize});
+
+  @override
+  State<ScanOverlay> createState() => _ScanOverlayState();
+}
+
+class _ScanOverlayState extends State<ScanOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final double boxW = widget.width ?? widget.boxSize ?? 300;
+    final double boxH = widget.height ?? widget.boxSize ?? 300;
+    const double radius = 24;
+
     return Stack(
       children: [
-        // gradient top/bottom for nicer UI
+        // Subtle top/bottom fades to focus the frame
         Align(
           alignment: Alignment.topCenter,
           child: Container(
@@ -36,23 +65,69 @@ class ScanOverlay extends StatelessWidget {
             ),
           ),
         ),
+
+        // Center scanning box
         Center(
-          child: DottedBorder(
-            borderType: BorderType.Rect,
-            color: Colors.white,
-            strokeWidth: 3,
-            dashPattern: const [8, 4],
-            child: Container(
-              width: boxSize,
-              height: boxSize,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22),
-              ),
+          child: SizedBox(
+            width: boxW,
+            height: boxH,
+            child: Stack(
+              children: [
+                // Outer subtle border
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(radius + 6),
+                    border: Border.all(color: Colors.white24, width: 2),
+                  ),
+                ),
+
+                // Inner main border
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(radius),
+                      border: Border.all(color: Colors.white60, width: 2),
+                    ),
+                  ),
+                ),
+
+                // ไม่มีจุดกึ่งกลางและมุมไฮไลต์ตามที่ขอ
+
+                // Animated scanning line
+                AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, _) {
+                    final double padding = 18;
+                    final double track = boxH - padding * 2 - 2; // travel area
+                    final double y = padding + track * _controller.value;
+                    return Positioned(
+                      left: 24,
+                      right: 24,
+                      top: y,
+                      child: _scanLine(),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
   }
-}
 
+  Widget _scanLine() {
+    return Container(
+      height: 3,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        gradient: AppGradients.scanLabel,
+        boxShadow: const [
+          BoxShadow(color: Color(0x6617C5A3), blurRadius: 8, spreadRadius: 1),
+        ],
+      ),
+    );
+  }
+  
+}
