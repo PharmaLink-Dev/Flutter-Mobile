@@ -2,12 +2,8 @@ import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/service/supabase_init.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Service สำหรับเรียก Supabase RPC เพื่อตรวจสอบสถานะสารประกอบ
 class SupabaseQueryService {
   final SupabaseClient _supabase = supabase;
-
-  /// เรียกฟังก์ชัน `check_ingredients_status` ใน Supabase
-  /// แล้วแปลงผลลัพธ์ให้อยู่ในรูป List<Ingredient> สำหรับใช้บนหน้า Result
   ///
   /// ตัวอย่างโครงสร้างข้อมูลจาก RPC:
   /// [
@@ -22,10 +18,7 @@ class SupabaseQueryService {
   ///     "search_term": "Potassium Citrate"
   ///   }
   /// ]
-  ///
-  /// - แถวที่ `status != "found"` จะถูกกรองทิ้ง (ไม่แสดงใน Result)
-  /// - `Risk_Level` (green / yellow / red) จะถูกแปลงเป็นข้อความไทยใน field `status`
-  /// - `Explanation` + `Refference` จะถูกนำมารวมเป็น description
+
   Future<List<Ingredient>> searchInDatabase(List<String> terms) async {
     try {
       final response = await _supabase.rpc(
@@ -43,12 +36,10 @@ class SupabaseQueryService {
       for (final row in response) {
         if (row is! Map) continue;
 
-        // wrapper อาจเป็น Map<dynamic, dynamic> จาก Supabase
         final wrapper = Map<String, dynamic>.from(row as Map);
 
         final wrapperStatus =
             (wrapper['status'] ?? '').toString().trim().toLowerCase();
-        // ถ้าไม่พบข้อมูล ไม่ต้องเอาไปแสดงบน ResultPage
         if (wrapperStatus != 'found') continue;
 
         final rawData = wrapper['data'];
