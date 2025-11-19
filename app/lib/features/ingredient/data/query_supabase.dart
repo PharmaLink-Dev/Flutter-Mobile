@@ -14,7 +14,9 @@ class SupabaseQueryService {
 
       final List<dynamic> results = response as List<dynamic>;
 
-      for (var item in results) {
+      print('RPC call results: $results');
+
+      for (var item in results) {s
         final String searchTerm = item['search_term'];
         final String status = item['status']; 
         final Map<String, dynamic>? data = item['data'];
