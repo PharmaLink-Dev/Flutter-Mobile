@@ -39,6 +39,7 @@ class _ScanScreenState extends State<ScanScreen> {
               final List<Ingredient> ingredients = rawIngredients.map((item) {
                 return Ingredient(
                   name: item['name'] ?? 'Unknown',
+                  mg: item['mg'] is num ? (item['mg'] as num).toDouble() : null,
                   status: item['status'] ?? '',
                 );
               }).toList();

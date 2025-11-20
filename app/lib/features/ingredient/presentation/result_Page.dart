@@ -33,7 +33,7 @@ class ResultPage extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(gradient: AppGradients.background),
+        color: Colors.white,
         child: ingredients.isEmpty
             ? const Center(
                 child: Padding(

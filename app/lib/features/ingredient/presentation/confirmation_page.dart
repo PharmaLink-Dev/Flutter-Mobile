@@ -11,10 +11,6 @@ import 'package:app/features/history/data/scan_history.dart';
 import 'package:app/features/history/data/history_ingredient.dart';
 import 'dart:typed_data';
 
-/// หน้ายืนยันส่วนผสมก่อนวิเคราะห์ผล
-///
-/// - แสดงรายการส่วนผสมจาก OCR ให้ผู้ใช้ติ๊ก/ลบ/เพิ่มเองได้
-/// - ผู้ใช้ต้องติ๊กยืนยันความถูกต้องของข้อมูลก่อนกด "วิเคราะห์ผล"
 class ConfirmationPage extends StatefulWidget {
   final List<Ingredient> ingredients;
   final String imagePath;
@@ -60,7 +56,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
         return Scaffold(
           appBar: const _ConfirmationAppBar(),
           body: Container(
-            decoration: const BoxDecoration(gradient: AppGradients.background),
+            color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -110,6 +106,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                       );
 
                       try {
+                        // ได้ผลลัพธ์จาก Supabase (มีเฉพาะตัวที่เจอ)
                         final results = await _supabaseQueryService
                             .searchInDatabase(searchTerms);
 
@@ -118,34 +115,57 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         // ปิด loading
                         Navigator.of(context).pop();
 
-                        // ถ้า Supabase ไม่ได้ส่งข้อมูลกลับมา ใช้รายการที่เลือกไว้แทน
+                        // ---------------------------------------------------------
+                        // ผสานข้อมูล: ยึด OCR (selected) เป็นหลัก แล้ว enrich จาก DB
+                        // ---------------------------------------------------------
+                        List<Ingredient> mergedIngredients = selected;
 
-                        final finalResults = results.isNotEmpty
-                            ? results // 1. หาก Supabase มีข้อมูลกลับมา (results ไม่ว่างเปล่า) ให้ใช้ข้อมูลจาก Supabase
-                            : selected; // 2. หาก Supabase ไม่มีข้อมูลกลับมา (results ว่างเปล่า) ให้ใช้รายการที่ผู้ใช้เลือกไว้ (selected) แทน
+                        if (results.isNotEmpty) {
+                          mergedIngredients = selected.map((ocrItem) {
+                            // จับคู่แบบ case-insensitive โดยใช้ searchTerm จาก DB เป็นหลัก
+                            Ingredient? dbMatch;
+                            for (final dbItem in results) {
+                              final dbKey = (dbItem.searchTerm ?? dbItem.name)
+                                  .trim()
+                                  .toLowerCase();
+                              final ocrKey =
+                                  ocrItem.name.trim().toLowerCase();
+                              if (dbKey == ocrKey) {
+                                dbMatch = dbItem;
+                                break;
+                              }
+                            }
 
-                        final List<Ingredient> ingredientsForResult =
-                            finalResults.isNotEmpty
-                            ? finalResults
-                            : selected; // ตรวจสอบซ้ำอีกครั้ง (ในกรณีที่ finalResults อาจว่างเปล่า แต่ในโค้ดนี้ควรจะเป็น selected เสมอ)
+                            if (dbMatch != null) {
+                              // ใช้ชื่อ / mg เดิมจาก OCR แต่เติม status / description / riskLevel จาก DB
+                              return ocrItem.copyWith(
+                                status: dbMatch.status,
+                                description: dbMatch.description,
+                                riskLevel: dbMatch.riskLevel,
+                              );
+                            } else {
+                              // ไม่เจอใน DB ใช้ข้อมูล OCR ตามเดิม
+                              return ocrItem;
+                            }
+                          }).toList();
+                        }
 
                         final List<HistoryIngredient> ingredientsForHistory =
-                            ingredientsForResult.map((ing) {
-                              return HistoryIngredient(
-                                name: ing.name,
-                                status: ing.status,
-                                riskLevel: ing.riskLevel,
-                                description: ing.description,
-                              );
-                            }).toList();
+                            mergedIngredients.map((ing) {
+                          return HistoryIngredient(
+                            name: ing.name,
+                            status: ing.status,
+                            riskLevel: ing.riskLevel,
+                            description: ing.description,
+                          );
+                        }).toList();
 
                         final newScanHistory = ScanHistory(
                           id: _uuid.v4(),
                           scanName: 'Ingredient Scan ${_historyBox.length + 1}',
                           scanDate: DateTime.now(),
                           imagePath: widget.imagePath,
-                          ingredients:
-                              ingredientsForHistory, // <-- ใช้ตัวที่ถูกแปลงแล้ว
+                          ingredients: ingredientsForHistory,
                           imageBytes: widget.scannedImageBytes,
                         );
                         print(
@@ -157,7 +177,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                           context,
                           MaterialPageRoute(
                             builder: (_) =>
-                                ResultPage(ingredients: ingredientsForResult),
+                                ResultPage(ingredients: mergedIngredients),
                           ),
                         );
                       } catch (e) {

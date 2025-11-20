@@ -50,7 +50,10 @@ class SupabaseQueryService {
         final searchTerm =
             (wrapper['search_term'] ?? '').toString().trim();
 
-        final name = (data['Keyword'] ?? searchTerm).toString().trim();
+        // ชื่อจากฐานข้อมูล (Keyword) ใช้เพื่ออ้างอิงเชิงวิชาการ
+        // แต่เรายังคงเก็บ searchTerm แยกไว้สำหรับจับคู่กับ OCR
+        final dbKeyword = (data['Keyword'] ?? '').toString().trim();
+        final name = dbKeyword.isNotEmpty ? dbKeyword : searchTerm;
 
         final rawRiskLevel =
             (data['Risk_Level'] ?? '').toString().trim().toLowerCase();
@@ -77,6 +80,7 @@ class SupabaseQueryService {
             status: statusThai,
             riskLevel: rawRiskLevel,
             description: buffer.toString(),
+            searchTerm: searchTerm.isNotEmpty ? searchTerm : null,
           ),
         );
       }

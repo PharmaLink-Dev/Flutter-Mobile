@@ -2,8 +2,6 @@ import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// การ์ดผลการวิเคราะห์ส่วนผสม 1 รายการ
-/// ใช้ซ้ำได้ทั้งในหน้า Result และหน้าอื่น ๆ
 class IngredientResultCard extends StatefulWidget {
   final Ingredient ingredient;
 
@@ -23,10 +21,8 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
   Widget build(BuildContext context) {
     final ingredient = widget.ingredient;
     final statusColor = _statusColor(ingredient.status);
-    final statusLabel =
-        ingredient.status.isNotEmpty ? ingredient.status : 'ไม่พบข้อมูล';
+    final statusLabel = ingredient.status.isNotEmpty ? ingredient.status : '';
 
-    // แยก description เป็นส่วน explanation และ reference (ถ้ามี)
     final description = ingredient.description;
     const refLabel = 'อ้างอิง:';
     String explanationText = '';
@@ -36,104 +32,137 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
       final idx = description.indexOf(refLabel);
       if (idx >= 0) {
         explanationText = description.substring(0, idx).trim();
-        referenceText =
-            description.substring(idx + refLabel.length).trim();
+        referenceText = description.substring(idx + refLabel.length).trim();
       } else {
         explanationText = description.trim();
       }
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Material(
-        color: AppColors.surface,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _expanded = !_expanded;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        ingredient.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: AppColors.text,
-                        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFFE5E7EB)), // สีเทาอ่อนๆ แบบในรูป
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _expanded = !_expanded;
+              });
+            },
+            borderRadius: BorderRadius.vertical(
+              top: const Radius.circular(12),
+              bottom: Radius.circular(_expanded ? 0 : 12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start, 
+                children: [
+                  // ชื่อส่วนผสม
+                  Expanded(
+                    child: Text(
+                      ingredient.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700, 
+                        fontSize: 15,
+                        color: Color(0xFF1F2937),
+                        height: 1.4,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                  ),
+                  const SizedBox(width: 8),
+                  
+                  // Status Chip
+                  if (statusLabel.isNotEmpty) ...[
                     _StatusChip(
                       label: statusLabel,
                       color: statusColor,
                     ),
-                    const SizedBox(width: 4),
-                    Icon(
+                    const SizedBox(width: 12),
+                  ],
+
+                  // Icon Arrow
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2), 
+                    child: Icon(
                       _expanded
                           ? Icons.keyboard_arrow_up_rounded
                           : Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.darkGrey,
-                    ),
-                  ],
-                ),
-                AnimatedCrossFade(
-                  firstChild: const SizedBox.shrink(),
-                  secondChild: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          explanationText.isNotEmpty
-                              ? explanationText
-                              : 'ยังไม่มีรายละเอียดสำหรับส่วนผสมนี้',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            height: 1.4,
-                            color: AppColors.text,
-                          ),
-                        ),
-                        if (referenceText.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          const Text(
-                            'อ้างอิง',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.text,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            referenceText,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              height: 1.4,
-                              color: AppColors.darkGrey,
-                            ),
-                          ),
-                        ],
-                      ],
+                      color: const Color(0xFF6B7280),
+                      size: 20,
                     ),
                   ),
-                  crossFadeState: _expanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 200),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
+
+
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Container(
+              width: double.infinity,
+              // 2. พื้นหลังสีเทาอ่อนสำหรับเนื้อหาที่ขยายออกมา
+              decoration: const BoxDecoration(
+                color: Color(0xFFF9FAFB), // สีเทาอ่อนมาก (Cool Gray 50)
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    explanationText.isNotEmpty
+                        ? explanationText
+                        : 'ไม่มีรายละเอียดข้อมูล',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                      color: Color(0xFF4B5563), 
+                    ),
+                  ),
+                  if (referenceText.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'อ้างอิง',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF374151),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      referenceText,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        height: 1.4,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            crossFadeState: _expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+          ),
+        ],
       ),
     );
   }
@@ -151,17 +180,18 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      // ปรับขนาด Chip ให้เหมือนในรูป (มนๆ เล็กๆ)
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12), // มนมากหน่อย
       ),
       child: Text(
         label,
         style: const TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          fontSize: 11, 
         ),
       ),
     );
@@ -179,5 +209,5 @@ Color _statusColor(String status) {
     default:
       return AppColors.darkGrey;
   }
-}
 
+}
