@@ -3,7 +3,6 @@ import '../../../../shared/app_colors.dart';
 
 void showWarningDialog(
   BuildContext context, {
-  required String diseaseName,
   required List<String> riskyIngredients,
   String? customMessage,
 }) {
@@ -18,11 +17,11 @@ void showWarningDialog(
               const Icon(
                 Icons.warning_amber_rounded,
                 color: AppColors.red,
-                size: 40,
+                size: 80,
               ),
               const SizedBox(height: 10),
               Text(
-                'อันตรายสำหรับผู้ป่วย$diseaseName!',
+                'อันตรายสำหรับผู้ป่วยโรคไต!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
@@ -47,7 +46,7 @@ void showWarningDialog(
             const SizedBox(height: 10),
             Text(
               customMessage ??
-                  'ส่วนผสมเหล่านี้อาจส่งผลเสียต่อผู้ป่วย$diseaseName\nกรุณาปรึกษาแพทย์',
+                  'ส่วนผสมเหล่านี้อาจส่งผลเสียต่อผู้ป่วยโรคไต\nกรุณาปรึกษาแพทย์',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12),
             ),
@@ -59,7 +58,7 @@ void showWarningDialog(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
               child: const Text(
-                'รับทราบ',
+                'ดูรายละเอียด',
                 style: TextStyle(color: Colors.white),
               ),
             ),

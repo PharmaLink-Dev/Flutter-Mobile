@@ -1,17 +1,48 @@
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/presentation/widgets/ingredient_result_card.dart';
+import 'package:app/features/ingredient/presentation/widgets/warning_dialog.dart';
 import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 
-/// หน้าผลการวิเคราะห์ส่วนผสม
+/// หน้าแสดงผลการวิเคราะห์ส่วนผสม
 /// แสดงเฉพาะส่วนผสมที่มีข้อมูลจากฐาน Supabase แล้วเท่านั้น
-class ResultPage extends StatelessWidget {
+class ResultPage extends StatefulWidget {
   final List<Ingredient> ingredients;
 
   const ResultPage({super.key, required this.ingredients});
 
   @override
+  State<ResultPage> createState() => _ResultPageState();
+}
+
+class _ResultPageState extends State<ResultPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    // แสดงคำเตือนสำหรับผู้ป่วยโรคไตเมื่อพบส่วนผสมกลุ่มสีแดง
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final redIngredients = widget.ingredients
+          .where(
+            (ingredient) => ingredient.riskLevel.toLowerCase() == 'red',
+          )
+          .map((ingredient) => ingredient.name)
+          .toSet()
+          .toList();
+
+      if (redIngredients.isNotEmpty) {
+        showWarningDialog(
+          context,
+          riskyIngredients: redIngredients,
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ingredients = widget.ingredients;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -60,3 +91,4 @@ class ResultPage extends StatelessWidget {
     );
   }
 }
+
