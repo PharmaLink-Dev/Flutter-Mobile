@@ -8,7 +8,7 @@ part of 'scan_history.dart';
 
 class ScanHistoryAdapter extends TypeAdapter<ScanHistory> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
   ScanHistory read(BinaryReader reader) {
@@ -18,27 +18,33 @@ class ScanHistoryAdapter extends TypeAdapter<ScanHistory> {
     };
     return ScanHistory(
       id: fields[0] as String,
-      imagePath: fields[1] as String,
-      ingredients: (fields[2] as List).cast<Ingredient>(),
-      scanDate: fields[3] as DateTime,
-      isFavorite: fields[4] as bool,
+      scanName: fields[1] as String,
+      scanDate: fields[2] as DateTime,
+      imagePath: fields[3] as String,
+      ingredients: (fields[4] as List).cast<Ingredient>(),
+      isFavorite: fields[5] as bool,
+      imageBytes: fields[6] as Uint8List?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ScanHistory obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.imagePath)
+      ..write(obj.scanName)
       ..writeByte(2)
-      ..write(obj.ingredients)
-      ..writeByte(3)
       ..write(obj.scanDate)
+      ..writeByte(3)
+      ..write(obj.imagePath)
       ..writeByte(4)
-      ..write(obj.isFavorite);
+      ..write(obj.ingredients)
+      ..writeByte(5)
+      ..write(obj.isFavorite)
+      ..writeByte(6)
+      ..write(obj.imageBytes);
   }
 
   @override

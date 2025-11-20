@@ -2,20 +2,15 @@ import 'package:hive/hive.dart';
 
 part 'ingredient.g.dart';
 
-@HiveType(typeId: 1) // New unique typeId for Ingredient
+@HiveType(typeId: 0)
 class Ingredient extends HiveObject {
   @HiveField(0)
-  late String name;
+  final String name;
 
   @HiveField(1)
-  late String description; // e.g., "Moisturizer", "Preservative"
+  final String status; // เช่น "Good", "Bad", "เพิ่มเอง", "ไม่พบข้อมูล"
 
-  @HiveField(2)
-  late String safetyLevel; // e.g., "Safe", "Warning", "Danger"
+  // เพิ่ม field อื่นๆ ที่ต้องการเก็บ เช่น detail, caution etc.
 
-  Ingredient({
-    required this.name,
-    required this.description,
-    required this.safetyLevel,
-  });
+  Ingredient({required this.name, required this.status});
 }
