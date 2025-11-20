@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/domain/confirmation_controller.dart';
-import 'package:app/features/ingredient/presentation/result_Page.dart';
+import 'package:app/features/ingredient/presentation/result_page.dart';
 import 'package:app/shared/app_colors.dart';
+import 'package:app/features/ingredient/data/query_supabase.dart';
+import 'package:flutter/material.dart';
 
 /// หน้ายืนยันส่วนผสมก่อนวิเคราะห์ผล
 ///
@@ -25,6 +26,7 @@ class ConfirmationPage extends StatefulWidget {
 class _ConfirmationPageState extends State<ConfirmationPage> {
   final ConfirmationController _vm = ConfirmationController();
   final TextEditingController _addCtrl = TextEditingController();
+  final SupabaseQueryService _supabaseQueryService = SupabaseQueryService();
 
   @override
   void initState() {
@@ -76,17 +78,60 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     isConfirmed: _vm.isConfirmed,
                     canAnalyze: _vm.canAnalyze,
                     onConfirmChanged: _vm.setConfirmed,
-                    onAnalyze: () {
+                    onAnalyze: () async {
                       final selected = _vm.items
                           .where((it) => it.checked)
                           .map((it) => it.ingredient)
                           .toList();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ResultPage(ingredients: selected),
+
+                      // ดึงเฉพาะชื่อไป query Supabase
+                      final searchTerms =
+                          selected.map((e) => e.name).toList();
+
+                      // แสดง loading ระหว่างเรียก Supabase
+                      showDialog<void>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => const Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(
+                              AppColors.primary,
+                            ),
+                          ),
                         ),
                       );
+
+                      try {
+                        final results = await _supabaseQueryService
+                            .searchInDatabase(searchTerms);
+
+                        if (!context.mounted) return;
+
+                        // ปิด loading
+                        Navigator.of(context).pop();
+
+                        // ถ้า Supabase ไม่ได้ส่งข้อมูลกลับมา ใช้รายการที่เลือกไว้แทน
+                        final ingredientsForResult = results;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ResultPage(ingredients: ingredientsForResult),
+                          ),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
+
+                        Navigator.of(context).pop(); // ปิด loading
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],
