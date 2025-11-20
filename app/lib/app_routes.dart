@@ -1,5 +1,4 @@
 //material app routes using go_router with stateful shell route
-import 'package:app/features/history/presentation/test_screen.dart';
 import 'package:app/features/ingredient/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,28 +21,21 @@ final GoRouter appRouter = GoRouter(
           ShellScaffold(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
+          routes: [GoRoute(path: '/', builder: (_, __) => const HomeScreen())],
+        ),
+        StatefulShellBranch(
           routes: [
             GoRoute(
-                path: '/',
-                builder: (_, __) => const HomeScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'test', // Added route for the test screen
-                    builder: (_, __) => const TestScreen(),
-                  ),
-                ]),
+              path: '/history',
+              builder: (_, __) => const HistoryScreen(),
+            ),
           ],
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/history', builder: (_, __) => const HistoryScreen()),
+            GoRoute(path: '/news', builder: (_, __) => const NewsScreen()),
           ],
         ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(path: '/news', builder: (_, __) => const NewsScreen())
-          ]
-        )
       ],
     ),
     // Scan is OUTSIDE the shell so it will be disposed when leaving.
@@ -65,7 +57,6 @@ class ShellScaffold extends StatefulWidget {
 }
 
 class _ShellScaffoldState extends State<ShellScaffold> {
-
   // This method handles the navigation when a tab is tapped.
   void _onTap(int index) {
     // index is the TAPPED index of the BottomNavigationBarItem
@@ -87,7 +78,8 @@ class _ShellScaffoldState extends State<ShellScaffold> {
       branchIndex = 0;
     } else if (index == 2) {
       branchIndex = 1;
-    } else { // index is 3
+    } else {
+      // index is 3
       branchIndex = 2;
     }
 
@@ -147,8 +139,8 @@ class _ShellScaffoldState extends State<ShellScaffold> {
           BottomNavigationBarItem(
             icon: Icon(Icons.newspaper_outlined),
             activeIcon: Icon(Icons.newspaper),
-            label: "News"
-          )
+            label: "News",
+          ),
         ],
       ),
     );
