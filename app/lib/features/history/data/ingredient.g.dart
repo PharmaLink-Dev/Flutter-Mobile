@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ingredient.dart';
+part of 'history_ingredient.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
@@ -16,10 +16,7 @@ class IngredientAdapter extends TypeAdapter<Ingredient> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Ingredient(
-      name: fields[0] as String,
-      status: fields[1] as String,
-    );
+    return Ingredient(name: fields[0] as String, status: fields[1] as String);
   }
 
   @override

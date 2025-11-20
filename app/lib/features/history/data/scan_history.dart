@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'ingredient.dart'; // Import the new Ingredient model
+import 'history_ingredient.dart'; // Import the new Ingredient model
 import 'dart:typed_data';
 
 part 'scan_history.g.dart';
@@ -19,7 +19,7 @@ class ScanHistory extends HiveObject {
   late String imagePath; // Path/URL ของรูปภาพที่สแกน
 
   @HiveField(4)
-  late List<Ingredient> ingredients; // รายการส่วนผสมที่ได้
+  late List<HistoryIngredient> ingredients; // รายการส่วนผสมที่ได้
 
   @HiveField(5)
   bool isFavorite = false;

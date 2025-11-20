@@ -21,7 +21,7 @@ class ScanHistoryAdapter extends TypeAdapter<ScanHistory> {
       scanName: fields[1] as String,
       scanDate: fields[2] as DateTime,
       imagePath: fields[3] as String,
-      ingredients: (fields[4] as List).cast<Ingredient>(),
+      ingredients: (fields[4] as List).cast<HistoryIngredient>(),
       isFavorite: fields[5] as bool,
       imageBytes: fields[6] as Uint8List?,
     );
