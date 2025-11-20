@@ -21,7 +21,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
   Widget build(BuildContext context) {
     final ingredient = widget.ingredient;
     final statusColor = _statusColor(ingredient.status);
-    final statusLabel = ingredient.status.isNotEmpty ? ingredient.status : '';
+    final statusLabel = ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
 
     final description = ingredient.description;
     const refLabel = 'อ้างอิง:';
@@ -89,7 +89,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                       label: statusLabel,
                       color: statusColor,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                   ],
 
                   // Icon Arrow

@@ -116,12 +116,14 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         Navigator.of(context).pop();
 
                         // ---------------------------------------------------------
-                        // ผสานข้อมูล: ยึด OCR (selected) เป็นหลัก แล้ว enrich จาก DB
+                        // ผสานข้อมูล: แสดงเฉพาะรายการที่ "พบ" ในฐาน (status = found)
+                        // โดยยึดชื่อ/mg จาก OCR แล้ว enrich ด้วยข้อมูลจาก DB
+                        // ถ้าไม่พบเลย -> mergedIngredients จะเป็นลิสต์ว่าง
                         // ---------------------------------------------------------
-                        List<Ingredient> mergedIngredients = selected;
+                        final List<Ingredient> mergedIngredients = [];
 
                         if (results.isNotEmpty) {
-                          mergedIngredients = selected.map((ocrItem) {
+                          for (final ocrItem in selected) {
                             // จับคู่แบบ case-insensitive โดยใช้ searchTerm จาก DB เป็นหลัก
                             Ingredient? dbMatch;
                             for (final dbItem in results) {
@@ -138,16 +140,15 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
                             if (dbMatch != null) {
                               // ใช้ชื่อ / mg เดิมจาก OCR แต่เติม status / description / riskLevel จาก DB
-                              return ocrItem.copyWith(
-                                status: dbMatch.status,
-                                description: dbMatch.description,
-                                riskLevel: dbMatch.riskLevel,
+                              mergedIngredients.add(
+                                ocrItem.copyWith(
+                                  status: dbMatch.status,
+                                  description: dbMatch.description,
+                                  riskLevel: dbMatch.riskLevel,
+                                ),
                               );
-                            } else {
-                              // ไม่เจอใน DB ใช้ข้อมูล OCR ตามเดิม
-                              return ocrItem;
                             }
-                          }).toList();
+                          }
                         }
 
                         final List<HistoryIngredient> ingredientsForHistory =
