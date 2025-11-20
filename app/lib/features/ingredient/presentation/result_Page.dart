@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 class ResultPage extends StatelessWidget {
   final List<Ingredient> ingredients;
 
-  const ResultPage({
-    super.key,
-    required this.ingredients,
-  });
+  const ResultPage({super.key, required this.ingredients});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +33,7 @@ class ResultPage extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppGradients.background,
-        ),
+        decoration: const BoxDecoration(gradient: AppGradients.background),
         child: ingredients.isEmpty
             ? const Center(
                 child: Padding(
@@ -58,13 +53,10 @@ class ResultPage extends StatelessWidget {
                 itemCount: ingredients.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
-                  return IngredientResultCard(
-                    ingredient: ingredients[index],
-                  );
+                  return IngredientResultCard(ingredient: ingredients[index]);
                 },
               ),
       ),
     );
   }
 }
-

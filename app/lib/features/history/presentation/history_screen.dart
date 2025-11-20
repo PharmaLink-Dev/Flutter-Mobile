@@ -1,10 +1,15 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+
 import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/scan_history.dart';
-import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
+import 'package:app/features/ingredient/presentation/result_page.dart';
+
+import 'package:app/features/ingredient/data/ingredient.dart';
 import 'history_widgets.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'history_utils.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -68,6 +73,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // ... ใน screen_history.dart ภายใน _HistoryScreenState:
+
+  Future<void> _navigateToIngredientResult(ScanHistory item) async {
+    // แปลง List<HistoryIngredient> ที่มีข้อมูลครบแล้ว
+    //  กลับไปเป็น List<Ingredient> เพื่อให้ ResultPage ใช้งานได้
+    final List<Ingredient> ingredientsForDisplay = item.ingredients.map((
+      histIng,
+    ) {
+      return Ingredient(
+        name: histIng.name,
+        status: histIng.status,
+        riskLevel: histIng.riskLevel,
+        description: histIng.description,
+      );
+    }).toList();
+
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ResultPage(ingredients: ingredientsForDisplay),
+      ),
+    );
+  }
+
   Widget _buildIngredientHistory() {
     return ValueListenableBuilder(
       valueListenable: _historyBox.listenable(),
@@ -111,6 +141,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     item: (group['items'] as List<ScanHistory>)[i],
                     onFavoriteToggle: () => setState(() {}),
                     onDelete: () => _deleteIngredientItem(
+                      (group['items'] as List<ScanHistory>)[i],
+                    ),
+                    onTap: () => _navigateToIngredientResult(
                       (group['items'] as List<ScanHistory>)[i],
                     ),
                   ),

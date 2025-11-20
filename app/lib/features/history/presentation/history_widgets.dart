@@ -43,7 +43,7 @@ class HistoryToggleButtons extends StatelessWidget {
           ),
           Expanded(
             child: _ToggleButton(
-              label: 'อย.',
+              label: 'FDA',
               isSelected: !isIngredientSelected,
               onTap: () => onToggle(false),
             ),
@@ -150,12 +150,14 @@ class IngredientCard extends StatelessWidget {
   final ScanHistory item;
   final VoidCallback onFavoriteToggle;
   final VoidCallback onDelete;
+  final VoidCallback onTap;
 
   const IngredientCard({
     super.key,
     required this.item,
     required this.onFavoriteToggle,
     required this.onDelete,
+    required this.onTap,
   });
 
   @override
@@ -238,9 +240,7 @@ class IngredientCard extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () {
-                // Navigate to detail if needed
-              },
+              onTap: onTap,
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(
@@ -257,17 +257,22 @@ class IngredientCard extends StatelessWidget {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            File(item.imagePath),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.image_not_supported,
-                                color: Colors.grey[400],
-                                size: 32,
-                              );
-                            },
-                          ),
+                          child: item.imageBytes != null
+                              ? Image.memory(
+                                  item.imageBytes!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  File(item.imagePath),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey[400],
+                                      size: 32,
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                     ),
