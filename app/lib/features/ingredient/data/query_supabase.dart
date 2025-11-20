@@ -22,7 +22,7 @@ class SupabaseQueryService {
   Future<List<Ingredient>> searchInDatabase(List<String> terms) async {
     try {
       final response = await _supabase.rpc(
-        'check_ingredients_status',
+        'search_and_update',
         params: {'search_terms': terms},
       );
 
