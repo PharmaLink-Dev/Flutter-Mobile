@@ -18,11 +18,6 @@ class HomeScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            // Temporary button to access the test screen
-            ElevatedButton(
-              onPressed: () => context.go('/test'),
-              child: const Text('Go to Test Screen'),
-            ),
             const SizedBox(height: 20),
             const TopSummaryCard(),
             const SizedBox(height: 20),
