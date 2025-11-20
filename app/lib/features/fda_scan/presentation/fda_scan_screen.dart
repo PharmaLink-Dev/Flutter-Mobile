@@ -12,7 +12,10 @@ import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
 
-  Future<void> _showFdaNotFoundDialog(BuildContext context, FdaOcrResult result) async {
+  Future<void> _showFdaNotFoundDialog(
+    BuildContext context,
+    FdaOcrResult result,
+  ) async {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -24,17 +27,26 @@ class FdaScanScreen extends StatelessWidget {
             children: [
               const Text('ลองถ่ายใหม่หรือกรอกเลขด้วยตนเอง'),
               const SizedBox(height: 12),
-              const Text('ผลลัพธ์การสแกน', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'ผลลัพธ์การสแกน',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 6),
               Text(result.fullText.isEmpty ? '-' : result.fullText),
-              if (result.normalizedText != null ) ...[
+              if (result.normalizedText != null) ...[
                 const SizedBox(height: 12),
-                const Text('ผลลัพธ์หลังปรับปรุง', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'ผลลัพธ์หลังปรับปรุง',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 6),
                 Text(result.normalizedText!),
               ],
               const SizedBox(height: 12),
-              Text('ประมวลผลใน: ${result.duration.inMilliseconds}ms', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(
+                'ประมวลผลใน: ${result.duration.inMilliseconds}ms',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -53,7 +65,10 @@ class FdaScanScreen extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    const textStyle = TextStyle(color: Colors.white, fontWeight: FontWeight.w600);
+    const textStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w600,
+    );
     return Container(
       height: 54,
       decoration: BoxDecoration(
@@ -136,9 +151,9 @@ class FdaScanScreen extends StatelessWidget {
       _goToCrop(context, bytes, picked.name);
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ไม่สามารถเลือกภาพ: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('ไม่สามารถเลือกภาพ: $e')));
     }
   }
 
@@ -165,7 +180,8 @@ class FdaScanScreen extends StatelessWidget {
           _galleryUploadButton(context),
         ],
       ),
-      onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
+      onCaptured: (bytes, fileName) async =>
+          _goToCrop(context, bytes, fileName),
     );
   }
 }

@@ -5,6 +5,12 @@ import 'package:app/shared/app_colors.dart';
 import 'package:app/features/ingredient/data/query_supabase.dart';
 import 'package:flutter/material.dart';
 
+import 'package:uuid/uuid.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:app/features/history/data/scan_history.dart';
+import 'package:app/features/history/data/history_ingredient.dart';
+import 'dart:typed_data';
+
 /// หน้ายืนยันส่วนผสมก่อนวิเคราะห์ผล
 ///
 /// - แสดงรายการส่วนผสมจาก OCR ให้ผู้ใช้ติ๊ก/ลบ/เพิ่มเองได้
@@ -12,11 +18,13 @@ import 'package:flutter/material.dart';
 class ConfirmationPage extends StatefulWidget {
   final List<Ingredient> ingredients;
   final String imagePath;
+  final Uint8List? scannedImageBytes;
 
   const ConfirmationPage({
     super.key,
     required this.ingredients,
     required this.imagePath,
+    this.scannedImageBytes,
   });
 
   @override
@@ -27,6 +35,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
   final ConfirmationController _vm = ConfirmationController();
   final TextEditingController _addCtrl = TextEditingController();
   final SupabaseQueryService _supabaseQueryService = SupabaseQueryService();
+
+  static const _uuid = Uuid();
+  final _historyBox = Hive.box<ScanHistory>('history');
 
   @override
   void initState() {
@@ -49,9 +60,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
         return Scaffold(
           appBar: const _ConfirmationAppBar(),
           body: Container(
-            decoration: const BoxDecoration(
-              gradient: AppGradients.background,
-            ),
+            decoration: const BoxDecoration(gradient: AppGradients.background),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -85,8 +94,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                           .toList();
 
                       // ดึงเฉพาะชื่อไป query Supabase
-                      final searchTerms =
-                          selected.map((e) => e.name).toList();
+                      final searchTerms = selected.map((e) => e.name).toList();
 
                       // แสดง loading ระหว่างเรียก Supabase
                       showDialog<void>(
@@ -111,7 +119,39 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         Navigator.of(context).pop();
 
                         // ถ้า Supabase ไม่ได้ส่งข้อมูลกลับมา ใช้รายการที่เลือกไว้แทน
-                        final ingredientsForResult = results;
+
+                        final finalResults = results.isNotEmpty
+                            ? results // 1. หาก Supabase มีข้อมูลกลับมา (results ไม่ว่างเปล่า) ให้ใช้ข้อมูลจาก Supabase
+                            : selected; // 2. หาก Supabase ไม่มีข้อมูลกลับมา (results ว่างเปล่า) ให้ใช้รายการที่ผู้ใช้เลือกไว้ (selected) แทน
+
+                        final List<Ingredient> ingredientsForResult =
+                            finalResults.isNotEmpty
+                            ? finalResults
+                            : selected; // ตรวจสอบซ้ำอีกครั้ง (ในกรณีที่ finalResults อาจว่างเปล่า แต่ในโค้ดนี้ควรจะเป็น selected เสมอ)
+
+                        final List<HistoryIngredient> ingredientsForHistory =
+                            ingredientsForResult.map((ing) {
+                              return HistoryIngredient(
+                                name: ing.name,
+                                status: ing.status,
+                                riskLevel: ing.riskLevel,
+                                description: ing.description,
+                              );
+                            }).toList();
+
+                        final newScanHistory = ScanHistory(
+                          id: _uuid.v4(),
+                          scanName: 'Ingredient Scan ${_historyBox.length + 1}',
+                          scanDate: DateTime.now(),
+                          imagePath: widget.imagePath,
+                          ingredients:
+                              ingredientsForHistory, // <-- ใช้ตัวที่ถูกแปลงแล้ว
+                          imageBytes: widget.scannedImageBytes,
+                        );
+                        print(
+                          'Bytes length to save: ${widget.scannedImageBytes?.lengthInBytes ?? 0}',
+                        );
+                        await _historyBox.add(newScanHistory);
 
                         Navigator.push(
                           context,
@@ -192,9 +232,7 @@ class _IngredientList extends StatelessWidget {
       return const Center(
         child: Text(
           'ไม่พบรายการส่วนผสมจากการสแกน',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(color: AppColors.textSecondary),
         ),
       );
     }
@@ -225,9 +263,7 @@ class _IngredientList extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.ingredient.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
                 IconButton(
@@ -249,10 +285,7 @@ class _AddSection extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onAdd;
 
-  const _AddSection({
-    required this.controller,
-    required this.onAdd,
-  });
+  const _AddSection({required this.controller, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -261,15 +294,10 @@ class _AddSection extends StatelessWidget {
       children: [
         const Text(
           'เพิ่มหรือแก้ไขส่วนผสม',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
-        _AddBar(
-          controller: controller,
-          onAdd: onAdd,
-        ),
+        _AddBar(controller: controller, onAdd: onAdd),
       ],
     );
   }
@@ -301,9 +329,7 @@ class _ConfirmationFooter extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             const Expanded(
-              child: Text(
-                'ฉันขอยืนยันว่าข้อมูลทั้งหมดนั้นถูกต้อง',
-              ),
+              child: Text('ฉันขอยืนยันว่าข้อมูลทั้งหมดนั้นถูกต้อง'),
             ),
           ],
         ),
@@ -314,8 +340,7 @@ class _ConfirmationFooter extends StatelessWidget {
             onPressed: canAnalyze ? onAnalyze : null,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 56),
-              backgroundColor:
-                  canAnalyze ? AppColors.primary : AppColors.grey,
+              backgroundColor: canAnalyze ? AppColors.primary : AppColors.grey,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -323,10 +348,7 @@ class _ConfirmationFooter extends StatelessWidget {
             ),
             child: const Text(
               'วิเคราะห์ผล',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -339,10 +361,7 @@ class _AddBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onAdd;
 
-  const _AddBar({
-    required this.controller,
-    required this.onAdd,
-  });
+  const _AddBar({required this.controller, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {
@@ -374,8 +393,7 @@ class _AddBar extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

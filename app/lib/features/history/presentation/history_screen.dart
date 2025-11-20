@@ -1,8 +1,16 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+
 import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/scan_history.dart';
-import 'package:flutter/material.dart';
+
+import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
+import 'package:app/features/ingredient/presentation/result_page.dart';
+
+import 'package:app/features/ingredient/data/ingredient.dart';
+import 'history_widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'history_utils.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -15,29 +23,46 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final _historyBox = Hive.box<ScanHistory>('history');
   final _fdaScanBox = Hive.box<FdaScan>('fda_scans');
   bool _isIngredientSelected = true;
+  bool _showFavoritesOnly = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('History'),
+        elevation: 0,
+        backgroundColor: HistoryConstants.primaryGreen,
+        title: const Text(
+          'History',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: () async {
-              await _historyBox.clear();
-              await _fdaScanBox.clear();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("All history cleared!")),
-              );
-            },
+            icon: Icon(
+              _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              color: _showFavoritesOnly ? Colors.red : Colors.black54,
+            ),
+            onPressed: () =>
+                setState(() => _showFavoritesOnly = !_showFavoritesOnly),
+            tooltip: 'Show Favorites Only',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_sweep, color: Colors.black54),
+            onPressed: _showDeleteConfirmation,
             tooltip: 'Clear All History',
-          )
+          ),
         ],
       ),
       body: Column(
         children: [
-          _buildToggleButtons(),
+          HistoryToggleButtons(
+            isIngredientSelected: _isIngredientSelected,
+            onToggle: (value) => setState(() => _isIngredientSelected = value),
+          ),
           Expanded(
             child: _isIngredientSelected
                 ? _buildIngredientHistory()
@@ -48,30 +73,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildToggleButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextButton(
-            onPressed: () => setState(() => _isIngredientSelected = true),
-            style: TextButton.styleFrom(
-              backgroundColor:
-                  _isIngredientSelected ? Colors.blue.withOpacity(0.1) : null,
-            ),
-            child: const Text('Ingredient'),
-          ),
-        ),
-        Expanded(
-          child: TextButton(
-            onPressed: () => setState(() => _isIngredientSelected = false),
-            style: TextButton.styleFrom(
-              backgroundColor:
-                  !_isIngredientSelected ? Colors.blue.withOpacity(0.1) : null,
-            ),
-            child: const Text('อย.'),
-          ),
-        ),
-      ],
+  // ... ใน screen_history.dart ภายใน _HistoryScreenState:
+
+  Future<void> _navigateToIngredientResult(ScanHistory item) async {
+    // แปลง List<HistoryIngredient> ที่มีข้อมูลครบแล้ว
+    //  กลับไปเป็น List<Ingredient> เพื่อให้ ResultPage ใช้งานได้
+    final List<Ingredient> ingredientsForDisplay = item.ingredients.map((
+      histIng,
+    ) {
+      return Ingredient(
+        name: histIng.name,
+        status: histIng.status,
+        riskLevel: histIng.riskLevel,
+        description: histIng.description,
+      );
+    }).toList();
+
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ResultPage(ingredients: ingredientsForDisplay),
+      ),
     );
   }
 
@@ -80,12 +103,55 @@ class _HistoryScreenState extends State<HistoryScreen> {
       valueListenable: _historyBox.listenable(),
       builder: (context, Box<ScanHistory> box, _) {
         if (box.values.isEmpty) {
-          return const Center(
-            child: Text('No ingredient scan history yet.'),
-          );
+          return const EmptyState(message: 'No ingredient scan history yet.');
         }
-        final items = box.values.toList().reversed.toList();
-        return _buildHistoryList(items);
+
+        var items = box.values.toList();
+
+        if (_showFavoritesOnly) {
+          items = items.where((item) => item.isFavorite).toList();
+          if (items.isEmpty) {
+            return const EmptyState(message: 'No favorite items yet.');
+          }
+        }
+
+        items.sort((a, b) {
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          return b.scanDate.compareTo(a.scanDate);
+        });
+
+        final grouped = HistoryGrouper.groupByTimeRange(
+          items,
+          (item) => item.scanDate,
+        );
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: grouped.length,
+          itemBuilder: (context, index) {
+            final group = grouped[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TimeGroupHeader(title: group['title'] as String),
+                ...List.generate(
+                  (group['items'] as List<ScanHistory>).length,
+                  (i) => IngredientCard(
+                    item: (group['items'] as List<ScanHistory>)[i],
+                    onFavoriteToggle: () => setState(() {}),
+                    onDelete: () => _deleteIngredientItem(
+                      (group['items'] as List<ScanHistory>)[i],
+                    ),
+                    onTap: () => _navigateToIngredientResult(
+                      (group['items'] as List<ScanHistory>)[i],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -95,80 +161,155 @@ class _HistoryScreenState extends State<HistoryScreen> {
       valueListenable: _fdaScanBox.listenable(),
       builder: (context, Box<FdaScan> box, _) {
         if (box.values.isEmpty) {
-          return const Center(
-            child: Text('No FDA scan history yet.'),
-          );
+          return const EmptyState(message: 'No FDA scan history yet.');
         }
-        final items = box.values.toList().reversed.toList();
-        return _buildFdaScanList(items);
+
+        var items = box.values.toList();
+
+        if (_showFavoritesOnly) {
+          items = items.where((item) => item.isFavorite).toList();
+          if (items.isEmpty) {
+            return const EmptyState(message: 'No favorite items yet.');
+          }
+        }
+
+        items.sort((a, b) {
+          if (a.isFavorite && !b.isFavorite) return -1;
+          if (!a.isFavorite && b.isFavorite) return 1;
+          return b.scanDate.compareTo(a.scanDate);
+        });
+
+        final grouped = HistoryGrouper.groupByTimeRange(
+          items,
+          (item) => item.scanDate,
+        );
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: grouped.length,
+          itemBuilder: (context, index) {
+            final group = grouped[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TimeGroupHeader(title: group['title'] as String),
+                ...List.generate(
+                  (group['items'] as List<FdaScan>).length,
+                  (i) => FdaCard(
+                    item: (group['items'] as List<FdaScan>)[i],
+                    onFavoriteToggle: () => setState(() {}),
+                    onDelete: () =>
+                        _deleteFdaItem((group['items'] as List<FdaScan>)[i]),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => FdaSuccessScreen(
+                            data: (group['items'] as List<FdaScan>)[i].fdaData,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
       },
     );
   }
 
-  Widget _buildHistoryList(List<ScanHistory> history) {
-    return ListView.builder(
-      itemCount: history.length,
-      itemBuilder: (context, index) {
-        final item = history[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListTile(
-            leading: Image.file(
-              File(item.imagePath),
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error, color: Colors.red);
-              },
-            ),
-            title: Text(
-              item.ingredients.map((e) => e.name).join(', '),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text('Scanned on: ${item.scanDate.toShortString()}'),
-            trailing: IconButton(
-              icon: Icon(
-                item.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: item.isFavorite ? Colors.red : null,
+  Future<void> _deleteIngredientItem(ScanHistory item) async {
+    // ลบ showDialog และ if (shouldDelete) ออกทั้งหมด
+    await item.delete(); // <-- ลบข้อมูลเลย
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Item deleted'),
+          backgroundColor: Colors.green[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteFdaItem(FdaScan item) async {
+    // ลบ showDialog และ if (shouldDelete) ออกทั้งหมด
+    await item.delete(); // <-- ลบข้อมูลเลย
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Item deleted'),
+          backgroundColor: Colors.green[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation() async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Clear All History?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'This will permanently delete all your scan history. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[700])),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              onPressed: () {
-                // This requires item to be a HiveObject
-                item.isFavorite = !item.isFavorite;
-                item.save(); 
-              },
+            ),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'Delete All',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete ?? false) {
+      await _historyBox.clear();
+      await _fdaScanBox.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('All history cleared!'),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
         );
-      },
-    );
-  }
-
-  Widget _buildFdaScanList(List<FdaScan> fdaScans) {
-    return ListView.builder(
-      itemCount: fdaScans.length,
-      itemBuilder: (context, index) {
-        final item = fdaScans[index];
-        final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListTile(
-            leading: item.imagePath != null
-                ? Image.file(File(item.imagePath!), width: 50, height: 50, fit: BoxFit.cover)
-                : const Icon(Icons.document_scanner_outlined, size: 40),
-            title: Text(item.scanName),
-            subtitle: Text("Product: $productName\nScanned on: ${item.scanDate.toShortString()}"),
-            isThreeLine: true,
-          ),
-        );
-      },
-    );
-  }
-}
-
-extension on DateTime {
-  String toShortString() {
-    return "$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+      }
+    }
   }
 }

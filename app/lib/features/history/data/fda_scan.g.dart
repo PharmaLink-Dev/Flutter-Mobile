@@ -19,11 +19,10 @@ class FdaScanAdapter extends TypeAdapter<FdaScan> {
     return FdaScan(
       id: fields[0] as String,
       fdaNumber: fields[1] as String,
-      imagePath: fields[2] as String?,
-      scanName: fields[3] as String?,
-      scanDate: fields[4] as DateTime,
-      fdaData: (fields[5] as Map).cast<String, String?>(),
-    );
+      scanName: fields[2] as String?,
+      scanDate: fields[3] as DateTime,
+      fdaData: (fields[4] as Map).cast<String, String?>(),
+    )..isFavorite = fields[5] as bool;
   }
 
   @override
@@ -35,13 +34,13 @@ class FdaScanAdapter extends TypeAdapter<FdaScan> {
       ..writeByte(1)
       ..write(obj.fdaNumber)
       ..writeByte(2)
-      ..write(obj.imagePath)
-      ..writeByte(3)
       ..write(obj.scanName)
-      ..writeByte(4)
+      ..writeByte(3)
       ..write(obj.scanDate)
+      ..writeByte(4)
+      ..write(obj.fdaData)
       ..writeByte(5)
-      ..write(obj.fdaData);
+      ..write(obj.isFavorite);
   }
 
   @override

@@ -26,14 +26,16 @@ class _ScanScreenState extends State<ScanScreen> {
           fileName: fileName,
           onCropped: (croppedBytes, originalFilename) async {
             setState(() => _isLoading = true);
-            Navigator.of(context).pop(); 
+            Navigator.of(context).pop();
 
             try {
-              final scanResult =
-                  await _scanService.uploadAndScanImage(croppedBytes);
+              final scanResult = await _scanService.uploadAndScanImage(
+                croppedBytes,
+              );
               if (!context.mounted) return;
 
-              final List<dynamic> rawIngredients = scanResult['ingredients'] ?? [];
+              final List<dynamic> rawIngredients =
+                  scanResult['ingredients'] ?? [];
               final List<Ingredient> ingredients = rawIngredients.map((item) {
                 return Ingredient(
                   name: item['name'] ?? 'Unknown',
@@ -43,14 +45,20 @@ class _ScanScreenState extends State<ScanScreen> {
 
               final String imagePath = scanResult['imagePath'] ?? '';
 
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => ConfirmationPage(ingredients: ingredients, imagePath: imagePath),
-              ));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => ConfirmationPage(
+                    ingredients: ingredients,
+                    imagePath: imagePath,
+                    scannedImageBytes: croppedBytes,
+                  ),
+                ),
+              );
             } catch (e) {
               if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(e.toString())),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(e.toString())));
             } finally {
               if (mounted) {
                 setState(() => _isLoading = false);
@@ -72,7 +80,8 @@ class _ScanScreenState extends State<ScanScreen> {
             overlay: const ScanOverlay(width: 320, height: 320),
             guideText: 'วางฉลากให้อยู่ในกรอบ',
             showGalleryUpload: true,
-            onCaptured: (bytes, fileName) async => _goToCrop(context, bytes, fileName),
+            onCaptured: (bytes, fileName) async =>
+                _goToCrop(context, bytes, fileName),
           ),
 
           if (_isLoading)
