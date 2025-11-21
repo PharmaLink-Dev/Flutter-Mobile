@@ -1,79 +1,146 @@
 import 'package:flutter/material.dart';
+import 'package:app/features/home/widgets/quick_actions.dart';
 import 'package:app/features/home/widgets/recent_scan_list.dart';
 
-// Import custom widgets
-import '../widgets/quick_actions.dart';
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final Color kPrimaryColor = const Color(0xFF0C9869);
+  final Color kBackgroundColor = const Color(0xFFF9F8FD);
+
+  @override
   Widget build(BuildContext context) {
-    const Color mainGreen = Color(0xFF00CFA5);
+    Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: mainGreen,
-      body: SafeArea(
-        bottom: false,
+      backgroundColor: kBackgroundColor,
+      // สร้าง Custom App Bar ด้านบน
+      appBar: buildAppBar(),
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Welcome To Kidness',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0FFF9),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.search, color: Colors.black54),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 15),
+            // ส่วนหัว + ช่องค้นหา
+            HeaderWithSearchBox(size: size, primaryColor: kPrimaryColor),
+            
+            // ส่วน Quick Action (แทน Recommended เดิม)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: QuickActions(),
+            ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: RecentScanList(scanType: ScanType.ingredient),
+            ),
+            
+          ],
+        ),
+      ),
+    );
+  }
+
+  AppBar buildAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: kPrimaryColor,
+    );
+  }
+}
+
+
+class HeaderWithSearchBox extends StatelessWidget {
+  const HeaderWithSearchBox({
+    super.key,
+    required this.size,
+    required this.primaryColor,
+  });
+
+  final Size size;
+  final Color primaryColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20 ),
+      // ใช้ Stack เพื่อซ้อน Search bar ไว้กึ่งกลางรอยต่อ
+      height: size.height * 0.18,
+      child: Stack(
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              bottom: 36 + 20,
+            ),
+            height: size.height * 0.18 - 27,
+            decoration: BoxDecoration(
+              color: primaryColor,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(36),
+                bottomRight: Radius.circular(36),
+              ),
+            ),
+            child: Row(
+              children: <Widget>[
+                Text(
+                  'Welcome to kidness',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ),
+                ),
+                const Spacer(),
+              ],
+            ),
+          ),
+          // Search Bar
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              alignment: Alignment.center,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              height: 54,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 10),
+                    blurRadius: 50,
+                    color: primaryColor.withOpacity(0.23),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {},
+                      decoration: InputDecoration(
+                        hintText: "Search",
+                        hintStyle: TextStyle(
+                          color: primaryColor.withOpacity(0.5),
+                        ),
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                    ),
                   ),
-                ),
-                child: ListView(
-                  padding: const EdgeInsets.all(20),
-                  children: const [
-                    QuickActions(),
-                    SizedBox(height: 20),
-                    RecentScanList(scanType: ScanType.ingredient),
-                    SizedBox(height: 20),
-                    RecentScanList(scanType: ScanType.fda),
-                  ],
-                ),
+                  Icon(Icons.search, color: primaryColor.withOpacity(0.5)),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
