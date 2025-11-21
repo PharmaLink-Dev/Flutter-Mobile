@@ -108,7 +108,38 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   Widget build(BuildContext context) {
-    final ingredients = widget.ingredients;
+    // จัดเรียงส่วนผสมตามระดับความเสี่ยง: อันตราย (red) > ระมัดระวัง (yellow) > ปลอดภัย (green / อื่น ๆ)
+    final ingredients = [...widget.ingredients]..sort((a, b) {
+        int score(String level) {
+          switch (level.toLowerCase()) {
+            case 'red':
+              return 0; // อันตรายสูงสุด ให้อยู่บนสุด
+            case 'yellow':
+              return 1; // ระมัดระวัง
+            case 'green':
+              return 2; // ปลอดภัย
+            default:
+              return 3; // อื่น ๆ / ไม่ทราบ
+          }
+        }
+
+        final aScore = score(a.riskLevel);
+        final bScore = score(b.riskLevel);
+        if (aScore != bScore) return aScore.compareTo(bScore);
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      });
+
+    // หา index สุดท้ายของแต่ละโซนความเสี่ยง
+    int lastRedIndex = -1;
+    int lastYellowIndex = -1;
+    for (var i = 0; i < ingredients.length; i++) {
+      final level = ingredients[i].riskLevel.toLowerCase();
+      if (level == 'red') {
+        lastRedIndex = i;
+      } else if (level == 'yellow') {
+        lastYellowIndex = i;
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -155,24 +186,49 @@ class _ResultPageState extends State<ResultPage> {
                       return _buildImageHeader();
                     }
                     final ingredientIndex = index - 1;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: ingredientIndex == ingredients.length - 1
-                            ? 0
-                            : 8,
-                      ),
-                      child: IngredientResultCard(
-                        ingredient: ingredients[ingredientIndex],
-                      ),
+                    final ingredient = ingredients[ingredientIndex];
+
+                    final isZoneBoundary = ingredientIndex == lastRedIndex ||
+                        ingredientIndex == lastYellowIndex;
+
+                    return Column(
+                      children: [
+                        IngredientResultCard(
+                          ingredient: ingredient,
+                        ),
+                        if (isZoneBoundary &&
+                            ingredientIndex != ingredients.length - 1)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
+                            child: Divider(
+                              color: Colors.grey,
+                              thickness: 1,
+                              height: 2,
+                            ),
+                          ),
+                      ],
                     );
                   } else {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom: index == ingredients.length - 1 ? 0 : 8,
-                      ),
-                      child: IngredientResultCard(
-                        ingredient: ingredients[index],
-                      ),
+                    final ingredient = ingredients[index];
+
+                    final isZoneBoundary =
+                        index == lastRedIndex || index == lastYellowIndex;
+
+                    return Column(
+                      children: [
+                        IngredientResultCard(
+                          ingredient: ingredient,
+                        ),
+                        if (isZoneBoundary && index != ingredients.length - 1)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Divider(
+                              color: Colors.white70,
+                              thickness: 1,
+                              height: 1,
+                            ),
+                          ),
+                      ],
                     );
                   }
                 },

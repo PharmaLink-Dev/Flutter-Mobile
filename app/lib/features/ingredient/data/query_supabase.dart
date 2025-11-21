@@ -99,7 +99,7 @@ String _mapRiskLevelToThai(String riskLevel) {
     case 'green':
       return 'ปลอดภัย';
     case 'yellow':
-      return 'ควรระวัง';
+      return 'ระมัดระวัง';
     case 'red':
       return 'อันตราย';
     default:
