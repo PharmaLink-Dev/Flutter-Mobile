@@ -8,7 +8,7 @@ import 'package:app/features/history/data/scan_history.dart';
 import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/ingredient/data/ingredient.dart'; // สำหรับแปลง HistoryIngredient กลับมา
 
-import 'package:app/features/ingredient/presentation/result_page.dart';
+import 'package:app/features/ingredient/presentation/result_Page.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
 
 // *********** ข้อมูลจาก history_utils.dart ที่จำเป็น ***********

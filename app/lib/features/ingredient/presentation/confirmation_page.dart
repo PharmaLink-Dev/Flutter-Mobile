@@ -1,6 +1,6 @@
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/domain/confirmation_controller.dart';
-import 'package:app/features/ingredient/presentation/result_page.dart';
+import 'package:app/features/ingredient/presentation/result_Page.dart';
 import 'package:app/shared/app_colors.dart';
 import 'package:app/features/ingredient/data/query_supabase.dart';
 import 'package:flutter/material.dart';
