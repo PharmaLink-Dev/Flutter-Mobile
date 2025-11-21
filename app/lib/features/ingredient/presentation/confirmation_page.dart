@@ -177,8 +177,11 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                ResultPage(ingredients: mergedIngredients),
+                            builder: (_) => ResultPage(
+                              ingredients: mergedIngredients,
+                              imageBytes: widget.scannedImageBytes,
+                              imagePath: widget.imagePath,
+                            ),
                           ),
                         );
                       } catch (e) {

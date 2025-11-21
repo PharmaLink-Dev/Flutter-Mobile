@@ -52,7 +52,11 @@ class RecentScanList extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         // *หมายเหตุ: คุณต้อง import ResultPage มาด้วย*
-        builder: (_) => ResultPage(ingredients: ingredientsForDisplay),
+          builder: (_) => ResultPage(
+            ingredients: ingredientsForDisplay,
+            imageBytes: item.imageBytes,
+            imagePath: item.imagePath,
+          ),
       ),
     );
   }

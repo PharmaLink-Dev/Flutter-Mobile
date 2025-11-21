@@ -93,7 +93,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ResultPage(ingredients: ingredientsForDisplay),
+        builder: (_) => ResultPage(
+          ingredients: ingredientsForDisplay,
+          imageBytes: item.imageBytes,
+          imagePath: item.imagePath,
+          heroTag: 'ingredient_${item.scanDate.millisecondsSinceEpoch}',
+        ),
       ),
     );
   }

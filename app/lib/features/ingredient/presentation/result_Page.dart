@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/presentation/widgets/ingredient_result_card.dart';
 import 'package:app/features/ingredient/presentation/widgets/warning_dialog.dart';
@@ -8,14 +11,31 @@ import 'package:flutter/material.dart';
 /// แสดงเฉพาะส่วนผสมที่มีข้อมูลจากฐาน Supabase แล้วเท่านั้น
 class ResultPage extends StatefulWidget {
   final List<Ingredient> ingredients;
+  final Uint8List? imageBytes;
+  final String? imagePath;
+  final String? heroTag;
 
-  const ResultPage({super.key, required this.ingredients});
+  const ResultPage({
+    super.key,
+    required this.ingredients,
+    this.imageBytes,
+    this.imagePath,
+    this.heroTag,
+  });
 
   @override
   State<ResultPage> createState() => _ResultPageState();
 }
 
 class _ResultPageState extends State<ResultPage> {
+  bool get _hasImage {
+    final bytes = widget.imageBytes;
+    final path = widget.imagePath;
+    final hasBytes = bytes != null && bytes.isNotEmpty;
+    final hasPath = path != null && path.isNotEmpty;
+    return hasBytes || hasPath;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +57,53 @@ class _ResultPageState extends State<ResultPage> {
         );
       }
     });
+  }
+
+  Widget _buildImageHeader() {
+    if (!_hasImage) return const SizedBox.shrink();
+
+    Widget imageWidget;
+    if (widget.imageBytes != null && widget.imageBytes!.isNotEmpty) {
+      imageWidget = Image.memory(
+        widget.imageBytes!,
+        fit: BoxFit.cover,
+      );
+    } else if (widget.imagePath != null && widget.imagePath!.isNotEmpty) {
+      imageWidget = Image.file(
+        File(widget.imagePath!),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.image_not_supported,
+            color: Colors.grey[400],
+            size: 48,
+          );
+        },
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    Widget content = ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: AspectRatio(
+        aspectRatio: 4 / 3,
+        child: imageWidget,
+      ),
+    );
+
+    final heroTag = widget.heroTag;
+    if (heroTag != null && heroTag.isNotEmpty) {
+      content = Hero(
+        tag: heroTag,
+        child: content,
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: content,
+    );
   }
 
   @override
@@ -79,16 +146,38 @@ class _ResultPageState extends State<ResultPage> {
                   ),
                 ),
               )
-            : ListView.separated(
+            : ListView.builder(
                 padding: const EdgeInsets.all(16),
-                itemCount: ingredients.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemCount: ingredients.length + (_hasImage ? 1 : 0),
                 itemBuilder: (context, index) {
-                  return IngredientResultCard(ingredient: ingredients[index]);
+                  if (_hasImage) {
+                    if (index == 0) {
+                      return _buildImageHeader();
+                    }
+                    final ingredientIndex = index - 1;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: ingredientIndex == ingredients.length - 1
+                            ? 0
+                            : 8,
+                      ),
+                      child: IngredientResultCard(
+                        ingredient: ingredients[ingredientIndex],
+                      ),
+                    );
+                  } else {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index == ingredients.length - 1 ? 0 : 8,
+                      ),
+                      child: IngredientResultCard(
+                        ingredient: ingredients[index],
+                      ),
+                    );
+                  }
                 },
               ),
       ),
     );
   }
 }
-
