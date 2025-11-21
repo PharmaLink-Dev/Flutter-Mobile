@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 
 /// Shows the FDA number input dialog and returns the entered text,
 /// or null if the user cancels.
@@ -153,7 +154,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                       visualDensity: VisualDensity.compact,
                       splashRadius: 18,
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(CupertinoIcons.back),
                     ),
                   ),
                 ],

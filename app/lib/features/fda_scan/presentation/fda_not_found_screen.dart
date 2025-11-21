@@ -54,7 +54,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                           color: Colors.white,
                         ),
                         child: const Center(
-                          child: Icon(Icons.close, size: 72, color: Color(0xFFEF4444)),
+                          child: Icon(CupertinoIcons.back, size: 72, color: Color(0xFFEF4444)),
                         ),
                       ),
                       const SizedBox(height: 24),
