@@ -154,7 +154,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                       visualDensity: VisualDensity.compact,
                       splashRadius: 18,
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(CupertinoIcons.back),
+                      icon: const Icon(Icons.close),
                     ),
                   ),
                 ],

@@ -292,7 +292,7 @@ class _IngredientList extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(CupertinoIcons.back),
+                  icon: const Icon(Icons.close),
                   color: AppColors.primary,
                   tooltip: 'ลบ',
                   onPressed: () => onRemove(index),
