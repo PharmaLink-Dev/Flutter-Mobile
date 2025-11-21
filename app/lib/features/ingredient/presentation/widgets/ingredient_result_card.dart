@@ -20,6 +20,10 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
   @override
   Widget build(BuildContext context) {
     final ingredient = widget.ingredient;
+    final displayName = (ingredient.searchTerm != null &&
+            ingredient.searchTerm!.trim().isNotEmpty)
+        ? ingredient.searchTerm!
+        : ingredient.name;
     final statusColor = _statusColor(ingredient.status);
     final statusLabel =
         ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
@@ -85,7 +89,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                 children: [
                   Expanded(
                     child: Text(
-                      ingredient.name,
+                      displayName,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
@@ -243,4 +247,3 @@ Color _statusColor(String status) {
       return AppColors.darkGrey;
   }
 }
-

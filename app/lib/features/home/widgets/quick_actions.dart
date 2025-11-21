@@ -34,7 +34,7 @@ class QuickActions extends StatelessWidget {
             "Quick Action",
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: AppColors.text,
             ),
           ),

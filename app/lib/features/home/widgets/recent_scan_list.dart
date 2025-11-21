@@ -138,7 +138,7 @@ class RecentScanList extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
         ),
         TextButton(
           // *ใช้ GoRouter เพื่อนำทางไปยังหน้า History หลัก*

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app/features/home/widgets/quick_actions.dart';
 import 'package:app/features/home/widgets/recent_scan_list.dart';
+import 'package:app/features/home/widgets/searchBar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,8 +27,11 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ส่วนหัว + ช่องค้นหา
-            HeaderWithSearchBox(size: size, primaryColor: kPrimaryColor),
-            
+            HeaderWithSearchBox(
+              size: size,
+              primaryColor: kPrimaryColor,
+            ),
+
             // ส่วน Quick Action (แทน Recommended เดิม)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -38,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: RecentScanList(scanType: ScanType.ingredient),
             ),
-            
           ],
         ),
       ),
@@ -104,41 +107,7 @@ class HeaderWithSearchBox extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
-              alignment: Alignment.center,
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              height: 54,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    offset: const Offset(0, 10),
-                    blurRadius: 50,
-                    color: primaryColor.withOpacity(0.23),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      onChanged: (value) {},
-                      decoration: InputDecoration(
-                        hintText: "Search",
-                        hintStyle: TextStyle(
-                          color: primaryColor.withOpacity(0.5),
-                        ),
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.search, color: primaryColor.withOpacity(0.5)),
-                ],
-              ),
-            ),
+            child: HomeSearchBar(primaryColor: primaryColor),
           ),
         ],
       ),
