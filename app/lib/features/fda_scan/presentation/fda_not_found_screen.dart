@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
 import 'widgets/fda_input_dialog.dart';
+import 'package:flutter/cupertino.dart';
 
 class FdaNotFoundScreen extends StatelessWidget {
   final String scannedRaw;
@@ -185,7 +186,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                   style: const ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(Colors.white24),
                   ),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: const Icon(CupertinoIcons.back, color: Colors.white),
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/fda_result_bottom_sheet.dart';
+import 'package:flutter/cupertino.dart';
 
 class FdaSuccessScreen extends StatelessWidget {
   final Map<String, String?> data;
@@ -96,7 +97,7 @@ class FdaSuccessScreen extends StatelessWidget {
                   style: const ButtonStyle(
                     backgroundColor: MaterialStatePropertyAll(Colors.white24),
                   ),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: const Icon(CupertinoIcons.back, color: Colors.white),
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
