@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:app/features/history/data/scan_history.dart';
 import 'package:app/features/history/data/history_ingredient.dart';
 import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
 
 class ConfirmationPage extends StatefulWidget {
   final List<Ingredient> ingredients;
@@ -291,7 +292,7 @@ class _IngredientList extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(CupertinoIcons.back),
                   color: AppColors.primary,
                   tooltip: 'ลบ',
                   onPressed: () => onRemove(index),

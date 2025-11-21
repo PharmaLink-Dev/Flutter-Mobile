@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app/shared/app_colors.dart';
 import 'aurora_bg.dart';
+import 'package:flutter/cupertino.dart';
 
 typedef OnCaptured = Future<void> Function(Uint8List bytes, String fileName);
 
@@ -373,7 +374,7 @@ class _PlainHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _RoundIconButton(icon: Icons.arrow_back, onTap: onBack),
+          _RoundIconButton(icon: CupertinoIcons.back, onTap: onBack),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
