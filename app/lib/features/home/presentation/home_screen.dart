@@ -1,10 +1,7 @@
-import 'package:app/features/home/widgets/recent_scan_list.dart';
 import 'package:flutter/material.dart';
-import 'package:app/shared/app_colors.dart';
-import 'package:go_router/go_router.dart';
+import 'package:app/features/home/widgets/recent_scan_list.dart';
 
 // Import custom widgets
-import '../widgets/top_summary_card.dart';
 import '../widgets/quick_actions.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -12,20 +9,69 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color mainGreen = Color(0xFF00CFA5);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: mainGreen,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
-            const TopSummaryCard(),
-            const SizedBox(height: 20),
-            const QuickActions(), // grid of shortcuts
-            const SizedBox(height: 20),
-            const RecentScanList(scanType: ScanType.ingredient),
-            const SizedBox(height: 20),
-            const RecentScanList(scanType: ScanType.fda),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Welcome To Kidness',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0FFF9),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search, color: Colors.black54),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: ListView(
+                  padding: const EdgeInsets.all(20),
+                  children: const [
+                    QuickActions(),
+                    SizedBox(height: 20),
+                    RecentScanList(scanType: ScanType.ingredient),
+                    SizedBox(height: 20),
+                    RecentScanList(scanType: ScanType.fda),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
