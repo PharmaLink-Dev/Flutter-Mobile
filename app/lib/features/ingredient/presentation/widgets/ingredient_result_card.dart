@@ -21,7 +21,17 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
   Widget build(BuildContext context) {
     final ingredient = widget.ingredient;
     final statusColor = _statusColor(ingredient.status);
-    final statusLabel = ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
+    final statusLabel =
+        ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
+
+    final double? mgValue = ingredient.mg;
+    String? mgLabel;
+    if (mgValue != null) {
+      final bool isInt = mgValue % 1 == 0;
+      final String formatted =
+          isInt ? mgValue.toInt().toString() : mgValue.toStringAsFixed(1);
+      mgLabel = '$formatted mg';
+    }
 
     final description = ingredient.description;
     const refLabel = 'อ้างอิง:';
@@ -38,17 +48,21 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
       }
     }
 
+    if (explanationText.isEmpty) {
+      explanationText = 'ไม่มีรายละเอียดข้อมูล';
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFFE5E7EB)), // สีเทาอ่อนๆ แบบในรูป
+        border: Border.all(color: const Color(0xFFE5E7EB)),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 4,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -67,14 +81,13 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start, 
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ชื่อส่วนผสม
                   Expanded(
                     child: Text(
                       ingredient.name,
                       style: const TextStyle(
-                        fontWeight: FontWeight.w700, 
+                        fontWeight: FontWeight.w700,
                         fontSize: 15,
                         color: Color(0xFF1F2937),
                         height: 1.4,
@@ -82,59 +95,56 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  
-                  // Status Chip
                   if (statusLabel.isNotEmpty) ...[
+                    if (mgLabel != null) ...[
+                      _InfoChip(label: mgLabel),
+                      const SizedBox(width: 8),
+                    ],
                     _StatusChip(
                       label: statusLabel,
                       color: statusColor,
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                   ],
-
-                  // Icon Arrow
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2), 
-                    child: Icon(
-                      _expanded
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      color: const Color(0xFF6B7280),
-                      size: 20,
-                    ),
+                  Icon(
+                    _expanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: const Color(0xFF6B7280),
+                    size: 20,
                   ),
                 ],
               ),
             ),
           ),
-
-
           AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
             secondChild: Container(
               width: double.infinity,
-              // 2. พื้นหลังสีเทาอ่อนสำหรับเนื้อหาที่ขยายออกมา
               decoration: const BoxDecoration(
-                color: Color(0xFFF9FAFB), // สีเทาอ่อนมาก (Cool Gray 50)
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                color: Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(12),
+                ),
               ),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    explanationText.isNotEmpty
-                        ? explanationText
-                        : 'ไม่มีรายละเอียดข้อมูล',
+                    explanationText,
                     style: const TextStyle(
                       fontSize: 14,
                       height: 1.6,
-                      color: Color(0xFF4B5563), 
+                      color: Color(0xFF4B5563),
                     ),
                   ),
                   if (referenceText.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    const Divider(height: 1, color: Color(0xFFE5E7EB)),
+                    const Divider(
+                      height: 1,
+                      color: Color(0xFFE5E7EB),
+                    ),
                     const SizedBox(height: 12),
                     const Text(
                       'อ้างอิง',
@@ -180,18 +190,41 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // ปรับขนาด Chip ให้เหมือนในรูป (มนๆ เล็กๆ)
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12), // มนมากหน่อย
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         label,
         style: const TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w500,
-          fontSize: 11, 
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final String label;
+
+  const _InfoChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: Color(0xFF111827),
         ),
       ),
     );
@@ -209,5 +242,5 @@ Color _statusColor(String status) {
     default:
       return AppColors.darkGrey;
   }
-
 }
+
