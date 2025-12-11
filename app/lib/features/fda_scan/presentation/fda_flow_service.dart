@@ -31,12 +31,16 @@ class FdaFlowService {
       // if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
 
       if (FdaSearchService.isValidResult(map)) {
-        // History Hive
+        // --- IMPROVEMENT: Use product name for history entry ---
+        final productName =
+            map['ชื่อผลิตภัณฑ์(TH)']?.isNotEmpty ?? false ? map['ชื่อผลิตภัณฑ์(TH)'] : map['ชื่อผลิตภัณฑ์(EN)'];
+
         final box = Hive.box<FdaScan>('fda_scans');
         await box.add(
           FdaScan(
             id: const Uuid().v4(),
             fdaNumber: query,
+            scanName: productName, // Use the fetched product name
             scanDate: DateTime.now(),
             fdaData: map,
           ),

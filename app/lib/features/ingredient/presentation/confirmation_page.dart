@@ -32,6 +32,7 @@ class ConfirmationPage extends StatefulWidget {
 class _ConfirmationPageState extends State<ConfirmationPage> {
   final ConfirmationController _vm = ConfirmationController();
   final TextEditingController _addCtrl = TextEditingController();
+  final TextEditingController _scanNameCtrl = TextEditingController(); // Controller for scan name
   final SupabaseQueryService _supabaseQueryService = SupabaseQueryService();
 
   static const _uuid = Uuid();
@@ -46,6 +47,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
   @override
   void dispose() {
     _addCtrl.dispose();
+    _scanNameCtrl.dispose(); // Dispose the new controller
     _vm.dispose();
     super.dispose();
   }
@@ -65,7 +67,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
+                // --- Scan Name Input Field ---
+                _ScanNameField(controller: _scanNameCtrl),
+                const SizedBox(height: 24),
                 Expanded(
                   child: _IngredientList(
                     items: _vm.items,
@@ -153,9 +157,14 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                         );
                       }).toList();
 
+                      // --- Use custom name or default ---
+                      final scanName = _scanNameCtrl.text.isNotEmpty
+                          ? _scanNameCtrl.text
+                          : 'Ingredient Scan ${_historyBox.length + 1}';
+
                       final newScanHistory = ScanHistory(
                         id: _uuid.v4(),
-                        scanName: 'Ingredient Scan ${_historyBox.length + 1}',
+                        scanName: scanName,
                         scanDate: DateTime.now(),
                         imagePath: widget.imagePath,
                         ingredients: ingredientsForHistory,
@@ -228,6 +237,39 @@ class _ConfirmationAppBar extends StatelessWidget
     );
   }
 }
+// --- New Widget for Scan Name Input ---
+class _ScanNameField extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _ScanNameField({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: 'ตั้งชื่อการสแกนนี้ (ไม่บังคับ)',
+        labelStyle: TextStyle(color: appColors.textSecondary),
+        filled: true,
+        fillColor: appColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: appColors.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: appColors.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: appColors.primary, width: 2),
+        ),
+      ),
+    );
+  }
+}
+
 
 class _IngredientList extends StatelessWidget {
   final List<ConfirmItem> items;
