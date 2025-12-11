@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:app/features/scan/presentation/crop_image_screen.dart';
 import 'package:app/features/scan/presentation/widgets/scan_overlay.dart';
 import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
+import 'package:go_router/go_router.dart'; // Import go_router
 
 import '../data/fda_ocr.dart';
 import 'widgets/fda_input_dialog.dart';
@@ -101,6 +102,8 @@ class FdaScanScreen extends StatelessWidget {
   }
 
   void _goToCrop(BuildContext context, Uint8List bytes, String fileName) {
+    // Using context.push from go_router is better here if CropImageScreen is a route
+    // But since it uses MaterialPageRoute, we'll keep it for now.
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => CropImageScreen(
@@ -116,7 +119,8 @@ class FdaScanScreen extends StatelessWidget {
               await _showFdaNotFoundDialog(context, result);
               return;
             }
-
+            
+            // Use the service to navigate
             await FdaFlowService(context).fetchAndNavigate(fda);
           },
         ),
@@ -125,12 +129,21 @@ class FdaScanScreen extends StatelessWidget {
   }
 
   Future<void> _openFdaInputDialog(BuildContext context) async {
+    // The `showFdaInputDialog` returns a value after the dialog is popped.
     final result = await showFdaInputDialog(context);
-    if (result == null || result.trim().isEmpty) {
+
+    // Important: Check if the context is still mounted after an async gap.
+    if (!context.mounted || result == null || result.trim().isEmpty) {
       return;
     }
-    if (!context.mounted) return;
-    await FdaFlowService(context).fetchAndNavigate(result);
+
+    // **THE FIX**: Wait for the current frame to complete before navigating.
+    // This prevents the `!_debugLocked` error by not navigating while a build is in progress.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (context.mounted) {
+        await FdaFlowService(context).fetchAndNavigate(result);
+      }
+    });
   }
 
   Widget _fdaInputButton(BuildContext context) {

@@ -1,3 +1,4 @@
+
 //material app routes using go_router with stateful shell route
 import 'package:app/features/ingredient/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:app/features/fda_scan/presentation/fda_scan_screen.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/history/presentation/history_screen.dart';
 import 'features/news/presentation/news_screen.dart';
+import 'features/settings/presentation/settings_screen.dart';
+import 'features/settings/presentation/appearance_screen.dart';
 
 /// App Router using GoRouter with StatefulShellRoute
 /// -------------------------------------------------
@@ -42,6 +45,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
     // FDA Scan: duplicate flow like Scan
     GoRoute(path: '/scan-fda', builder: (_, __) => const FdaScanScreen()),
+    // Settings page
+    GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
+    // Appearance settings page
+    GoRoute(path: '/settings/appearance', builder: (_, __) => const AppearanceScreen()),
   ],
 );
 

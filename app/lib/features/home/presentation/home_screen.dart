@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:app/features/home/widgets/quick_actions.dart';
 import 'package:app/features/home/widgets/recent_scan_list.dart';
 import 'package:app/features/home/widgets/searchBar.dart';
@@ -21,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: kBackgroundColor,
       // สร้าง Custom App Bar ด้านบน
-      appBar: buildAppBar(),
+      appBar: buildAppBar(context),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,14 +50,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar buildAppBar(BuildContext context) {
     return AppBar(
       elevation: 0,
       backgroundColor: kPrimaryColor,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings, color: Colors.white),
+          onPressed: () {
+            context.go('/settings');
+          },
+        ),
+      ],
     );
   }
 }
-
 
 class HeaderWithSearchBox extends StatelessWidget {
   const HeaderWithSearchBox({
