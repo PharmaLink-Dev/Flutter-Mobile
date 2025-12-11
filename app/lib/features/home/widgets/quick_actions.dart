@@ -10,17 +10,18 @@ class QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final actionCards = [
       ActionCard(
-        gradient: AppGradients.button, // Assuming you want to keep vibrant gradients
+        gradient: isDarkMode ? AppGradients.buttonDark : AppGradients.button,
         icon: FontAwesomeIcons.camera,
         title: "สแกนฉลาก",
         subtitle: "วิเคราะห์ส่วนผสม",
         onTap: () => context.go('/scan'),
       ),
       ActionCard(
-        gradient: AppGradients.actionCardSecondary,
+        gradient: isDarkMode ? AppGradients.actionCardSecondaryDark : AppGradients.actionCardSecondary,
         icon: FontAwesomeIcons.barcode,
         title: "ค้นหา FDA",
         subtitle: "ตรวจสอบใบอนุญาต",

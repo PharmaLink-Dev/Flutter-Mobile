@@ -119,9 +119,6 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
     _overlayEntry = OverlayEntry(
       builder: (context) {
         final appColors = Theme.of(context).extension<AppColorExtension>()!;
-        final isLight = Theme.of(context).brightness == Brightness.light;
-        final overlayBgColor =
-            isLight ? appColors.surface : Color.lerp(appColors.surface, appColors.primary, 0.05)!;
 
         return Positioned.fill(
           child: GestureDetector(
@@ -135,7 +132,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                   offset: const Offset(0, 56),
                   child: Material(
                     elevation: 8,
-                    color: overlayBgColor,
+                    color: appColors.surface,
                     borderRadius: BorderRadius.circular(12),
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height,

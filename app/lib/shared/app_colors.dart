@@ -128,10 +128,23 @@ class AppGradients {
     end: Alignment.bottomRight,
     colors: [Color(0xFF6EE7B7), Color(0xFF17C5A3), Color(0xFF0D9488)],
   );
-  
+
   // A cooler, minty green gradient
   static const LinearGradient actionCardSecondary = LinearGradient(
     colors: [Color(0xFF5EEAD4), Color(0xFF2DD4BF), Color(0xFF14B8A6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // --- Dark Mode Gradients ---
+  static const LinearGradient buttonDark = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF17C5A3), Color(0xFF0FAE8F), Color(0xFF263238)],
+  );
+
+  static const LinearGradient actionCardSecondaryDark = LinearGradient(
+    colors: [Color(0xFF2DD4BF), Color(0xFF14B8A6), Color(0xFF263238)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
