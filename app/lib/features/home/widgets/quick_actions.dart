@@ -20,7 +20,7 @@ class QuickActions extends StatelessWidget {
         onTap: () => context.go('/scan'),
       ),
       ActionCard(
-        gradient: AppGradients.headerOrange, // Assuming you want to keep vibrant gradients
+        gradient: AppGradients.actionCardSecondary,
         icon: FontAwesomeIcons.barcode,
         title: "ค้นหา FDA",
         subtitle: "ตรวจสอบใบอนุญาต",

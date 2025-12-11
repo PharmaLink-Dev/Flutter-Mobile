@@ -122,15 +122,17 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
 class AppGradients {
   AppGradients._();
 
+  // A vibrant, energetic green gradient
   static const LinearGradient button = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF19C7A5), Color(0xFF0BBF95)],
+    colors: [Color(0xFF6EE7B7), Color(0xFF17C5A3), Color(0xFF0D9488)],
   );
   
-  static const LinearGradient headerOrange = LinearGradient(
-    colors: [Color(0xFF3F5AE6), Color(0xFF1F8FDB), Color(0xFF009E8A)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+  // A cooler, minty green gradient
+  static const LinearGradient actionCardSecondary = LinearGradient(
+    colors: [Color(0xFF5EEAD4), Color(0xFF2DD4BF), Color(0xFF14B8A6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 }
