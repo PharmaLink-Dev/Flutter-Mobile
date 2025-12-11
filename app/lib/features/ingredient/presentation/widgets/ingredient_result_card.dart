@@ -59,9 +59,17 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
       explanationText = 'ไม่มีรายละเอียดข้อมูล';
     }
 
+    final cardColor = isLight
+        ? appColors.surface
+        : Color.lerp(appColors.surface, appColors.primary, 0.1)!;
+
+    final expandedColor = isLight
+        ? const Color(0xFFF9FAFB)
+        : Color.lerp(appColors.background, appColors.primary, 0.05)!;
+
     return Container(
       decoration: BoxDecoration(
-        color: appColors.surface,
+        color: cardColor,
         border: Border.all(color: appColors.outline),
         borderRadius: BorderRadius.circular(12),
         boxShadow: isLight
@@ -131,7 +139,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
             secondChild: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                color: isLight ? const Color(0xFFF9FAFB) : appColors.background,
+                color: expandedColor,
                 borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(12),
                 ),

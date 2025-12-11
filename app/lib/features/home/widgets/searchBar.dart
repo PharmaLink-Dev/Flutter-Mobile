@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/presentation/widgets/ingredient_result_card.dart';
@@ -117,6 +118,11 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
+        final appColors = Theme.of(context).extension<AppColorExtension>()!;
+        final isLight = Theme.of(context).brightness == Brightness.light;
+        final overlayBgColor =
+            isLight ? appColors.surface : Color.lerp(appColors.surface, appColors.primary, 0.05)!;
+
         return Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -129,6 +135,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                   offset: const Offset(0, 56),
                   child: Material(
                     elevation: 8,
+                    color: overlayBgColor,
                     borderRadius: BorderRadius.circular(12),
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height,
@@ -164,7 +171,8 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = widget.primaryColor;
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
 
     return CompositedTransformTarget(
       link: _layerLink,
@@ -174,15 +182,17 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
         padding: const EdgeInsets.only(left: 20, right: 10),
         height: 54,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              offset: const Offset(0, 10),
-              blurRadius: 50,
-              color: primaryColor.withOpacity(0.23),
-            ),
-          ],
+          boxShadow: isLight
+              ? [
+                  BoxShadow(
+                    offset: const Offset(0, 10),
+                    blurRadius: 50,
+                    color: widget.primaryColor.withOpacity(0.23),
+                  ),
+                ]
+              : [],
         ),
         child: Row(
           children: <Widget>[
@@ -191,10 +201,11 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                 controller: _controller,
                 onChanged: _onChanged,
                 textInputAction: TextInputAction.search,
+                style: TextStyle(color: appColors.text),
                 decoration: InputDecoration(
                   hintText: "Search",
                   hintStyle: TextStyle(
-                    color: primaryColor.withOpacity(0.5),
+                    color: appColors.textSecondary,
                   ),
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -208,7 +219,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    primaryColor.withOpacity(0.7),
+                    widget.primaryColor.withOpacity(0.7),
                   ),
                 ),
               )
@@ -216,7 +227,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
               IconButton(
                 icon: Icon(
                   Icons.search,
-                  color: primaryColor.withOpacity(0.5),
+                  color: appColors.textSecondary,
                 ),
                 onPressed: () => _triggerSearch(_controller.text),
               ),
