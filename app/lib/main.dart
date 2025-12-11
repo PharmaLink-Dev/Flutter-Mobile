@@ -4,6 +4,7 @@ import 'package:app/features/history/data/history_ingredient.dart';
 import 'package:app/features/history/data/scan_history.dart';
 import 'package:app/features/settings/application/theme_provider.dart';
 import 'package:app/service/supabase_init.dart';
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -47,11 +48,17 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.light,
         colorSchemeSeed: Colors.green,
+        extensions: const <ThemeExtension<dynamic>>[
+          AppColorExtension.light,
+        ],
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorSchemeSeed: Colors.green,
+        extensions: const <ThemeExtension<dynamic>>[
+          AppColorExtension.dark,
+        ],
       ),
       themeMode: themeProvider.themeMode,
     );

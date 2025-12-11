@@ -101,6 +101,9 @@ class _ShellScaffoldState extends State<ShellScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    // NEW: Get theme-aware colors
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     // This part is crucial for correctly highlighting the BottomNavigationBarItem.
     // We need to map the CURRENT branch index back to the correct TAB index.
     final int currentIndex;
@@ -124,8 +127,9 @@ class _ShellScaffoldState extends State<ShellScaffold> {
         // Use the correctly calculated index here.
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
+        // CHANGED: Use colors from the theme extension
+        selectedItemColor: appColors.primary,
+        unselectedItemColor: appColors.textSecondary,
         onTap: _onTap,
         items: const [
           BottomNavigationBarItem(

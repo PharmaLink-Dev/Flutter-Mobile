@@ -1,11 +1,15 @@
+
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../../../shared/app_colors.dart';
 
 void showWarningDialog(
   BuildContext context, {
   required List<String> riskyIngredients,
   String? customMessage,
 }) {
+  // NEW: Get theme-aware colors
+  final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
   showDialog(
     context: context,
     builder: (context) {
@@ -14,16 +18,17 @@ void showWarningDialog(
         title: Center(
           child: Column(
             children: [
-              const Icon(
+              Icon(
                 Icons.warning_amber_rounded,
-                color: AppColors.red,
+                // CHANGED: Use error color from theme
+                color: appColors.error,
                 size: 80,
               ),
               const SizedBox(height: 10),
-              Text(
+              const Text(
                 'อันตรายสำหรับผู้ป่วยโรคไต!',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -38,9 +43,10 @@ void showWarningDialog(
             const SizedBox(height: 5),
             Text(
               riskyIngredients.join(', '),
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AppColors.red,
+                // CHANGED: Use error color from theme
+                color: appColors.error,
               ),
             ),
             const SizedBox(height: 10),
@@ -56,10 +62,13 @@ void showWarningDialog(
           Center(
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
+              // CHANGED: Use theme-aware colors for the button
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColors.error,
+                foregroundColor: Colors.white, // White text is usually readable on red
+              ),
               child: const Text(
                 'ดูรายละเอียด',
-                style: TextStyle(color: Colors.white),
               ),
             ),
           ),

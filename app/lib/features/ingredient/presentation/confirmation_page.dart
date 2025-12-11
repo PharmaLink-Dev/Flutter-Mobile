@@ -1,3 +1,4 @@
+
 import 'package:app/features/ingredient/data/ingredient.dart';
 import 'package:app/features/ingredient/domain/confirmation_controller.dart';
 import 'package:app/features/ingredient/presentation/result_Page.dart';
@@ -51,156 +52,142 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     return AnimatedBuilder(
       animation: _vm,
       builder: (context, _) {
         return Scaffold(
+          backgroundColor: appColors.background,
           appBar: const _ConfirmationAppBar(),
-          body: Container(
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: _IngredientList(
-                      items: _vm.items,
-                      onToggle: _vm.toggleAt,
-                      onRemove: _vm.removeAt,
-                    ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Expanded(
+                  child: _IngredientList(
+                    items: _vm.items,
+                    onToggle: _vm.toggleAt,
+                    onRemove: _vm.removeAt,
                   ),
-                  const SizedBox(height: 16),
-                  _AddSection(
-                    controller: _addCtrl,
-                    onAdd: () {
-                      _vm.addManual(_addCtrl.text);
-                      _addCtrl.clear();
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _ConfirmationFooter(
-                    isConfirmed: _vm.isConfirmed,
-                    canAnalyze: _vm.canAnalyze,
-                    onConfirmChanged: _vm.setConfirmed,
-                    onAnalyze: () async {
-                      final selected = _vm.items
-                          .where((it) => it.checked)
-                          .map((it) => it.ingredient)
-                          .toList();
+                ),
+                const SizedBox(height: 16),
+                _AddSection(
+                  controller: _addCtrl,
+                  onAdd: () {
+                    _vm.addManual(_addCtrl.text);
+                    _addCtrl.clear();
+                  },
+                ),
+                const SizedBox(height: 16),
+                _ConfirmationFooter(
+                  isConfirmed: _vm.isConfirmed,
+                  canAnalyze: _vm.canAnalyze,
+                  onConfirmChanged: _vm.setConfirmed,
+                  onAnalyze: () async {
+                    final selected = _vm.items
+                        .where((it) => it.checked)
+                        .map((it) => it.ingredient)
+                        .toList();
 
-                      // ดึงเฉพาะชื่อไป query Supabase
-                      final searchTerms = selected.map((e) => e.name).toList();
+                    final searchTerms = selected.map((e) => e.name).toList();
 
-                      // แสดง loading ระหว่างเรียก Supabase
-                      showDialog<void>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => const Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(
-                              AppColors.primary,
-                            ),
+                    showDialog<void>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(
+                            appColors.primary,
+                          ),
+                        ),
+                      ),
+                    );
+
+                    try {
+                      final results = await _supabaseQueryService
+                          .searchInDatabase(searchTerms);
+
+                      if (!context.mounted) return;
+
+                      Navigator.of(context).pop();
+
+                      final List<Ingredient> mergedIngredients = [];
+
+                      if (results.isNotEmpty) {
+                        for (final ocrItem in selected) {
+                          Ingredient? dbMatch;
+                          for (final dbItem in results) {
+                            final dbKey = (dbItem.searchTerm ?? dbItem.name)
+                                .trim()
+                                .toLowerCase();
+                            final ocrKey =
+                                ocrItem.name.trim().toLowerCase();
+                            if (dbKey == ocrKey) {
+                              dbMatch = dbItem;
+                              break;
+                            }
+                          }
+
+                          if (dbMatch != null) {
+                            mergedIngredients.add(
+                              ocrItem.copyWith(
+                                status: dbMatch.status,
+                                description: dbMatch.description,
+                                riskLevel: dbMatch.riskLevel,
+                              ),
+                            );
+                          }
+                        }
+                      }
+
+                      final List<HistoryIngredient> ingredientsForHistory =
+                          mergedIngredients.map((ing) {
+                        return HistoryIngredient(
+                          name: ing.name,
+                          status: ing.status,
+                          riskLevel: ing.riskLevel,
+                          description: ing.description,
+                        );
+                      }).toList();
+
+                      final newScanHistory = ScanHistory(
+                        id: _uuid.v4(),
+                        scanName: 'Ingredient Scan ${_historyBox.length + 1}',
+                        scanDate: DateTime.now(),
+                        imagePath: widget.imagePath,
+                        ingredients: ingredientsForHistory,
+                        imageBytes: widget.scannedImageBytes,
+                      );
+                      await _historyBox.add(newScanHistory);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ResultPage(
+                            ingredients: mergedIngredients,
+                            imageBytes: widget.scannedImageBytes,
+                            imagePath: widget.imagePath,
                           ),
                         ),
                       );
+                    } catch (e) {
+                      if (!context.mounted) return;
 
-                      try {
-                        // ได้ผลลัพธ์จาก Supabase (มีเฉพาะตัวที่เจอ)
-                        final results = await _supabaseQueryService
-                            .searchInDatabase(searchTerms);
-
-                        if (!context.mounted) return;
-
-                        // ปิด loading
-                        Navigator.of(context).pop();
-
-                        // ---------------------------------------------------------
-                        // ผสานข้อมูล: แสดงเฉพาะรายการที่ "พบ" ในฐาน (status = found)
-                        // โดยยึดชื่อ/mg จาก OCR แล้ว enrich ด้วยข้อมูลจาก DB
-                        // ถ้าไม่พบเลย -> mergedIngredients จะเป็นลิสต์ว่าง
-                        // ---------------------------------------------------------
-                        final List<Ingredient> mergedIngredients = [];
-
-                        if (results.isNotEmpty) {
-                          for (final ocrItem in selected) {
-                            // จับคู่แบบ case-insensitive โดยใช้ searchTerm จาก DB เป็นหลัก
-                            Ingredient? dbMatch;
-                            for (final dbItem in results) {
-                              final dbKey = (dbItem.searchTerm ?? dbItem.name)
-                                  .trim()
-                                  .toLowerCase();
-                              final ocrKey =
-                                  ocrItem.name.trim().toLowerCase();
-                              if (dbKey == ocrKey) {
-                                dbMatch = dbItem;
-                                break;
-                              }
-                            }
-
-                            if (dbMatch != null) {
-                              // ใช้ชื่อ / mg เดิมจาก OCR แต่เติม status / description / riskLevel จาก DB
-                              mergedIngredients.add(
-                                ocrItem.copyWith(
-                                  status: dbMatch.status,
-                                  description: dbMatch.description,
-                                  riskLevel: dbMatch.riskLevel,
-                                ),
-                              );
-                            }
-                          }
-                        }
-
-                        final List<HistoryIngredient> ingredientsForHistory =
-                            mergedIngredients.map((ing) {
-                          return HistoryIngredient(
-                            name: ing.name,
-                            status: ing.status,
-                            riskLevel: ing.riskLevel,
-                            description: ing.description,
-                          );
-                        }).toList();
-
-                        final newScanHistory = ScanHistory(
-                          id: _uuid.v4(),
-                          scanName: 'Ingredient Scan ${_historyBox.length + 1}',
-                          scanDate: DateTime.now(),
-                          imagePath: widget.imagePath,
-                          ingredients: ingredientsForHistory,
-                          imageBytes: widget.scannedImageBytes,
-                        );
-                        print(
-                          'Bytes length to save: ${widget.scannedImageBytes?.lengthInBytes ?? 0}',
-                        );
-                        await _historyBox.add(newScanHistory);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ResultPage(
-                              ingredients: mergedIngredients,
-                              imageBytes: widget.scannedImageBytes,
-                              imagePath: widget.imagePath,
-                            ),
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล',
                           ),
-                        );
-                      } catch (e) {
-                        if (!context.mounted) return;
-
-                        Navigator.of(context).pop(); // ปิด loading
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
             ),
           ),
         );
@@ -218,20 +205,22 @@ class _ConfirmationAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     return AppBar(
-      backgroundColor: AppColors.primary,
+      backgroundColor: appColors.primary,
       elevation: 0,
       centerTitle: true,
       title: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: appColors.surface, // Use surface color for the chip
           borderRadius: BorderRadius.circular(24),
         ),
-        child: const Text(
+        child: Text(
           'ตรวจสอบผลการสแกน',
           style: TextStyle(
-            color: AppColors.primaryDark,
+            color: appColors.primaryDark, // Contrasting text on surface
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -253,11 +242,13 @@ class _IngredientList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'ไม่พบรายการส่วนผสมจากการสแกน',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: appColors.textSecondary),
         ),
       );
     }
@@ -269,7 +260,7 @@ class _IngredientList extends StatelessWidget {
         final item = items[index];
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: appColors.surface,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
@@ -279,7 +270,7 @@ class _IngredientList extends StatelessWidget {
                 Checkbox(
                   value: item.checked,
                   onChanged: (v) => onToggle(index, v ?? false),
-                  activeColor: AppColors.primary,
+                  activeColor: appColors.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -288,12 +279,12 @@ class _IngredientList extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.ingredient.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600, color: appColors.text),
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  color: AppColors.primary,
+                  color: appColors.textSecondary, // Muted color for the close icon
                   tooltip: 'ลบ',
                   onPressed: () => onRemove(index),
                 ),
@@ -314,12 +305,14 @@ class _AddSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'เพิ่มหรือแก้ไขส่วนผสม',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600, color: appColors.text),
         ),
         const SizedBox(height: 8),
         _AddBar(controller: controller, onAdd: onAdd),
@@ -343,6 +336,9 @@ class _ConfirmationFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final onSurfaceTextColor = Theme.of(context).colorScheme.onSurface;
+
     return Column(
       children: [
         Row(
@@ -350,11 +346,11 @@ class _ConfirmationFooter extends StatelessWidget {
             Checkbox(
               value: isConfirmed,
               onChanged: (v) => onConfirmChanged(v ?? false),
-              activeColor: AppColors.primary,
+              activeColor: appColors.primary,
             ),
             const SizedBox(width: 4),
-            const Expanded(
-              child: Text('ฉันขอยืนยันว่าข้อมูลทั้งหมดนั้นถูกต้อง'),
+            Expanded(
+              child: Text('ฉันขอยืนยันว่าข้อมูลทั้งหมดนั้นถูกต้อง', style: TextStyle(color: onSurfaceTextColor)),
             ),
           ],
         ),
@@ -365,8 +361,9 @@ class _ConfirmationFooter extends StatelessWidget {
             onPressed: canAnalyze ? onAnalyze : null,
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 56),
-              backgroundColor: canAnalyze ? AppColors.primary : AppColors.grey,
-              foregroundColor: Colors.white,
+              backgroundColor: appColors.primary,
+              disabledBackgroundColor: appColors.textSecondary.withOpacity(0.5),
+              foregroundColor: appColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -390,6 +387,8 @@ class _AddBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     return Row(
       children: [
         Expanded(
@@ -400,7 +399,7 @@ class _AddBar extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'เพิ่มส่วนผสมเอง...',
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: appColors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -416,8 +415,8 @@ class _AddBar extends StatelessWidget {
         ElevatedButton(
           onPressed: onAdd,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            backgroundColor: appColors.primary,
+            foregroundColor: appColors.surface,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

@@ -122,12 +122,11 @@ class _ScanOverlayState extends State<ScanOverlay>
       height: 3,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(2),
-        gradient: AppGradients.scanLabel,
+        gradient: AppGradients.button, // FIX: Use button gradient
         boxShadow: const [
           BoxShadow(color: Color(0x6617C5A3), blurRadius: 8, spreadRadius: 1),
         ],
       ),
     );
   }
-  
 }

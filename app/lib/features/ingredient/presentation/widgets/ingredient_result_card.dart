@@ -19,12 +19,15 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     final ingredient = widget.ingredient;
     final displayName = (ingredient.searchTerm != null &&
             ingredient.searchTerm!.trim().isNotEmpty)
         ? ingredient.searchTerm!
         : ingredient.name;
-    final statusColor = _statusColor(ingredient.status);
+    final statusColor = _statusColor(ingredient.status, appColors);
     final statusLabel =
         ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
 
@@ -58,16 +61,18 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: appColors.surface,
+        border: Border.all(color: appColors.outline),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: isLight
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -90,10 +95,10 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                   Expanded(
                     child: Text(
                       displayName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
-                        color: Color(0xFF1F2937),
+                        color: appColors.text,
                         height: 1.4,
                       ),
                     ),
@@ -114,7 +119,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                     _expanded
                         ? Icons.keyboard_arrow_up_rounded
                         : Icons.keyboard_arrow_down_rounded,
-                    color: const Color(0xFF6B7280),
+                    color: appColors.textSecondary,
                     size: 20,
                   ),
                 ],
@@ -125,9 +130,9 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
             firstChild: const SizedBox.shrink(),
             secondChild: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF9FAFB),
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: isLight ? const Color(0xFFF9FAFB) : appColors.background,
+                borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(12),
                 ),
               ),
@@ -137,34 +142,34 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                 children: [
                   Text(
                     explanationText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       height: 1.6,
-                      color: Color(0xFF4B5563),
+                      color: appColors.text,
                     ),
                   ),
                   if (referenceText.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    const Divider(
+                    Divider(
                       height: 1,
-                      color: Color(0xFFE5E7EB),
+                      color: appColors.outline,
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'อ้างอิง',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF374151),
+                        color: appColors.text,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       referenceText,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         height: 1.4,
-                        color: Color(0xFF6B7280),
+                        color: appColors.textSecondary,
                       ),
                     ),
                   ],
@@ -202,7 +207,7 @@ class _StatusChip extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
-          color: Colors.white,
+          color: Colors.white, // White provides good contrast on status colors
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
@@ -218,6 +223,7 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -225,25 +231,25 @@ class _InfoChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w400,
-          color: Color(0xFF111827),
+          color: appColors.text,
         ),
       ),
     );
   }
 }
 
-Color _statusColor(String status) {
+Color _statusColor(String status, AppColorExtension colors) {
   switch (status.trim()) {
     case 'ปลอดภัย':
-      return AppColors.success;
+      return colors.success;
     case 'ควรระวัง':
-      return AppColors.warning;
+      return colors.warning;
     case 'อันตราย':
-      return AppColors.error;
+      return colors.error;
     default:
-      return AppColors.darkGrey;
+      return colors.neutral;
   }
 }

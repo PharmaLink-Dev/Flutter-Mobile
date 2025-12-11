@@ -1,9 +1,10 @@
+
 import 'dart:typed_data';
+import 'package:app/shared/app_colors.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
-import 'package:app/shared/app_colors.dart';
 import 'aurora_bg.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -76,10 +77,11 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
         _initializing = false;
         _cameraError = errorText;
       });
+      final appColors = Theme.of(context).extension<AppColorExtension>()!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorText),
-          backgroundColor: Colors.red,
+          backgroundColor: appColors.error,
         ),
       );
     }
@@ -118,10 +120,11 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
         _initializing = false;
         _cameraError = errorText;
       });
+      final appColors = Theme.of(context).extension<AppColorExtension>()!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorText),
-          backgroundColor: Colors.red,
+          backgroundColor: appColors.error,
         ),
       );
     }
@@ -230,7 +233,7 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
     return Container(
       height: 54,
       decoration: BoxDecoration(
-        gradient: AppGradients.scanLabel,
+        gradient: AppGradients.button, // This gradient is kept for vibrancy
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
           BoxShadow(color: Colors.black38, blurRadius: 12, offset: Offset(0, 4)),
@@ -272,13 +275,18 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
   }
 
   Widget _buildUploadButton() {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return Container(
       height: 54,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white24),
-        gradient: const LinearGradient(
-          colors: [Color(0x335E6A75), Color(0x115E6A75)],
+        border: Border.all(color: isLight ? Colors.white24 : appColors.outline),
+        gradient: LinearGradient(
+          colors: isLight 
+              ? const [Color(0x335E6A75), Color(0x115E6A75)] 
+              : [appColors.surface.withOpacity(0.8), appColors.surface.withOpacity(0.5)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -288,13 +296,16 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: _openingCamera ? null : _pickFromGallery,
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.upload, color: Colors.white),
-                SizedBox(width: 8),
-                Text('อัพโหลดรูปภาพ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                Icon(Icons.upload, color: appColors.text),
+                const SizedBox(width: 8),
+                Text(
+                  'อัพโหลดรูปภาพ', 
+                  style: TextStyle(color: appColors.text, fontWeight: FontWeight.w600),
+                ),
               ],
             ),
           ),
@@ -305,9 +316,12 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
 
   Widget _buildPreview() {
     if (_initializing) {
-      return const ColoredBox(
-        color: AppColors.background,
-        child: Center(child: CircularProgressIndicator()),
+      // NEW: Get theme-aware colors
+      final appColors = Theme.of(context).extension<AppColorExtension>()!;
+      return ColoredBox(
+        // CHANGED: Use background color from theme
+        color: appColors.background,
+        child: const Center(child: CircularProgressIndicator()),
       );
     }
     final c = _controller;
@@ -334,6 +348,9 @@ class _RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return InkResponse(
       onTap: onTap,
       customBorder: const CircleBorder(),
@@ -343,7 +360,7 @@ class _RoundIconButton extends StatelessWidget {
         height: 38,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Color(0x335E6A75),
+          color: isLight ? const Color(0x335E6A75) : appColors.surface.withOpacity(0.5),
         ),
         child: Icon(icon, color: Colors.white),
       ),
@@ -366,10 +383,13 @@ class _PlainHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final isLight = Theme.of(context).brightness == Brightness.light;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0x335E6A75),
+        color: isLight ? const Color(0x335E6A75) : appColors.surface.withOpacity(0.5),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(

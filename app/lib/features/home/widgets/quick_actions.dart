@@ -1,23 +1,26 @@
+
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:app/shared/app_colors.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     final actionCards = [
       ActionCard(
-        gradient: AppGradients.scanLabel,
+        gradient: AppGradients.button, // Assuming you want to keep vibrant gradients
         icon: FontAwesomeIcons.camera,
         title: "สแกนฉลาก",
         subtitle: "วิเคราะห์ส่วนผสม",
         onTap: () => context.go('/scan'),
       ),
       ActionCard(
-        gradient: AppGradients.fdaNumber,
+        gradient: AppGradients.headerOrange, // Assuming you want to keep vibrant gradients
         icon: FontAwesomeIcons.barcode,
         title: "ค้นหา FDA",
         subtitle: "ตรวจสอบใบอนุญาต",
@@ -28,23 +31,21 @@ class QuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 10),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             "Quick Action",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: AppColors.text,
+              // CHANGED: Use text color from theme
+              color: appColors.text,
             ),
           ),
         ),
-        // Use LayoutBuilder to create a fully responsive card size
         LayoutBuilder(
           builder: (context, constraints) {
             const double spacing = 12.0;
-            // Calculate the ideal card width based on available space,
-            // then clamp it to our desired min/max size.
             final double cardWidth = ((constraints.maxWidth - spacing) / 2).clamp(140.0, 165.0);
 
             return Center(
@@ -53,7 +54,6 @@ class QuickActions extends StatelessWidget {
                 runSpacing: spacing,
                 alignment: WrapAlignment.center,
                 children: actionCards.map((card) {
-                  // Apply the calculated width to each card.
                   return SizedBox(
                     width: cardWidth,
                     child: card,
@@ -101,31 +101,39 @@ class _ActionCardState extends State<ActionCard> {
   @override
   Widget build(BuildContext context) {
     final scale = _isTapped ? 0.95 : 1.0;
+    // NEW: Get theme-aware colors
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
+    // For content on a colorful gradient, a static white or a highly contrasting
+    // color from the theme is usually best. `appColors.surface` is often white
+    // in light mode and a dark color in dark mode. For gradients, we might
+    // want to stick with a light color for readability in both themes.
+    final Color onGradientColor = Colors.white;
 
     return AnimatedScale(
       scale: scale,
       duration: const Duration(milliseconds: 120),
       curve: Curves.easeOut,
-      // The ConstrainedBox is removed from here to allow dynamic sizing.
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: _handleTap,
           borderRadius: BorderRadius.circular(20),
-          splashColor: Colors.white24,
-          highlightColor: Colors.white10,
+          splashColor: onGradientColor.withOpacity(0.2),
+          highlightColor: onGradientColor.withOpacity(0.1),
           child: Container(
-            constraints: const BoxConstraints(minHeight: 140), // Ensure a nice aspect ratio
+            constraints: const BoxConstraints(minHeight: 140),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: widget.gradient,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
-                  color: AppColors.overlay,
+                  // CHANGED: Use a theme-aware shadow color or a semi-transparent black
+                  color: Colors.black.withOpacity(0.15),
                   blurRadius: 10,
-                  offset: Offset(0, 5),
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
@@ -137,16 +145,16 @@ class _ActionCardState extends State<ActionCard> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(widget.icon, color: Colors.white, size: showText ? 28 : 32),
+                    Icon(widget.icon, color: onGradientColor, size: showText ? 28 : 32),
                     if (showText) ...[
                       const SizedBox(height: 12),
                       Text(
                         widget.title,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: onGradientColor,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -155,7 +163,7 @@ class _ActionCardState extends State<ActionCard> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.9),
+                          color: onGradientColor.withOpacity(0.9),
                         ),
                       ),
                     ],

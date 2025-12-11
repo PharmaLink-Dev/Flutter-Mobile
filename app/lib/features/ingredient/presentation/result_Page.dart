@@ -1,3 +1,4 @@
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -61,6 +62,7 @@ class _ResultPageState extends State<ResultPage> {
 
   Widget _buildImageHeader() {
     if (!_hasImage) return const SizedBox.shrink();
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
 
     Widget imageWidget;
     if (widget.imageBytes != null && widget.imageBytes!.isNotEmpty) {
@@ -75,7 +77,7 @@ class _ResultPageState extends State<ResultPage> {
         errorBuilder: (context, error, stackTrace) {
           return Icon(
             Icons.image_not_supported,
-            color: Colors.grey[400],
+            color: appColors.textSecondary,
             size: 48,
           );
         },
@@ -108,6 +110,8 @@ class _ResultPageState extends State<ResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     // จัดเรียงส่วนผสมตามระดับความเสี่ยง: อันตราย (red) > ระมัดระวัง (yellow) > ปลอดภัย (green / อื่น ๆ)
     final ingredients = [...widget.ingredients]..sort((a, b) {
         int score(String level) {
@@ -130,110 +134,73 @@ class _ResultPageState extends State<ResultPage> {
       });
 
     // หา index สุดท้ายของแต่ละโซนความเสี่ยง
-    int lastRedIndex = -1;
-    int lastYellowIndex = -1;
-    for (var i = 0; i < ingredients.length; i++) {
-      final level = ingredients[i].riskLevel.toLowerCase();
-      if (level == 'red') {
-        lastRedIndex = i;
-      } else if (level == 'yellow') {
-        lastYellowIndex = i;
-      }
-    }
+    int lastRedIndex = ingredients.lastIndexWhere((ing) => ing.riskLevel.toLowerCase() == 'red');
+    int lastYellowIndex = ingredients.lastIndexWhere((ing) => ing.riskLevel.toLowerCase() == 'yellow');
 
     return Scaffold(
+      backgroundColor: appColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: appColors.primary,
         centerTitle: true,
         elevation: 0,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: appColors.surface,
             borderRadius: BorderRadius.circular(24),
           ),
-          child: const Text(
+          child: Text(
             'ผลการวิเคราะห์ส่วนผสม',
             style: TextStyle(
-              color: AppColors.primaryDark,
+              color: appColors.primaryDark,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
       ),
-      body: Container(
-        color: Colors.white,
-        child: ingredients.isEmpty
-            ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Text(
-                    'ไม่พบข้อมูลส่วนผสมที่ตรงกับฐานข้อมูล',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                    ),
+      body: ingredients.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'ไม่พบข้อมูลส่วนผสมที่ตรงกับฐานข้อมูล',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: appColors.textSecondary,
+                    fontSize: 16,
                   ),
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: ingredients.length + (_hasImage ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (_hasImage) {
-                    if (index == 0) {
-                      return _buildImageHeader();
-                    }
-                    final ingredientIndex = index - 1;
-                    final ingredient = ingredients[ingredientIndex];
-
-                    final isZoneBoundary = ingredientIndex == lastRedIndex ||
-                        ingredientIndex == lastYellowIndex;
-
-                    return Column(
-                      children: [
-                        IngredientResultCard(
-                          ingredient: ingredient,
-                        ),
-                        if (isZoneBoundary &&
-                            ingredientIndex != ingredients.length - 1)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
-                            child: Divider(
-                              color: Colors.grey,
-                              thickness: 1,
-                              height: 2,
-                            ),
-                          ),
-                      ],
-                    );
-                  } else {
-                    final ingredient = ingredients[index];
-
-                    final isZoneBoundary =
-                        index == lastRedIndex || index == lastYellowIndex;
-
-                    return Column(
-                      children: [
-                        IngredientResultCard(
-                          ingredient: ingredient,
-                        ),
-                        if (isZoneBoundary && index != ingredients.length - 1)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(
-                              color: Colors.white70,
-                              thickness: 1,
-                              height: 1,
-                            ),
-                          ),
-                      ],
-                    );
-                  }
-                },
               ),
-      ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: ingredients.length + (_hasImage ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (_hasImage) {
+                  if (index == 0) {
+                    return _buildImageHeader();
+                  }
+                  index -= 1; // Adjust index to account for the header
+                }
+
+                final ingredient = ingredients[index];
+                final isZoneBoundary =
+                    index == lastRedIndex || index == lastYellowIndex;
+
+                return Column(
+                  children: [
+                    IngredientResultCard(
+                      ingredient: ingredient,
+                    ),
+                    if (isZoneBoundary && index != ingredients.length - 1)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Divider(thickness: 1),
+                      ),
+                  ],
+                );
+              },
+            ),
     );
   }
 }
