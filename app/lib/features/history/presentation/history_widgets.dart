@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:app/features/history/data/fda_scan.dart';
 import 'package:app/features/history/data/scan_history.dart';
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'history_utils.dart';
 
@@ -19,10 +20,11 @@ class HistoryToggleButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -67,14 +69,13 @@ class _ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected
-              ? HistoryConstants.primaryGreen
-              : Colors.transparent,
+          color: isSelected ? appColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
@@ -83,7 +84,7 @@ class _ToggleButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected ? Colors.black87 : Colors.black54,
+              color: isSelected ? Colors.white : appColors.textSecondary,
             ),
           ),
         ),
@@ -102,15 +103,16 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 80, color: Colors.grey[300]),
+          Icon(Icons.history, size: 80, color: appColors.textSecondary.withOpacity(0.5)),
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 16, color: appColors.textSecondary),
           ),
         ],
       ),
@@ -128,6 +130,7 @@ class TimeGroupHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       child: Text(
@@ -135,7 +138,7 @@ class TimeGroupHeader extends StatelessWidget {
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Colors.grey[700],
+          color: appColors.textSecondary,
           letterSpacing: 0.5,
         ),
       ),
@@ -162,10 +165,11 @@ class IngredientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -184,7 +188,7 @@ class IngredientCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: appColors.error,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.delete, color: Colors.white, size: 28),
@@ -193,38 +197,40 @@ class IngredientCard extends StatelessWidget {
             return await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
+                backgroundColor: appColors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                title: const Text(
+                title: Text(
                   'Delete Item?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: appColors.text),
                 ),
-                content: const Text(
+                content: Text(
                   'Are you sure you want to delete this scan?',
+                  style: TextStyle(color: appColors.textSecondary),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     child: Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.grey[700]),
+                      style: TextStyle(color: appColors.textSecondary),
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.red.withOpacity(0.1),
+                      backgroundColor: appColors.error.withOpacity(0.1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'Delete',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: appColors.error,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -253,7 +259,7 @@ class IngredientCard extends StatelessWidget {
                         height: 70,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          color: Colors.grey[200],
+                          color: appColors.background,
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -268,7 +274,7 @@ class IngredientCard extends StatelessWidget {
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.image_not_supported,
-                                      color: Colors.grey[400],
+                                      color: appColors.textSecondary.withOpacity(0.5),
                                       size: 32,
                                     );
                                   },
@@ -286,10 +292,11 @@ class IngredientCard extends StatelessWidget {
                             item.ingredients.map((e) => e.name).join(', '),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                               height: 1.3,
+                              color: appColors.text,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -298,14 +305,14 @@ class IngredientCard extends StatelessWidget {
                               Icon(
                                 Icons.access_time,
                                 size: 14,
-                                color: Colors.grey[500],
+                                color: appColors.textSecondary,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 DateFormatter.formatTime(item.scanDate),
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey[600],
+                                  color: appColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -330,8 +337,8 @@ class IngredientCard extends StatelessWidget {
                                 ? Icons.favorite
                                 : Icons.favorite_border,
                             color: item.isFavorite
-                                ? Colors.red
-                                : Colors.grey[400],
+                                ? appColors.error
+                                : appColors.textSecondary.withOpacity(0.7),
                             size: 24,
                           ),
                         ),
@@ -367,12 +374,13 @@ class FdaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -391,47 +399,50 @@ class FdaCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: appColors.error,
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.delete, color: Colors.white, size: 28),
           ),
           confirmDismiss: (direction) async {
+            // Re-using the same dialog logic from IngredientCard
             return await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
+                backgroundColor: appColors.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                title: const Text(
+                title: Text(
                   'Delete Item?',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: appColors.text),
                 ),
-                content: const Text(
+                content: Text(
                   'Are you sure you want to delete this scan?',
+                  style: TextStyle(color: appColors.textSecondary),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     child: Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.grey[700]),
+                      style: TextStyle(color: appColors.textSecondary),
                     ),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.red.withOpacity(0.1),
+                      backgroundColor: appColors.error.withOpacity(0.1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
                         'Delete',
                         style: TextStyle(
-                          color: Colors.red,
+                          color: appColors.error,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -457,12 +468,12 @@ class FdaCard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: HistoryConstants.primaryGreen.withOpacity(0.2),
+                        color: appColors.primary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.verified_user,
-                        color: HistoryConstants.darkGreen,
+                        color: appColors.primary,
                         size: 32,
                       ),
                     ),
@@ -474,10 +485,11 @@ class FdaCard extends StatelessWidget {
                         children: [
                           Text(
                             item.scanName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               height: 1.3,
+                              color: appColors.text,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -487,7 +499,7 @@ class FdaCard extends StatelessWidget {
                             productName,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: appColors.textSecondary,
                               height: 1.3,
                             ),
                             maxLines: 1,
@@ -499,14 +511,14 @@ class FdaCard extends StatelessWidget {
                               Icon(
                                 Icons.access_time,
                                 size: 14,
-                                color: Colors.grey[500],
+                                color: appColors.textSecondary,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 DateFormatter.formatTime(item.scanDate),
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey[600],
+                                  color: appColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -531,8 +543,8 @@ class FdaCard extends StatelessWidget {
                                 ? Icons.favorite
                                 : Icons.favorite_border,
                             color: item.isFavorite
-                                ? Colors.red
-                                : Colors.grey[400],
+                                ? appColors.error
+                                : appColors.textSecondary.withOpacity(0.7),
                             size: 24,
                           ),
                         ),

@@ -1,3 +1,4 @@
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -133,23 +134,25 @@ class RecentScanList extends StatelessWidget {
   }
 
   Widget _buildTitleRow(BuildContext context, String title) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
+          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18, color: appColors.text),
         ),
         TextButton(
           // *ใช้ GoRouter เพื่อนำทางไปยังหน้า History หลัก*
           onPressed: () => context.go('/history'),
-          child: const Text('See All'),
+          child: Text('See All', style: TextStyle(color: appColors.primary)),
         ),
       ],
     );
   }
 
   Widget _buildEmptyState(BuildContext context, String title) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,7 +163,7 @@ class RecentScanList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Text(
               'No recent ${title.toLowerCase()}',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: appColors.textSecondary),
             ),
           ),
         ),
@@ -180,7 +183,7 @@ class _IngredientCardRecent extends StatelessWidget {
   const _IngredientCardRecent({required this.item, required this.onTap});
 
   // Helper function เพื่อคำนวณ Status และ Color
-  Map<String, dynamic> _getDisplayData() {
+  Map<String, dynamic> _getDisplayData(AppColorExtension appColors) {
     final highRiskCount = item.ingredients
         .where((i) => i.riskLevel == 'High')
         .length;
@@ -193,13 +196,13 @@ class _IngredientCardRecent extends StatelessWidget {
 
     if (highRiskCount > 0) {
       statusText = 'High Risk ($highRiskCount)';
-      statusColor = Colors.red;
+      statusColor = appColors.error;
     } else if (mediumRiskCount > 0) {
       statusText = 'Medium Risk ($mediumRiskCount)';
-      statusColor = Colors.orange;
+      statusColor = appColors.warning;
     } else {
       statusText = 'Safe';
-      statusColor = Colors.green;
+      statusColor = appColors.success;
     }
 
     return {'status': statusText, 'statusColor': statusColor};
@@ -207,7 +210,8 @@ class _IngredientCardRecent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = _getDisplayData();
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final data = _getDisplayData(appColors);
     final statusColor = data['statusColor'] as Color;
 
     return InkWell(
@@ -216,7 +220,7 @@ class _IngredientCardRecent extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -251,16 +255,17 @@ class _IngredientCardRecent extends StatelessWidget {
                 children: [
                   Text(
                     item.scanName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: appColors.text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     '${DateFormatter.formatTime(item.scanDate)} | ${item.ingredients.length} ingredients',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: appColors.textSecondary),
                   ),
                 ],
               ),
@@ -281,7 +286,7 @@ class _IngredientCardRecent extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            Icon(Icons.chevron_right, color: appColors.textSecondary),
           ],
         ),
       ),
@@ -302,9 +307,6 @@ class _FdaCardRecent extends StatelessWidget {
   Map<String, dynamic> _getDisplayData() {
     final fdaStatus = item.fdaData['สถานะ'] ?? 'Unverified';
 
-    // 🛑 ไม่จำเป็นต้องกำหนด statusColor ตามเงื่อนไขอีกต่อไป
-    // แต่ยังคง return product name
-
     return {
       'status': fdaStatus,
       'productName': item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A',
@@ -313,9 +315,8 @@ class _FdaCardRecent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     final data = _getDisplayData();
-    // 🛑 ไม่มีการใช้ statusColor แล้ว
-    // final statusColor = data['statusColor'] as Color;
 
     return InkWell(
       onTap: onTap, // 🎯 นำทางไปยัง FdaSuccessScreen
@@ -323,7 +324,7 @@ class _FdaCardRecent extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: appColors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -341,13 +342,11 @@ class _FdaCardRecent extends StatelessWidget {
               height: 50,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                // ใช้ primaryGreen เป็นสีพื้นหลังคงที่
-                color: HistoryConstants.primaryGreen.withOpacity(0.2),
+                color: appColors.primary.withOpacity(0.2),
               ),
               child: Icon(
-                Icons.verified_user, // ใช้ Icon(Icons.verified_user)
-                color: HistoryConstants
-                    .darkGreen, // ใช้ darkGreen เป็นสีไอคอนคงที่
+                Icons.verified_user,
+                color: appColors.primary,
                 size: 28,
               ),
             ),
@@ -359,23 +358,23 @@ class _FdaCardRecent extends StatelessWidget {
                 children: [
                   Text(
                     data['productName'],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: appColors.text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     'FDA Ref: ${item.scanName}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: appColors.textSecondary),
                   ),
                 ],
               ),
             ),
 
-            // 🛑 ลบ Status Tag Container ออกทั้งหมดตามคำขอ
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            Icon(Icons.chevron_right, color: appColors.textSecondary),
           ],
         ),
       ),

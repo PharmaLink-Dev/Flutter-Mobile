@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import 'package:app/features/history/data/fda_scan.dart';
@@ -27,31 +28,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: appColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: HistoryConstants.primaryGreen,
-        title: const Text(
+        backgroundColor: appColors.primary,
+        foregroundColor: appColors.surface, // Automatically colors title and icons
+        title: Text(
           'History',
           style: TextStyle(
-            color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 24,
+            color: appColors.surface,
           ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
-              color: _showFavoritesOnly ? Colors.red : Colors.black54,
+              color: _showFavoritesOnly ? appColors.error : appColors.surface,
             ),
             onPressed: () =>
                 setState(() => _showFavoritesOnly = !_showFavoritesOnly),
             tooltip: 'Show Favorites Only',
           ),
           IconButton(
-            icon: const Icon(Icons.delete_sweep, color: Colors.black54),
+            icon: const Icon(Icons.delete_sweep),
             onPressed: _showDeleteConfirmation,
             tooltip: 'Clear All History',
           ),
@@ -73,11 +77,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // ... ใน screen_history.dart ภายใน _HistoryScreenState:
-
   Future<void> _navigateToIngredientResult(ScanHistory item) async {
-    // แปลง List<HistoryIngredient> ที่มีข้อมูลครบแล้ว
-    //  กลับไปเป็น List<Ingredient> เพื่อให้ ResultPage ใช้งานได้
     final List<Ingredient> ingredientsForDisplay = item.ingredients.map((
       histIng,
     ) {
@@ -225,13 +225,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _deleteIngredientItem(ScanHistory item) async {
-    // ลบ showDialog และ if (shouldDelete) ออกทั้งหมด
-    await item.delete(); // <-- ลบข้อมูลเลย
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    await item.delete();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Item deleted'),
-          backgroundColor: Colors.green[600],
+          backgroundColor: appColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -243,13 +243,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _deleteFdaItem(FdaScan item) async {
-    // ลบ showDialog และ if (shouldDelete) ออกทั้งหมด
-    await item.delete(); // <-- ลบข้อมูลเลย
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    await item.delete();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Item deleted'),
-          backgroundColor: Colors.green[600],
+          backgroundColor: appColors.success,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -261,36 +261,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _showDeleteConfirmation() async {
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: appColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Clear All History?',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: appColors.text),
         ),
-        content: const Text(
+        content: Text(
           'This will permanently delete all your scan history. This action cannot be undone.',
+           style: TextStyle(color: appColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey[700])),
+            child: Text('Cancel', style: TextStyle(color: appColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.red.withOpacity(0.1),
+              backgroundColor: appColors.error.withOpacity(0.1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 'Delete All',
                 style: TextStyle(
-                  color: Colors.red,
+                  color: appColors.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -307,7 +310,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('All history cleared!'),
-            backgroundColor: Colors.green[600],
+            backgroundColor: appColors.success,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
