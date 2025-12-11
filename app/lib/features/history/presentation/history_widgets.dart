@@ -166,6 +166,8 @@ class IngredientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final ingredientsPreview = item.ingredients.map((e) => e.name).take(3).join(', ');
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -289,17 +291,26 @@ class IngredientCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item.ingredients.map((e) => e.name).join(', '),
-                            maxLines: 2,
+                            item.scanName, // Use the custom scan name
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              height: 1.3,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                               color: appColors.text,
                             ),
                           ),
                           const SizedBox(height: 4),
+                          Text(
+                            'Contains: $ingredientsPreview',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: appColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               Icon(
@@ -375,7 +386,6 @@ class FdaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
-    final productName = item.fdaData['ชื่อผลิตภัณฑ์(TH)'] ?? 'N/A';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -484,28 +494,26 @@ class FdaCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item.scanName,
+                            item.scanName ?? 'FDA Scan', // Use product name, with fallback
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              height: 1.3,
                               color: appColors.text,
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            productName,
+                            item.fdaNumber, // Show FDA Number as subtitle
                             style: TextStyle(
                               fontSize: 14,
                               color: appColors.textSecondary,
-                              height: 1.3,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Row(
                             children: [
                               Icon(
