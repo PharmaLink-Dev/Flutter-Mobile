@@ -36,7 +36,7 @@ class SupabaseQueryService {
       for (final row in response) {
         if (row is! Map) continue;
 
-        final wrapper = Map<String, dynamic>.from(row as Map);
+        final wrapper = Map<String, dynamic>.from(row);
 
         final wrapperStatus =
             (wrapper['status'] ?? '').toString().trim().toLowerCase();
@@ -44,7 +44,7 @@ class SupabaseQueryService {
 
         final rawData = wrapper['data'];
         final data = rawData is Map
-            ? Map<String, dynamic>.from(rawData as Map)
+            ? Map<String, dynamic>.from(rawData)
             : <String, dynamic>{};
 
         final searchTerm =

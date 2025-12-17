@@ -404,7 +404,7 @@ class _ConfirmationFooter extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 56),
               backgroundColor: appColors.primary,
-              disabledBackgroundColor: appColors.textSecondary.withOpacity(0.5),
+              disabledBackgroundColor: appColors.textSecondary.withValues(alpha: 0.5),
               foregroundColor: appColors.surface,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

@@ -186,7 +186,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                   BoxShadow(
                     offset: const Offset(0, 10),
                     blurRadius: 50,
-                    color: widget.primaryColor.withOpacity(0.23),
+                    color: widget.primaryColor.withValues(alpha: 0.23),
                   ),
                 ]
               : [],
@@ -216,7 +216,7 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    widget.primaryColor.withOpacity(0.7),
+                    widget.primaryColor.withValues(alpha: 0.7),
                   ),
                 ),
               )

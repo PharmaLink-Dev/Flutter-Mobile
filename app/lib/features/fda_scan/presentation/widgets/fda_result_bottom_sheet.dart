@@ -66,7 +66,7 @@ class FdaResultBottomSheet extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: tint.withOpacity(0.08),
+                color: tint.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -76,7 +76,7 @@ class FdaResultBottomSheet extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: tint.withOpacity(0.18),
+                      color: tint.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, color: tint),
@@ -111,7 +111,7 @@ class FdaResultBottomSheet extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF22C55E).withOpacity(0.12),
+                color: const Color(0xFF22C55E).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -121,7 +121,7 @@ class FdaResultBottomSheet extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withOpacity(0.18),
+                      color: const Color(0xFF22C55E).withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(Icons.shield_rounded, color: Color(0xFF22C55E)),

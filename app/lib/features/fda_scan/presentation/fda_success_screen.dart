@@ -64,7 +64,7 @@ class FdaSuccessScreen extends StatelessWidget {
                         'ข้อมูลตรวจสอบจากฐานข้อมูล\nสำนักงานคณะกรรมการอาหารและยา กระทรวงสาธารณสุข',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withValues(alpha: 0.95),
                         ),
                       ),
                     ],
@@ -95,7 +95,7 @@ class FdaSuccessScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
                   style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.white24),
+                    backgroundColor: WidgetStatePropertyAll(Colors.white24),
                   ),
                   icon: const Icon(CupertinoIcons.back, color: Colors.white),
                   onPressed: () => Navigator.of(context).maybePop(),

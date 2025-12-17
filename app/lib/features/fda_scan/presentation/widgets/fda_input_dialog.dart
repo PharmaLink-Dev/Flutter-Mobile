@@ -72,7 +72,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                           },
                           decoration: InputDecoration(
                             hintText: '13-1-12345-1-0001',
-                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.25), fontSize: 18, fontWeight: FontWeight.w600),
+                            hintStyle: TextStyle(color: Colors.black.withValues(alpha: 0.25), fontSize: 18, fontWeight: FontWeight.w600),
                             filled: true,
                             fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),

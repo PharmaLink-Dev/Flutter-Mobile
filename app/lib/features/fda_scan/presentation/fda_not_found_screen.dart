@@ -71,7 +71,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                         'เลขที่ค้นหา: ' + scannedRaw,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withValues(alpha: 0.95),
                         ),
                       ),
                     ],
@@ -119,7 +119,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEF4444).withOpacity(0.18),
+                              color: const Color(0xFFEF4444).withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444)),
@@ -184,7 +184,7 @@ class FdaNotFoundScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
                   style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.white24),
+                    backgroundColor: WidgetStatePropertyAll(Colors.white24),
                   ),
                   icon: const Icon(CupertinoIcons.back, color: Colors.white),
                   onPressed: () => Navigator.of(context).maybePop(),
