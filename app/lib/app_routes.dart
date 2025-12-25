@@ -1,5 +1,3 @@
-
-//material app routes using go_router with stateful shell route
 import 'package:app/features/ingredient/presentation/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,153 +13,155 @@ import 'features/settings/presentation/appearance_screen.dart';
 import 'features/policy/presentation/policy_check_screen.dart';
 import 'features/policy/presentation/policy_screen.dart';
 
-/// App Router using GoRouter with StatefulShellRoute
-/// -------------------------------------------------
-/// Manages bottom navigation and page switching.
+// --- Main Router Configuration ---
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
+    // Initial policy check screen
     GoRoute(path: '/', builder: (_, __) => const PolicyCheckScreen()),
-    GoRoute(
-        path: '/initial-policy',
-        builder: (_, __) => const PolicyScreen(isFirstLaunch: true)),
-    // Bottom tabs (Home, History) are kept alive in a shell.
+    GoRoute(path: '/initial-policy', builder: (_, __) => const PolicyScreen(isFirstLaunch: true)),
+
+    // Main app structure with bottom navigation
     StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) =>
-          ShellScaffold(navigationShell: navigationShell),
+      builder: (context, state, navigationShell) => ShellScaffold(navigationShell: navigationShell),
       branches: [
-        StatefulShellBranch(
-          routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/history',
-              builder: (_, __) => const HistoryScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(path: '/news', builder: (_, __) => const NewsScreen()),
-          ],
-        ),
+        StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())]),
+        StatefulShellBranch(routes: [GoRoute(path: '/history', builder: (_, __) => const HistoryScreen())]),
+        StatefulShellBranch(routes: [GoRoute(path: '/news', builder: (_, __) => const NewsScreen())]),
+        StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen())]),
       ],
     ),
-    // Scan is OUTSIDE the shell so it will be disposed when leaving.
+
+    // --- Top-Level Routes (not part of the shell) ---
+    // These are pushed on top of the current screen.
     GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
-    // FDA Scan: duplicate flow like Scan
     GoRoute(path: '/scan-fda', builder: (_, __) => const FdaScanScreen()),
-    // Settings page
-    GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
-    // Appearance settings page
     GoRoute(path: '/settings/appearance', builder: (_, __) => const AppearanceScreen()),
-    // Policy page accessible from settings
     GoRoute(path: '/settings/policy', builder: (_, __) => const PolicyScreen()),
   ],
 );
 
-/// ShellScaffold
-/// -------------------------------------------------
-/// Wraps navigation shell with a Scaffold and a BottomNavigationBar.
-class ShellScaffold extends StatefulWidget {
+// --- ShellScaffold with Custom Bottom Navigation ---
+
+class ShellScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   const ShellScaffold({super.key, required this.navigationShell});
 
-  @override
-  State<ShellScaffold> createState() => _ShellScaffoldState();
-}
-
-class _ShellScaffoldState extends State<ShellScaffold> {
-  // This method handles the navigation when a tab is tapped.
-  void _onTap(int index) {
-    // index is the TAPPED index of the BottomNavigationBarItem
-    // 0=Home, 1=Scan, 2=History, 3=News
-
-    // "Scan" is a special case that navigates to a different route
-    // outside of the StatefulShellRoute.
-    if (index == 1) {
-      context.go('/scan');
+  void _onTap(BuildContext context, int index) {
+    // Central scan button logic
+    if (index == 2) {
+      context.push('/scan');
       return;
     }
 
-    // Map the tapped tab index to the correct branch index for the shell.
-    // Tab 0 (Home) -> Branch 0
-    // Tab 2 (History) -> Branch 1
-    // Tab 3 (News) -> Branch 2
-    final int branchIndex;
-    if (index == 0) {
-      branchIndex = 0;
-    } else if (index == 2) {
-      branchIndex = 1;
-    } else {
-      // index is 3
-      branchIndex = 2;
-    }
+    // Map tab index to branch index
+    final int branchIndex = (index < 2) ? index : index - 1;
 
-    widget.navigationShell.goBranch(
+    navigationShell.goBranch(
       branchIndex,
-      // This is an optimization. It will only pop to the initial location of
-      // the branch if the user taps the tab for the branch they are already on.
-      initialLocation: branchIndex == widget.navigationShell.currentIndex,
+      initialLocation: branchIndex == navigationShell.currentIndex,
     );
-    setState(() {});
+  }
+
+  int _getCurrentIndex() {
+    final int branchIndex = navigationShell.currentIndex;
+    return (branchIndex < 2) ? branchIndex : branchIndex + 1;
   }
 
   @override
   Widget build(BuildContext context) {
-    // NEW: Get theme-aware colors
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
-
-    // This part is crucial for correctly highlighting the BottomNavigationBarItem.
-    // We need to map the CURRENT branch index back to the correct TAB index.
-    final int currentIndex;
-    switch (widget.navigationShell.currentIndex) {
-      case 0: // Branch 0 (Home) should highlight Tab 0 (Home).
-        currentIndex = 0;
-        break;
-      case 1: // Branch 1 (History) should highlight Tab 2 (History).
-        currentIndex = 2;
-        break;
-      case 2: // Branch 2 (News) should highlight Tab 3 (News).
-        currentIndex = 3;
-        break;
-      default:
-        currentIndex = 0;
-    }
-
     return Scaffold(
-      body: widget.navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        // Use the correctly calculated index here.
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        // CHANGED: Use colors from the theme extension
-        selectedItemColor: appColors.primary,
-        unselectedItemColor: appColors.textSecondary,
-        onTap: _onTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner_outlined),
-            activeIcon: Icon(Icons.qr_code_scanner),
-            label: "Scan",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            activeIcon: Icon(Icons.history),
-            label: "History",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.newspaper_outlined),
-            activeIcon: Icon(Icons.newspaper),
-            label: "News",
-          ),
-        ],
+      body: navigationShell,
+      bottomNavigationBar: _CustomBottomNavBar(
+        currentIndex: _getCurrentIndex(),
+        onTap: (index) => _onTap(context, index),
+      ),
+    );
+  }
+}
+
+// --- Custom Bottom Navigation Bar Widget ---
+
+class _CustomBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const _CustomBottomNavBar({required this.currentIndex, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.extension<AppColorExtension>()!;
+
+    return SafeArea(
+      child: Container(
+        height: 80,
+        color: theme.colorScheme.surface, // Background color for the nav bar
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Stack(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildNavItem(context, icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Home', index: 0, colors: colors),
+                _buildNavItem(context, icon: Icons.history_outlined, activeIcon: Icons.history, label: 'History', index: 1, colors: colors),
+                const SizedBox(width: 56), // Placeholder for the central button
+                _buildNavItem(context, icon: Icons.newspaper_outlined, activeIcon: Icons.newspaper, label: 'News', index: 3, colors: colors),
+                _buildNavItem(context, icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings', index: 4, colors: colors),
+              ],
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: GestureDetector(
+                onTap: () => onTap(2),
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [colors.primary, colors.primary.withOpacity(0.7)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [BoxShadow(color: colors.primary.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))],
+                  ),
+                  child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 36),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, {required IconData icon, required IconData activeIcon, required String label, required int index, required AppColorExtension colors}) {
+    final bool isSelected = currentIndex == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => onTap(index),
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected ? colors.primary : colors.textSecondary,
+              size: 26,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? colors.primary : colors.textSecondary,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

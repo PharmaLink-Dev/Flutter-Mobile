@@ -12,11 +12,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // NEW: Get theme-aware colors from the context
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
 
     return Scaffold(
-      // CHANGED: Use background color from the theme
       backgroundColor: appColors.background,
       appBar: buildAppBar(context, appColors),
       body: SingleChildScrollView(
@@ -25,10 +23,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             HeaderWithSearchBox(
               size: size,
-              // CHANGED: Pass primary color from the theme
               primaryColor: appColors.primary,
-              // NEW: Pass text color that contrasts with the primary color
-              onPrimaryTextColor: appColors.surface, // Typically white in light theme
+              onPrimaryTextColor: appColors.surface,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -47,18 +43,8 @@ class HomeScreen extends StatelessWidget {
   AppBar buildAppBar(BuildContext context, AppColorExtension appColors) {
     return AppBar(
       elevation: 0,
-      // CHANGED: Use primary color from the theme
       backgroundColor: appColors.primary,
-      // The icon color will be automatically managed by the AppBar theme
-      // based on the brightness of the background color.
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.settings), // Color is now handled by theme
-          onPressed: () {
-            context.go('/settings');
-          },
-        ),
-      ],
+      // No actions are provided, so the settings icon will be removed.
     );
   }
 }
@@ -92,7 +78,6 @@ class HeaderWithSearchBox extends StatelessWidget {
             ),
             height: size.height * 0.18 - 27,
             decoration: BoxDecoration(
-              // CHANGED: Uses the color passed from the theme
               color: primaryColor,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(36),
@@ -104,7 +89,6 @@ class HeaderWithSearchBox extends StatelessWidget {
                 Text(
                   'Welcome to kidness',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        // CHANGED: Use a theme-aware text color
                         color: onPrimaryTextColor,
                         fontWeight: FontWeight.bold,
                       ),
@@ -117,7 +101,6 @@ class HeaderWithSearchBox extends StatelessWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            // CHANGED: Pass primary color from the theme
             child: HomeSearchBar(primaryColor: appColors.primary),
           ),
         ],
