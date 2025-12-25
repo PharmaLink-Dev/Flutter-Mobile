@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/cupertino.dart';
 
 /// Shows the FDA number input dialog and returns the entered text,
 /// or null if the user cancels.
@@ -9,6 +8,9 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
   return showDialog<String>(
     context: context,
     builder: (ctx) {
+      final theme = Theme.of(ctx);
+      final colorScheme = theme.colorScheme;
+
       String? errorText;
       String onlyDigits(String s) => s.replaceAll(RegExp(r'[^0-9]'), '');
       String formatFdaPattern(String digits) {
@@ -32,7 +34,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
           errorText = digitsCount == 0 || digitsCount == 13 ? null : 'กรอกตัวเลขให้ครบ 13 หลัก';
           final bool canSubmit = digitsCount == 13;
           return Dialog(
-            backgroundColor: Colors.white,
+            backgroundColor: colorScheme.surface, // Use theme color
             insetPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 24),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: SizedBox(
@@ -46,17 +48,17 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SizedBox(height: 8),
-                        const Center(
+                        Center(
                           child: Text(
                             'กรุณากรอกเลข FDA',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: controller,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           onChanged: (raw) {
@@ -72,22 +74,25 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                           },
                           decoration: InputDecoration(
                             hintText: '13-1-12345-1-0001',
-                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.25), fontSize: 18, fontWeight: FontWeight.w600),
+                            hintStyle: theme.textTheme.titleLarge?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.35),
+                              fontWeight: FontWeight.w600,
+                            ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                             contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                             errorText: errorText,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0x22000000)),
+                              borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0x22000000)),
+                              borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: Color(0x33000000), width: 1.5),
+                              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
                             ),
                           ),
                         ),
@@ -99,9 +104,9 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                                 style: OutlinedButton.styleFrom(
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                                  side: const BorderSide(color: Color(0x22000000)),
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: const Color(0xFF22303C),
+                                  side: BorderSide(color: colorScheme.outline),
+                                  backgroundColor: colorScheme.surface,
+                                  foregroundColor: colorScheme.onSurface,
                                 ),
                                 onPressed: () => Navigator.of(ctx).pop(),
                                 child: const Text('ยกเลิก', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -111,34 +116,17 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                             Expanded(
                               child: Opacity(
                                 opacity: canSubmit ? 1.0 : 0.5,
-                                child: Container(
-                                  height: 48,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFF8FB6FF), Color(0xFF6ED8B5)],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    boxShadow: const [
-                                      BoxShadow(color: Color(0x22000000), blurRadius: 8, offset: Offset(0, 3)),
-                                    ],
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                    backgroundColor: colorScheme.primary,
+                                    foregroundColor: colorScheme.onPrimary,
                                   ),
-                                  child: IgnorePointer(
-                                    ignoring: !canSubmit,
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(14),
-                                        onTap: () {
-                                          Navigator.of(ctx).pop(controller.text.trim());
-                                        },
-                                        child: const Center(
-                                          child: Text('ค้นหา', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  onPressed: canSubmit
+                                      ? () => Navigator.of(ctx).pop(controller.text.trim())
+                                      : null,
+                                  child: const Text('ค้นหา', style: TextStyle(fontWeight: FontWeight.w700)),
                                 ),
                               ),
                             ),
@@ -154,7 +142,7 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                       visualDensity: VisualDensity.compact,
                       splashRadius: 18,
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close, color: colorScheme.onSurface.withOpacity(0.6)),
                     ),
                   ),
                 ],

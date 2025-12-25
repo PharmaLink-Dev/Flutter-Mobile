@@ -37,7 +37,7 @@ class SettingsScreen extends StatelessWidget {
             tiles: [
               ListTile(
                 leading: const Icon(Icons.info_outline),
-                title: const Text('About Pharmlink'),
+                title: const Text('About Kidness'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
                   // TODO: Show about dialog or page
