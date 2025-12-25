@@ -48,7 +48,8 @@ class SettingsScreen extends StatelessWidget {
                 title: const Text('Privacy Policy'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  context.go('/settings/policy');
+                  // Use push to allow popping back to this screen
+                  context.push('/settings/policy');
                 },
               ),
             ],

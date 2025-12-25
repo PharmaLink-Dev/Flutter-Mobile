@@ -11,37 +11,30 @@ class PolicyScreen extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('policy_accepted', true);
     if (context.mounted) {
-      // ใช้ go_router ในการเปลี่ยนหน้า
       context.go('/home');
     }
   }
 
-  // Widget ช่วยสร้างหัวข้อหมวด (ตัวหนา)
   Widget _buildSectionTitle(String text, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 20.0, bottom: 12.0),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
-        ),
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
 
-  // Widget ช่วยสร้างเนื้อหา (จัดระยะบรรทัดให้อ่านง่าย)
   Widget _buildBodyText(String text, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Text(
         text,
-        style: TextStyle(
-          fontSize: 14,
-          height: 1.6, // เพิ่มระยะห่างบรรทัดให้อ่านสบายตา
-          color: Theme.of(context).textTheme.bodyMedium?.color,
-        ),
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              height: 1.6,
+            ),
         textAlign: TextAlign.start,
       ),
     );
@@ -49,9 +42,19 @@ class PolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ข้อกำหนดและนโยบายความเป็นส่วนตัว'),
+        // Explicitly add a back button if not in the first launch flow.
+        leading: !isFirstLaunch
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.pop(),
+              )
+            : null,
         automaticallyImplyLeading: !isFirstLaunch,
       ),
       body: SingleChildScrollView(
@@ -59,10 +62,10 @@ class PolicyScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(
+            Center(
               child: Text(
                 'ข้อกำหนดและเงื่อนไขการใช้งาน\nบริการแอปพลิเคชัน Kidness',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -171,40 +174,42 @@ class PolicyScreen extends StatelessWidget {
             _buildBodyText(
                 'หากท่านพบปัญหาการใช้งาน หรือต้องการแจ้งข้อมูลส่วนผสมเพิ่มเติม ท่านสามารถติดต่อทีมงานผู้พัฒนาได้ที่: Kidness.app@gmail.com', context),
 
-            // พื้นที่ว่างสำหรับเลื่อนอ่านจนสุด
             const SizedBox(height: 80),
           ],
         ),
       ),
       bottomNavigationBar: isFirstLaunch
           ? Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 50),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-          onPressed: () => _acceptPolicy(context),
-          child: const Text(
-            'ยอมรับและดำเนินการต่อ',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-      )
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.shadowColor.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                onPressed: () => _acceptPolicy(context),
+                child: Text(
+                  'ยอมรับและดำเนินการต่อ',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onPrimary, // Explicitly set color
+                  ),
+                ),
+              ),
+            )
           : null,
     );
   }
