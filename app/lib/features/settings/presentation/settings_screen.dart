@@ -43,6 +43,14 @@ class SettingsScreen extends StatelessWidget {
                   // TODO: Show about dialog or page
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.policy_outlined),
+                title: const Text('Privacy Policy'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  context.go('/settings/policy');
+                },
+              ),
             ],
           ),
         ],

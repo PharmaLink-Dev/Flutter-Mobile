@@ -17,6 +17,7 @@ class FdaResultBottomSheet extends StatelessWidget {
 
   void _copyToClipboard(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('คัดลอกแล้ว')),
     );
@@ -24,6 +25,9 @@ class FdaResultBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final order = <String>[
       'ชื่อผลิตภัณฑ์(TH)',
       'ชื่อผลิตภัณฑ์(EN)',
@@ -40,19 +44,20 @@ class FdaResultBottomSheet extends StatelessWidget {
 
     return Material(
       elevation: 12,
+      color: Colors.transparent, // Use transparent as background is handled by Container
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(24),
         topRight: Radius.circular(24),
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: colorScheme.surface, // Use theme surface color
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
           boxShadow: [
-            BoxShadow(color: Color(0x1A000000), blurRadius: 20, offset: Offset(0, -6)),
+            BoxShadow(color: theme.shadowColor.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -6)),
           ],
         ),
         child: Builder(builder: (context) {
@@ -66,7 +71,7 @@ class FdaResultBottomSheet extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: tint.withOpacity(0.08),
+                color: tint.withOpacity(0.1), // Adjusted opacity
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -87,17 +92,15 @@ class FdaResultBottomSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(label,
-                            style: const TextStyle(
-                              fontSize: 13,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF5F6B6E),
+                              color: colorScheme.onSurfaceVariant,
                             )),
                         const SizedBox(height: 4),
                         Text(value,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF0B1F17),
+                              color: colorScheme.onSurface,
                             )),
                       ],
                     ),
@@ -108,10 +111,11 @@ class FdaResultBottomSheet extends StatelessWidget {
           }
 
           Widget safetyCard({required bool good}) {
+            final goodColor = Colors.green.shade600;
             return Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF22C55E).withOpacity(0.12),
+                color: goodColor.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -121,27 +125,25 @@ class FdaResultBottomSheet extends StatelessWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withOpacity(0.18),
+                      color: goodColor.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.shield_rounded, color: Color(0xFF22C55E)),
+                    child: Icon(Icons.shield_outlined, color: goodColor),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('ปลอดภัย',
-                            style: TextStyle(
-                              fontSize: 15,
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF0B1F17),
+                              color: colorScheme.onSurface,
                             )),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text('ได้รับการรับรองจาก อย. กระทรวงสาธารณสุข',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF3B4B52),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             )),
                       ],
                     ),
@@ -167,10 +169,10 @@ class FdaResultBottomSheet extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'ผลการตรวจสอบ',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                     ),
                   ),
                   TextButton.icon(
@@ -186,7 +188,7 @@ class FdaResultBottomSheet extends StatelessWidget {
               if (nameTh.isNotEmpty) ...[
                 infoCard(
                   icon: Icons.medication_rounded,
-                  tint: const Color(0xFF14B8A6),
+                  tint: Colors.teal.shade400, // A color that works in both modes
                   label: 'ชื่อผลิตภัณฑ์ (TH)',
                   value: nameTh,
                 ),
@@ -195,7 +197,7 @@ class FdaResultBottomSheet extends StatelessWidget {
               if (nameEn.isNotEmpty) ...[
                 infoCard(
                   icon: Icons.inventory_2_rounded,
-                  tint: const Color(0xFFA78BFA),
+                  tint: Colors.purple.shade300, // A color that works in both modes
                   label: 'ชื่อผลิตภัณฑ์ (EN)',
                   value: nameEn,
                 ),
@@ -205,7 +207,7 @@ class FdaResultBottomSheet extends StatelessWidget {
               if (fdpdtno.isNotEmpty) ...[
                 infoCard(
                   icon: Icons.verified_rounded,
-                  tint: const Color(0xFF22C55E),
+                  tint: Colors.green.shade500, // A color that works in both modes
                   label: 'เลขทะเบียน FDA',
                   value: fdpdtno,
                 ),
@@ -215,7 +217,7 @@ class FdaResultBottomSheet extends StatelessWidget {
               if (licenseHolder.isNotEmpty) ...[
                 infoCard(
                   icon: Icons.factory_rounded,
-                  tint: const Color(0xFF60A5FA),
+                  tint: Colors.blue.shade400, // A color that works in both modes
                   label: 'ผู้รับอนุญาต',
                   value: licenseHolder,
                 ),
@@ -242,12 +244,12 @@ class FdaResultBottomSheet extends StatelessWidget {
                             );
                           }
                         },
-                  icon: const Icon(Icons.open_in_new_rounded, color: Color(0xFF22C55E)),
-                  label: const Text(
+                  icon: Icon(Icons.open_in_new_rounded, color: Colors.green.shade600),
+                  label: Text(
                     'ดูข้อมูลเพิ่มเติมที่ FDA',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Color.fromARGB(255, 10, 132, 54),
+                      color: Colors.green.shade700,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

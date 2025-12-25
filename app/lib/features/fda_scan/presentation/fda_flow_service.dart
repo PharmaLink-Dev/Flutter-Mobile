@@ -27,8 +27,10 @@ class FdaFlowService {
       final query = fdaNumber.replaceAll(RegExp(r'[^0-9]'), '');
       final map = await service.fetchByFdpdtno(query);
 
+      // FIX: Delay navigation to prevent conflict with dialog dismissal.
+      await Future.delayed(Duration.zero);
+
       if (!context.mounted) return;
-      // if (Navigator.of(context).canPop()) Navigator.of(context).pop(); // Close loading dialog
 
       if (FdaSearchService.isValidResult(map)) {
         // --- IMPROVEMENT: Use product name for history entry ---

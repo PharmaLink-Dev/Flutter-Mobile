@@ -12,19 +12,26 @@ import 'features/history/presentation/history_screen.dart';
 import 'features/news/presentation/news_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/settings/presentation/appearance_screen.dart';
+import 'features/policy/presentation/policy_check_screen.dart';
+import 'features/policy/presentation/policy_screen.dart';
 
 /// App Router using GoRouter with StatefulShellRoute
 /// -------------------------------------------------
 /// Manages bottom navigation and page switching.
 final GoRouter appRouter = GoRouter(
+  initialLocation: '/',
   routes: [
+    GoRoute(path: '/', builder: (_, __) => const PolicyCheckScreen()),
+    GoRoute(
+        path: '/initial-policy',
+        builder: (_, __) => const PolicyScreen(isFirstLaunch: true)),
     // Bottom tabs (Home, History) are kept alive in a shell.
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           ShellScaffold(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
-          routes: [GoRoute(path: '/', builder: (_, __) => const HomeScreen())],
+          routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())],
         ),
         StatefulShellBranch(
           routes: [
@@ -49,6 +56,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen()),
     // Appearance settings page
     GoRoute(path: '/settings/appearance', builder: (_, __) => const AppearanceScreen()),
+    // Policy page accessible from settings
+    GoRoute(path: '/settings/policy', builder: (_, __) => const PolicyScreen()),
   ],
 );
 

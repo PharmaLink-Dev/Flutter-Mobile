@@ -10,52 +10,55 @@ class FdaSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    // Use a specific green color that works well in both light and dark themes.
+    final successColor = Colors.green.shade600;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF1ABC9C),
+      backgroundColor: successColor, // A consistent background color
       body: Stack(
         children: [
           Container(
             height: MediaQuery.of(context).size.height * 0.50,
             width: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF34D399), Color(0xFF10B981)],
+                colors: [successColor.withOpacity(0.8), successColor],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
             ),
             child: SafeArea(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // decorative shapes
-                  Positioned(top: 56, left: 28, child: _SoftShape.circle(18, Colors.white24)),
-                  Positioned(top: 96, right: 36, child: _SoftShape.rounded(44, 14, Colors.white24)),
-                  Positioned(bottom: 96, left: 64, child: _SoftShape.rounded(56, 12, Colors.white12)),
-                  Positioned(bottom: 120, right: 40, child: _SoftShape.circle(12, Colors.white30)),
+                  // Decorative shapes using onPrimary color for contrast
+                  Positioned(top: 56, left: 28, child: _SoftShape.circle(18, colorScheme.onPrimary.withOpacity(0.2))),
+                  Positioned(top: 96, right: 36, child: _SoftShape.rounded(44, 14, colorScheme.onPrimary.withOpacity(0.2))),
+                  Positioned(bottom: 96, left: 64, child: _SoftShape.rounded(56, 12, colorScheme.onPrimary.withOpacity(0.1))),
+                  Positioned(bottom: 120, right: 40, child: _SoftShape.circle(12, colorScheme.onPrimary.withOpacity(0.25))),
 
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Solid white circle + green check
+                      // Use onPrimary for the circle to contrast with the green background
                       Container(
                         width: 140,
                         height: 140,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary, // White in light, dark in dark
                         ),
-                        child: const Center(
-                          child: Icon(Icons.check, size: 72, color: Color(0xFF2ECC71)),
+                        child: Center(
+                          child: Icon(Icons.check_circle_outline_rounded, size: 72, color: successColor),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         'ผลิตภัณฑ์ขึ้นทะเบียน !',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontSize: 20,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: colorScheme.onPrimary, // Text color contrasts with background
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -64,7 +67,7 @@ class FdaSuccessScreen extends StatelessWidget {
                         'ข้อมูลตรวจสอบจากฐานข้อมูล\nสำนักงานคณะกรรมการอาหารและยา กระทรวงสาธารณสุข',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.95),
+                          color: colorScheme.onPrimary.withOpacity(0.95),
                         ),
                       ),
                     ],
@@ -74,7 +77,7 @@ class FdaSuccessScreen extends StatelessWidget {
             ),
           ),
 
-          // Fixed-position bottom sheet (not draggable)
+          // The BottomSheet which is now theme-aware
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
@@ -87,17 +90,17 @@ class FdaSuccessScreen extends StatelessWidget {
             ),
           ),
 
-          // Back button
+          // Back button, also using theme-aware colors
           SafeArea(
             child: Align(
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
-                  style: const ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(Colors.white24),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(colorScheme.onPrimary.withOpacity(0.2)),
                   ),
-                  icon: const Icon(CupertinoIcons.back, color: Colors.white),
+                  icon: Icon(CupertinoIcons.back, color: colorScheme.onPrimary),
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
               ),
