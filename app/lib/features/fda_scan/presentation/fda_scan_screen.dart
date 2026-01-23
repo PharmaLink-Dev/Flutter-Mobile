@@ -6,9 +6,16 @@ import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 import 'package:go_router/go_router.dart'; // Import go_router
 
 import '../data/fda_ocr.dart';
+import '../data/fda_search_service.dart';
+import 'package:app/features/history/data/fda_scan.dart';
 import 'widgets/fda_input_dialog.dart';
+import 'widgets/scan_disclaimer_dialog.dart';
+import 'fda_success_screen.dart';
+import 'fda_not_found_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:app/features/fda_scan/presentation/fda_flow_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class FdaScanScreen extends StatelessWidget {
   const FdaScanScreen({super.key});
@@ -119,7 +126,7 @@ class FdaScanScreen extends StatelessWidget {
               await _showFdaNotFoundDialog(context, result);
               return;
             }
-            
+
             // Use the service to navigate
             await FdaFlowService(context).fetchAndNavigate(fda);
           },
@@ -129,21 +136,67 @@ class FdaScanScreen extends StatelessWidget {
   }
 
   Future<void> _openFdaInputDialog(BuildContext context) async {
-    // The `showFdaInputDialog` returns a value after the dialog is popped.
+    // Show disclaimer dialog FIRST
+    final disclaimerAccepted = await showScanDisclaimerDialog(context);
+
+    // If user cancelled disclaimer, exit early
+    if (disclaimerAccepted != true || !context.mounted) {
+      return;
+    }
+
+    // Now show the input dialog
     final result = await showFdaInputDialog(context);
 
-    // Important: Check if the context is still mounted after an async gap.
+    // Check if the context is still mounted after an async gap
     if (!context.mounted || result == null || result.trim().isEmpty) {
       return;
     }
 
-    // **THE FIX**: Wait for the current frame to complete before navigating.
-    // This prevents the `!_debugLocked` error by not navigating while a build is in progress.
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (context.mounted) {
-        await FdaFlowService(context).fetchAndNavigate(result);
+    // Navigate directly without showing disclaimer again
+    // (disclaimer was already shown above)
+    try {
+      final service = FdaSearchService();
+      final query = result.replaceAll(RegExp(r'[^0-9]'), '');
+      final map = await service.fetchByFdpdtno(query);
+
+      if (!context.mounted) return;
+
+      if (FdaSearchService.isValidResult(map)) {
+        final productName = map['ชื่อผลิตภัณฑ์(TH)']?.isNotEmpty ?? false
+            ? map['ชื่อผลิตภัณฑ์(TH)']
+            : map['ชื่อผลิตภัณฑ์(EN)'];
+
+        final box = Hive.box<FdaScan>('fda_scans');
+        await box.add(
+          FdaScan(
+            id: const Uuid().v4(),
+            fdaNumber: query,
+            scanName: productName,
+            scanDate: DateTime.now(),
+            fdaData: map,
+          ),
+        );
+
+        if (!context.mounted) return;
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => FdaSuccessScreen(data: map)));
+      } else {
+        if (!context.mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => FdaNotFoundScreen(scannedRaw: result),
+          ),
+        );
       }
-    });
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FdaNotFoundScreen(scannedRaw: result),
+        ),
+      );
+    }
   }
 
   Widget _fdaInputButton(BuildContext context) {
