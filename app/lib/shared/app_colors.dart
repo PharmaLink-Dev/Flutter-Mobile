@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 @immutable
@@ -64,7 +63,9 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
 
   @override
   ThemeExtension<AppColorExtension> lerp(
-      ThemeExtension<AppColorExtension>? other, double t) {
+    ThemeExtension<AppColorExtension>? other,
+    double t,
+  ) {
     if (other is! AppColorExtension) {
       return this;
     }
@@ -96,7 +97,7 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
     error: Color(0xFFEF5350),
     outline: Color(0xFFE3F0EC),
     success: Color(0xFF2E7D32), // Green 800
-    warning: Color(0xFFF57C00), // Orange 700
+    warning: Color(0xFFFDD835), // Yellow 600 - ระมัดระวัง
     neutral: Color(0xFF6B7B8A), // Same as textSecondary
   );
 
@@ -112,7 +113,7 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
     error: Color(0xFFCF6679), // Material standard dark error
     outline: Color(0xFF37474F), // Dark outline
     success: Color(0xFF66BB6A), // Green 300
-    warning: Color(0xFFFFCA28), // Amber 300
+    warning: Color(0xFFFFEB3B), // Yellow 500 - ระมัดระวัง
     neutral: Color(0xFFB0BEC5), // Same as textSecondary
   );
 }

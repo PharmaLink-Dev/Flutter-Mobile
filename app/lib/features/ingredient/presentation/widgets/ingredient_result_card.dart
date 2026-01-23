@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 class IngredientResultCard extends StatefulWidget {
   final Ingredient ingredient;
 
-  const IngredientResultCard({
-    super.key,
-    required this.ingredient,
-  });
+  const IngredientResultCard({super.key, required this.ingredient});
 
   @override
   State<IngredientResultCard> createState() => _IngredientResultCardState();
@@ -23,20 +20,23 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
     final isLight = Theme.of(context).brightness == Brightness.light;
 
     final ingredient = widget.ingredient;
-    final displayName = (ingredient.searchTerm != null &&
+    final displayName =
+        (ingredient.searchTerm != null &&
             ingredient.searchTerm!.trim().isNotEmpty)
         ? ingredient.searchTerm!
         : ingredient.name;
     final statusColor = _statusColor(ingredient.status, appColors);
-    final statusLabel =
-        ingredient.status.isNotEmpty ? ingredient.status : 'ไม่มีข้อมูล';
+    final statusLabel = ingredient.status.isNotEmpty
+        ? ingredient.status
+        : 'ไม่มีข้อมูล';
 
     final double? mgValue = ingredient.mg;
     String? mgLabel;
     if (mgValue != null) {
       final bool isInt = mgValue % 1 == 0;
-      final String formatted =
-          isInt ? mgValue.toInt().toString() : mgValue.toStringAsFixed(1);
+      final String formatted = isInt
+          ? mgValue.toInt().toString()
+          : mgValue.toStringAsFixed(1);
       mgLabel = '$formatted mg';
     }
 
@@ -117,10 +117,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                       _InfoChip(label: mgLabel),
                       const SizedBox(width: 8),
                     ],
-                    _StatusChip(
-                      label: statusLabel,
-                      color: statusColor,
-                    ),
+                    _StatusChip(label: statusLabel, color: statusColor),
                     const SizedBox(width: 12),
                   ],
                   Icon(
@@ -158,10 +155,7 @@ class _IngredientResultCardState extends State<IngredientResultCard> {
                   ),
                   if (referenceText.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    Divider(
-                      height: 1,
-                      color: appColors.outline,
-                    ),
+                    Divider(height: 1, color: appColors.outline),
                     const SizedBox(height: 12),
                     Text(
                       'อ้างอิง',
@@ -199,10 +193,7 @@ class _StatusChip extends StatelessWidget {
   final String label;
   final Color color;
 
-  const _StatusChip({
-    required this.label,
-    required this.color,
-  });
+  const _StatusChip({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -234,9 +225,7 @@ class _InfoChip extends StatelessWidget {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
       child: Text(
         label,
         style: TextStyle(
@@ -253,7 +242,7 @@ Color _statusColor(String status, AppColorExtension colors) {
   switch (status.trim()) {
     case 'ปลอดภัย':
       return colors.success;
-    case 'ควรระวัง':
+    case 'ระมัดระวัง':
       return colors.warning;
     case 'อันตราย':
       return colors.error;
