@@ -163,15 +163,18 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                           ? _scanNameCtrl.text
                           : 'Ingredient Scan ${_historyBox.length + 1}';
 
-                      final newScanHistory = ScanHistory(
-                        id: _uuid.v4(),
-                        scanName: scanName,
-                        scanDate: DateTime.now(),
-                        imagePath: widget.imagePath,
-                        ingredients: ingredientsForHistory,
-                        imageBytes: widget.scannedImageBytes,
-                      );
-                      await _historyBox.add(newScanHistory);
+                      // Only save to history if ingredients are found
+                      if (ingredientsForHistory.isNotEmpty) {
+                        final newScanHistory = ScanHistory(
+                          id: _uuid.v4(),
+                          scanName: scanName,
+                          scanDate: DateTime.now(),
+                          imagePath: widget.imagePath,
+                          ingredients: ingredientsForHistory,
+                          imageBytes: widget.scannedImageBytes,
+                        );
+                        await _historyBox.add(newScanHistory);
+                      }
 
                       Navigator.push(
                         context,
