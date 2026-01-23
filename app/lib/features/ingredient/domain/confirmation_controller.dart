@@ -53,9 +53,27 @@ class ConfirmationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void editAt(int index, String newName) {
+    if (index < 0 || index >= _items.length) return;
+    final n = newName.trim();
+    if (n.isEmpty) return;
+
+    final oldItem = _items[index];
+    _items[index] = ConfirmItem(
+      ingredient: Ingredient(
+        name: n,
+        status: oldItem.ingredient.status,
+        description: oldItem.ingredient.description,
+        riskLevel: oldItem.ingredient.riskLevel,
+      ),
+      checked: oldItem.checked,
+      isManual: oldItem.isManual,
+    );
+    notifyListeners();
+  }
+
   void setConfirmed(bool v) {
     _confirmed = v;
     notifyListeners();
   }
 }
-

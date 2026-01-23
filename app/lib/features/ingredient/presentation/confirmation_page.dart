@@ -75,6 +75,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     items: _vm.items,
                     onToggle: _vm.toggleAt,
                     onRemove: _vm.removeAt,
+                    onEdit: _vm.editAt,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -275,11 +276,13 @@ class _IngredientList extends StatelessWidget {
   final List<ConfirmItem> items;
   final void Function(int index, bool value) onToggle;
   final void Function(int index) onRemove;
+  final void Function(int index, String newName)? onEdit;
 
   const _IngredientList({
     required this.items,
     required this.onToggle,
     required this.onRemove,
+    this.onEdit,
   });
 
   @override
@@ -325,6 +328,14 @@ class _IngredientList extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  icon: const Icon(Icons.edit, size: 20),
+                  color: appColors.primary,
+                  tooltip: 'แก้ไข',
+                  onPressed: () {
+                    _showEditDialog(context, index, item.ingredient.name, appColors);
+                  },
+                ),
+                IconButton(
                   icon: const Icon(Icons.close),
                   color: appColors.textSecondary, // Muted color for the close icon
                   tooltip: 'ลบ',
@@ -333,6 +344,82 @@ class _IngredientList extends StatelessWidget {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, int index, String currentName, AppColorExtension appColors) {
+    final TextEditingController editController = TextEditingController(text: currentName);
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: appColors.surface,
+          title: Text(
+            'แก้ไขส่วนผสม',
+            style: TextStyle(color: appColors.text),
+          ),
+          content: TextField(
+            controller: editController,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'ชื่อส่วนผสม',
+              labelStyle: TextStyle(color: appColors.textSecondary),
+              filled: true,
+              fillColor: appColors.background,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: appColors.outline),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: appColors.outline),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: appColors.primary, width: 2),
+              ),
+            ),
+            style: TextStyle(color: appColors.text),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                // Dispose after dialog is closed
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  editController.dispose();
+                });
+              },
+              child: Text(
+                'ยกเลิก',
+                style: TextStyle(color: appColors.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final newName = editController.text.trim();
+                if (newName.isNotEmpty && onEdit != null) {
+                  onEdit!(index, newName);
+                }
+                Navigator.of(dialogContext).pop();
+                // Dispose after dialog is closed
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  editController.dispose();
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appColors.primary,
+                foregroundColor: appColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('บันทึก'),
+            ),
+          ],
         );
       },
     );
