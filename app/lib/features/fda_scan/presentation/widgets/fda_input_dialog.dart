@@ -20,7 +20,9 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
         for (int i = 0; i < groups.length; i++) {
           if (digits.length <= consumed) break;
           final g = groups[i];
-          final end = (consumed + g) <= digits.length ? (consumed + g) : digits.length;
+          final end = (consumed + g) <= digits.length
+              ? (consumed + g)
+              : digits.length;
           buf.write(digits.substring(consumed, end));
           consumed = end;
           if (consumed < digits.length && i < groups.length - 1) buf.write('-');
@@ -31,12 +33,19 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
       return StatefulBuilder(
         builder: (ctx, setState) {
           final digitsCount = onlyDigits(controller.text).length;
-          errorText = digitsCount == 0 || digitsCount == 13 ? null : 'กรอกตัวเลขให้ครบ 13 หลัก';
+          errorText = digitsCount == 0 || digitsCount == 13
+              ? null
+              : 'กรอกตัวเลขให้ครบ 13 หลัก';
           final bool canSubmit = digitsCount == 13;
           return Dialog(
             backgroundColor: colorScheme.surface, // Use theme color
-            insetPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 24),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 24,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: SizedBox(
               width: double.infinity,
               child: Stack(
@@ -51,24 +60,34 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                         Center(
                           child: Text(
                             'กรุณากรอกเลข FDA',
-                            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           controller: controller,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           onChanged: (raw) {
                             final digits = onlyDigits(raw);
                             final end = digits.length > 13 ? 13 : digits.length;
-                            final formatted = formatFdaPattern(digits.substring(0, end));
+                            final formatted = formatFdaPattern(
+                              digits.substring(0, end),
+                            );
                             if (controller.text != formatted) {
                               controller
                                 ..text = formatted
-                                ..selection = TextSelection.collapsed(offset: formatted.length);
+                                ..selection = TextSelection.collapsed(
+                                  offset: formatted.length,
+                                );
                             }
                             setState(() {});
                           },
@@ -79,20 +98,32 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                               fontWeight: FontWeight.w600,
                             ),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                            fillColor: colorScheme.surfaceVariant.withOpacity(
+                              0.5,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 16,
+                            ),
                             errorText: errorText,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
+                              borderSide: BorderSide(
+                                color: colorScheme.outline.withOpacity(0.5),
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
+                              borderSide: BorderSide(
+                                color: colorScheme.outline.withOpacity(0.5),
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+                              borderSide: BorderSide(
+                                color: colorScheme.primary,
+                                width: 1.5,
+                              ),
                             ),
                           ),
                         ),
@@ -102,14 +133,21 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                             Expanded(
                               child: OutlinedButton(
                                 style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
                                   side: BorderSide(color: colorScheme.outline),
                                   backgroundColor: colorScheme.surface,
                                   foregroundColor: colorScheme.onSurface,
                                 ),
                                 onPressed: () => Navigator.of(ctx).pop(),
-                                child: const Text('ยกเลิก', style: TextStyle(fontWeight: FontWeight.w600)),
+                                child: const Text(
+                                  'ยกเลิก',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -118,15 +156,26 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                                 opacity: canSubmit ? 1.0 : 0.5,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
                                     backgroundColor: colorScheme.primary,
                                     foregroundColor: colorScheme.onPrimary,
                                   ),
                                   onPressed: canSubmit
-                                      ? () => Navigator.of(ctx).pop(controller.text.trim())
+                                      ? () => Navigator.of(
+                                          ctx,
+                                        ).pop(controller.text.trim())
                                       : null,
-                                  child: const Text('ค้นหา', style: TextStyle(fontWeight: FontWeight.w700)),
+                                  child: const Text(
+                                    'ค้นหา',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -142,7 +191,10 @@ Future<String?> showFdaInputDialog(BuildContext context) async {
                       visualDensity: VisualDensity.compact,
                       splashRadius: 18,
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: Icon(Icons.close, color: colorScheme.onSurface.withOpacity(0.6)),
+                      icon: Icon(
+                        Icons.close,
+                        color: colorScheme.onSurface.withOpacity(0.6),
+                      ),
                     ),
                   ),
                 ],

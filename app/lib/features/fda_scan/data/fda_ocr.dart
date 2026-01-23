@@ -194,7 +194,9 @@ class FdaOcr {
       }
     }
     double sum = 0;
-    for (int i = 0; i < 256; i++) sum += i * hist[i];
+    for (int i = 0; i < 256; i++) {
+      sum += i * hist[i];
+    }
     double sumB = 0;
     int wB = 0;
     int wF = 0;

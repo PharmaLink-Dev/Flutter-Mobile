@@ -27,17 +27,49 @@ class FdaSuccessScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(28),
+              ),
             ),
             child: SafeArea(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   // Decorative shapes using onPrimary color for contrast
-                  Positioned(top: 56, left: 28, child: _SoftShape.circle(18, colorScheme.onPrimary.withOpacity(0.2))),
-                  Positioned(top: 96, right: 36, child: _SoftShape.rounded(44, 14, colorScheme.onPrimary.withOpacity(0.2))),
-                  Positioned(bottom: 96, left: 64, child: _SoftShape.rounded(56, 12, colorScheme.onPrimary.withOpacity(0.1))),
-                  Positioned(bottom: 120, right: 40, child: _SoftShape.circle(12, colorScheme.onPrimary.withOpacity(0.25))),
+                  Positioned(
+                    top: 56,
+                    left: 28,
+                    child: _SoftShape.circle(
+                      18,
+                      colorScheme.onPrimary.withOpacity(0.2),
+                    ),
+                  ),
+                  Positioned(
+                    top: 96,
+                    right: 36,
+                    child: _SoftShape.rounded(
+                      44,
+                      14,
+                      colorScheme.onPrimary.withOpacity(0.2),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 96,
+                    left: 64,
+                    child: _SoftShape.rounded(
+                      56,
+                      12,
+                      colorScheme.onPrimary.withOpacity(0.1),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 120,
+                    right: 40,
+                    child: _SoftShape.circle(
+                      12,
+                      colorScheme.onPrimary.withOpacity(0.25),
+                    ),
+                  ),
 
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -48,17 +80,23 @@ class FdaSuccessScreen extends StatelessWidget {
                         height: 140,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: colorScheme.onPrimary, // White in light, dark in dark
+                          color: colorScheme
+                              .onPrimary, // White in light, dark in dark
                         ),
                         child: Center(
-                          child: Icon(Icons.check_circle_outline_rounded, size: 72, color: successColor),
+                          child: Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 72,
+                            color: successColor,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
                       Text(
                         'ผลิตภัณฑ์ขึ้นทะเบียน !',
                         style: theme.textTheme.titleLarge?.copyWith(
-                          color: colorScheme.onPrimary, // Text color contrasts with background
+                          color: colorScheme
+                              .onPrimary, // Text color contrasts with background
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -98,7 +136,9 @@ class FdaSuccessScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
                   style: ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(colorScheme.onPrimary.withOpacity(0.2)),
+                    backgroundColor: MaterialStatePropertyAll(
+                      colorScheme.onPrimary.withOpacity(0.2),
+                    ),
                   ),
                   icon: Icon(CupertinoIcons.back, color: colorScheme.onPrimary),
                   onPressed: () => Navigator.of(context).maybePop(),
@@ -114,17 +154,17 @@ class FdaSuccessScreen extends StatelessWidget {
 
 class _SoftShape {
   static Widget circle(double size, Color color) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
 
   static Widget rounded(double width, double height, Color color) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(height / 2),
-        ),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(height / 2),
+    ),
+  );
 }

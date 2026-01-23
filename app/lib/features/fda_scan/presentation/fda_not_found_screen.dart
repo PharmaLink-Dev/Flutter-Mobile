@@ -35,16 +35,48 @@ class FdaNotFoundScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(28),
+              ),
             ),
             child: SafeArea(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Positioned(top: 56, left: 28, child: _SoftShape.circle(18, colorScheme.onError.withOpacity(0.2))),
-                  Positioned(top: 96, right: 36, child: _SoftShape.rounded(44, 14, colorScheme.onError.withOpacity(0.2))),
-                  Positioned(bottom: 96, left: 64, child: _SoftShape.rounded(56, 12, colorScheme.onError.withOpacity(0.1))),
-                  Positioned(bottom: 120, right: 40, child: _SoftShape.circle(12, colorScheme.onError.withOpacity(0.25))),
+                  Positioned(
+                    top: 56,
+                    left: 28,
+                    child: _SoftShape.circle(
+                      18,
+                      colorScheme.onError.withOpacity(0.2),
+                    ),
+                  ),
+                  Positioned(
+                    top: 96,
+                    right: 36,
+                    child: _SoftShape.rounded(
+                      44,
+                      14,
+                      colorScheme.onError.withOpacity(0.2),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 96,
+                    left: 64,
+                    child: _SoftShape.rounded(
+                      56,
+                      12,
+                      colorScheme.onError.withOpacity(0.1),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 120,
+                    right: 40,
+                    child: _SoftShape.circle(
+                      12,
+                      colorScheme.onError.withOpacity(0.25),
+                    ),
+                  ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -56,7 +88,11 @@ class FdaNotFoundScreen extends StatelessWidget {
                           color: colorScheme.onError,
                         ),
                         child: Center(
-                          child: Icon(CupertinoIcons.xmark, size: 72, color: colorScheme.error),
+                          child: Icon(
+                            CupertinoIcons.xmark,
+                            size: 72,
+                            color: colorScheme.error,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -98,7 +134,11 @@ class FdaNotFoundScreen extends StatelessWidget {
                     topRight: Radius.circular(24),
                   ),
                   boxShadow: [
-                    BoxShadow(color: theme.shadowColor.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -6)),
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, -6),
+                    ),
                   ],
                 ),
                 // add larger bottom padding so the buttons are not glued to the edge
@@ -106,7 +146,12 @@ class FdaNotFoundScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ผลการตรวจสอบ', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                    Text(
+                      'ผลการตรวจสอบ',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -124,18 +169,30 @@ class FdaNotFoundScreen extends StatelessWidget {
                               color: colorScheme.error.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Icon(Icons.error_outline_rounded, color: colorScheme.error),
+                            child: Icon(
+                              Icons.error_outline_rounded,
+                              color: colorScheme.error,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('ไม่พบข้อมูลผลิตภัณฑ์',
-                                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800, color: colorScheme.onSurface)),
+                                Text(
+                                  'ไม่พบข้อมูลผลิตภัณฑ์',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
-                                Text('เลขที่ค้นหา: ' + scannedRaw,
-                                    style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+                                Text(
+                                  'เลขที่ค้นหา: ' + scannedRaw,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -151,7 +208,9 @@ class FdaNotFoundScreen extends StatelessWidget {
                           icon: const Icon(Icons.edit),
                           label: const Text('แก้ไข'),
                           style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             side: BorderSide(color: colorScheme.outline),
                             foregroundColor: colorScheme.onSurface,
@@ -164,7 +223,9 @@ class FdaNotFoundScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorScheme.error,
                             foregroundColor: colorScheme.onError,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           child: const Text('สแกนใหม่'),
@@ -186,7 +247,9 @@ class FdaNotFoundScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: IconButton(
                   style: ButtonStyle(
-                    backgroundColor: MaterialStatePropertyAll(colorScheme.onError.withOpacity(0.2)),
+                    backgroundColor: MaterialStatePropertyAll(
+                      colorScheme.onError.withOpacity(0.2),
+                    ),
                   ),
                   icon: Icon(CupertinoIcons.back, color: colorScheme.onError),
                   onPressed: () => Navigator.of(context).maybePop(),
@@ -202,17 +265,17 @@ class FdaNotFoundScreen extends StatelessWidget {
 
 class _SoftShape {
   static Widget circle(double size, Color color) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+  );
 
   static Widget rounded(double width, double height, Color color) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(height / 2),
-        ),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(height / 2),
+    ),
+  );
 }

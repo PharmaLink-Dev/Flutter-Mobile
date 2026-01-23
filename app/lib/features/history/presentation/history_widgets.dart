@@ -28,7 +28,7 @@ class HistoryToggleButtons extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -108,7 +108,7 @@ class EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 80, color: appColors.textSecondary.withOpacity(0.5)),
+          Icon(Icons.history, size: 80, color: appColors.textSecondary.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           Text(
             message,
@@ -175,7 +175,7 @@ class IngredientCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -222,7 +222,7 @@ class IngredientCard extends StatelessWidget {
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(
-                      backgroundColor: appColors.error.withOpacity(0.1),
+                      backgroundColor: appColors.error.withValues(alpha: 0.1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -276,7 +276,7 @@ class IngredientCard extends StatelessWidget {
                                   errorBuilder: (context, error, stackTrace) {
                                     return Icon(
                                       Icons.image_not_supported,
-                                      color: appColors.textSecondary.withOpacity(0.5),
+                                      color: appColors.textSecondary.withValues(alpha: 0.5),
                                       size: 32,
                                     );
                                   },
@@ -349,7 +349,7 @@ class IngredientCard extends StatelessWidget {
                                 : Icons.favorite_border,
                             color: item.isFavorite
                                 ? appColors.error
-                                : appColors.textSecondary.withOpacity(0.7),
+                                : appColors.textSecondary.withValues(alpha: 0.7),
                             size: 24,
                           ),
                         ),
@@ -394,7 +394,7 @@ class FdaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -442,7 +442,7 @@ class FdaCard extends StatelessWidget {
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(
-                      backgroundColor: appColors.error.withOpacity(0.1),
+                      backgroundColor: appColors.error.withValues(alpha: 0.1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -478,7 +478,7 @@ class FdaCard extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: appColors.primary.withOpacity(0.2),
+                        color: appColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -552,7 +552,7 @@ class FdaCard extends StatelessWidget {
                                 : Icons.favorite_border,
                             color: item.isFavorite
                                 ? appColors.error
-                                : appColors.textSecondary.withOpacity(0.7),
+                                : appColors.textSecondary.withValues(alpha: 0.7),
                             size: 24,
                           ),
                         ),

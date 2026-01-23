@@ -69,7 +69,7 @@ class _CropImageScreenState extends State<CropImageScreen> {
               controller: _controller,
               image: widget.imageBytes,
               baseColor: Colors.black,
-              maskColor: Colors.black.withOpacity(0.5),
+              maskColor: Colors.black.withValues(alpha: 0.5),
               onCropped: _onCropped,
               // เปิดปุ่มเฉพาะเมื่อสถานะพร้อม เพื่อลดโอกาสเกิด InvalidRectError
               onStatusChanged: (status) {
