@@ -7,6 +7,7 @@ import 'package:app/features/scan/presentation/widgets/scan_page_template.dart';
 
 import 'confirmation_page.dart';
 import 'package:app/features/ingredient/data/typhoon-ocr.dart';
+import 'package:app/features/fda_scan/presentation/widgets/scan_disclaimer_dialog.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -25,6 +26,15 @@ class _ScanScreenState extends State<ScanScreen> {
           imageBytes: bytes,
           fileName: fileName,
           onCropped: (croppedBytes, originalFilename) async {
+            // Show disclaimer dialog before processing
+            final accepted = await showScanDisclaimerDialog(context);
+
+            // If user cancelled, exit early
+            if (accepted != true || !context.mounted) {
+              Navigator.of(context).pop(); // Close crop screen
+              return;
+            }
+
             setState(() => _isLoading = true);
             Navigator.of(context).pop();
 
