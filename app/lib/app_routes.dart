@@ -12,6 +12,7 @@ import 'features/settings/presentation/settings_screen.dart';
 import 'features/settings/presentation/appearance_screen.dart';
 import 'features/policy/presentation/policy_check_screen.dart';
 import 'features/policy/presentation/policy_screen.dart';
+import 'features/tutorial/presentation/tutorial_screen.dart';
 
 // --- Main Router Configuration ---
 final GoRouter appRouter = GoRouter(
@@ -19,16 +20,43 @@ final GoRouter appRouter = GoRouter(
   routes: [
     // Initial policy check screen
     GoRoute(path: '/', builder: (_, __) => const PolicyCheckScreen()),
-    GoRoute(path: '/initial-policy', builder: (_, __) => const PolicyScreen(isFirstLaunch: true)),
+    GoRoute(
+      path: '/initial-policy',
+      builder: (_, __) => const PolicyScreen(isFirstLaunch: true),
+    ),
+    GoRoute(path: '/tutorial', builder: (_, __) => const TutorialScreen()),
 
     // Main app structure with bottom navigation
     StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) => ShellScaffold(navigationShell: navigationShell),
+      builder: (context, state, navigationShell) =>
+          ShellScaffold(navigationShell: navigationShell),
       branches: [
-        StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (_, __) => const HomeScreen())]),
-        StatefulShellBranch(routes: [GoRoute(path: '/history', builder: (_, __) => const HistoryScreen())]),
-        StatefulShellBranch(routes: [GoRoute(path: '/news', builder: (_, __) => const NewsScreen())]),
-        StatefulShellBranch(routes: [GoRoute(path: '/settings', builder: (_, __) => const SettingsScreen())]),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/history',
+              builder: (_, __) => const HistoryScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/news', builder: (_, __) => const NewsScreen()),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (_, __) => const SettingsScreen(),
+            ),
+          ],
+        ),
       ],
     ),
 
@@ -36,7 +64,10 @@ final GoRouter appRouter = GoRouter(
     // These are pushed on top of the current screen.
     GoRoute(path: '/scan', builder: (_, __) => const ScanScreen()),
     GoRoute(path: '/scan-fda', builder: (_, __) => const FdaScanScreen()),
-    GoRoute(path: '/settings/appearance', builder: (_, __) => const AppearanceScreen()),
+    GoRoute(
+      path: '/settings/appearance',
+      builder: (_, __) => const AppearanceScreen(),
+    ),
     GoRoute(path: '/settings/policy', builder: (_, __) => const PolicyScreen()),
   ],
 );
@@ -104,11 +135,39 @@ class _CustomBottomNavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildNavItem(context, icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Home', index: 0, colors: colors),
-                _buildNavItem(context, icon: Icons.history_outlined, activeIcon: Icons.history, label: 'History', index: 1, colors: colors),
+                _buildNavItem(
+                  context,
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: 'Home',
+                  index: 0,
+                  colors: colors,
+                ),
+                _buildNavItem(
+                  context,
+                  icon: Icons.history_outlined,
+                  activeIcon: Icons.history,
+                  label: 'History',
+                  index: 1,
+                  colors: colors,
+                ),
                 const SizedBox(width: 56), // Placeholder for the central button
-                _buildNavItem(context, icon: Icons.newspaper_outlined, activeIcon: Icons.newspaper, label: 'News', index: 3, colors: colors),
-                _buildNavItem(context, icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings', index: 4, colors: colors),
+                _buildNavItem(
+                  context,
+                  icon: Icons.newspaper_outlined,
+                  activeIcon: Icons.newspaper,
+                  label: 'News',
+                  index: 3,
+                  colors: colors,
+                ),
+                _buildNavItem(
+                  context,
+                  icon: Icons.settings_outlined,
+                  activeIcon: Icons.settings,
+                  label: 'Settings',
+                  index: 4,
+                  colors: colors,
+                ),
               ],
             ),
             Align(
@@ -125,9 +184,19 @@ class _CustomBottomNavBar extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    boxShadow: [BoxShadow(color: colors.primary.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.primary.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 36),
+                  child: const Icon(
+                    Icons.qr_code_scanner_rounded,
+                    color: Colors.white,
+                    size: 36,
+                  ),
                 ),
               ),
             ),
@@ -137,7 +206,14 @@ class _CustomBottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, {required IconData icon, required IconData activeIcon, required String label, required int index, required AppColorExtension colors}) {
+  Widget _buildNavItem(
+    BuildContext context, {
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required int index,
+    required AppColorExtension colors,
+  }) {
     final bool isSelected = currentIndex == index;
     return Expanded(
       child: InkWell(

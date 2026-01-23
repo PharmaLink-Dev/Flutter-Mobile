@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app/features/fda_scan/data/fda_search_service.dart';
 import 'package:app/features/fda_scan/presentation/fda_not_found_screen.dart';
 import 'package:app/features/fda_scan/presentation/fda_success_screen.dart';
+import 'package:app/features/fda_scan/presentation/widgets/scan_disclaimer_dialog.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -19,6 +20,12 @@ class FdaFlowService {
   Future<void> fetchAndNavigate(String fdaNumber) async {
     if (!context.mounted) return;
 
+    // Show disclaimer dialog before proceeding
+    final accepted = await showScanDisclaimerDialog(context);
+
+    // If user cancelled or dialog was dismissed, exit early
+    if (accepted != true || !context.mounted) return;
+
     // Show a loading indicator, if desired (optional)
     // showDialog(context: context, builder: (_) => Center(child: CircularProgressIndicator()));
 
@@ -34,8 +41,9 @@ class FdaFlowService {
 
       if (FdaSearchService.isValidResult(map)) {
         // --- IMPROVEMENT: Use product name for history entry ---
-        final productName =
-            map['ชื่อผลิตภัณฑ์(TH)']?.isNotEmpty ?? false ? map['ชื่อผลิตภัณฑ์(TH)'] : map['ชื่อผลิตภัณฑ์(EN)'];
+        final productName = map['ชื่อผลิตภัณฑ์(TH)']?.isNotEmpty ?? false
+            ? map['ชื่อผลิตภัณฑ์(TH)']
+            : map['ชื่อผลิตภัณฑ์(EN)'];
 
         final box = Hive.box<FdaScan>('fda_scans');
         await box.add(
