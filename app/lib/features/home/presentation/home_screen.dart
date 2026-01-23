@@ -1,4 +1,3 @@
-
 import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +15,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: appColors.background,
-      appBar: buildAppBar(context, appColors),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,7 +22,8 @@ class HomeScreen extends StatelessWidget {
             HeaderWithSearchBox(
               size: size,
               primaryColor: appColors.primary,
-              onPrimaryTextColor: appColors.surface,
+              onPrimaryTextColor:
+                  Colors.white, // Always white for contrast on gradient
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -40,13 +39,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  AppBar buildAppBar(BuildContext context, AppColorExtension appColors) {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: appColors.primary,
-      // No actions are provided, so the settings icon will be removed.
-    );
-  }
+  // AppBar removed
 }
 
 class HeaderWithSearchBox extends StatelessWidget {
@@ -64,36 +57,84 @@ class HeaderWithSearchBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final topPadding = MediaQuery.of(context).padding.top;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      height: size.height * 0.18,
+      // Increased height to account for status bar
+      height: size.height * 0.2 + topPadding,
       child: Stack(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 20,
               right: 20,
               bottom: 36 + 20,
+              top: topPadding + 80, // Added extra padding to move text down
             ),
-            height: size.height * 0.18 - 27,
+            height: size.height * 0.2 - 27 + topPadding,
             decoration: BoxDecoration(
-              color: primaryColor,
+              gradient: AppGradients.primaryHeader,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(36),
                 bottomRight: Radius.circular(36),
               ),
-            ),
-            child: Row(
-              children: <Widget>[
-                Text(
-                  'Welcome to kidness',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: onPrimaryTextColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+              boxShadow: [
+                BoxShadow(
+                  color: primaryColor.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
                 ),
-                const Spacer(),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Decorative Circles
+                Positioned(
+                  top: -20,
+                  right: -20,
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  left: -10,
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        'Welcome to kidness',
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              color: onPrimaryTextColor,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 10.0,
+                                  color: AppColorExtension.textGlow,
+                                  offset: const Offset(0, 0),
+                                ),
+                              ],
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

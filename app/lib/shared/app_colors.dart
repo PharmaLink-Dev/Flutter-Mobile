@@ -116,6 +116,9 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
     warning: Color(0xFFFFEB3B), // Yellow 500 - ระมัดระวัง
     neutral: Color(0xFFB0BEC5), // Same as textSecondary
   );
+
+  // Glow Colors
+  static const Color textGlow = Colors.white;
 }
 
 // You can keep gradients if they are used, but be mindful that
@@ -148,5 +151,34 @@ class AppGradients {
     colors: [Color(0xFF2DD4BF), Color(0xFF14B8A6), Color(0xFF263238)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  // --- Quick Action Gradients ---
+  static const LinearGradient scanLabel = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF42A5F5), // Blue 400
+      Color(0xFF26A69A), // Teal 400
+    ],
+  );
+
+  static const LinearGradient searchFda = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF66BB6A), // Green 400
+      Color(0xFFFDD835), // Yellow 600
+    ],
+  );
+
+  // --- Header Gradients ---
+  static const LinearGradient primaryHeader = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF17C5A3), // Primary
+      Color(0xFF0D9488), // Darker Teal
+    ],
   );
 }

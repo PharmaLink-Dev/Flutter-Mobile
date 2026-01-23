@@ -1,4 +1,3 @@
-
 import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,22 +9,23 @@ class QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final actionCards = [
       ActionCard(
-        gradient: isDarkMode ? AppGradients.buttonDark : AppGradients.button,
+        gradient: AppGradients.scanLabel,
         icon: FontAwesomeIcons.camera,
         title: "สแกนฉลาก",
         subtitle: "วิเคราะห์ส่วนผสม",
         onTap: () => context.go('/scan'),
+        shadowColor: const Color(0xFF42A5F5).withValues(alpha: 0.4),
       ),
       ActionCard(
-        gradient: isDarkMode ? AppGradients.actionCardSecondaryDark : AppGradients.actionCardSecondary,
+        gradient: AppGradients.searchFda,
         icon: FontAwesomeIcons.barcode,
         title: "ค้นหา FDA",
         subtitle: "ตรวจสอบใบอนุญาต",
         onTap: () => context.go('/scan-fda'),
+        shadowColor: const Color(0xFFFDD835).withValues(alpha: 0.4),
       ),
     ];
 
@@ -39,7 +39,6 @@ class QuickActions extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              // CHANGED: Use text color from theme
               color: appColors.text,
             ),
           ),
@@ -47,7 +46,8 @@ class QuickActions extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             const double spacing = 12.0;
-            final double cardWidth = ((constraints.maxWidth - spacing) / 2).clamp(140.0, 165.0);
+            final double cardWidth = ((constraints.maxWidth - spacing) / 2)
+                .clamp(140.0, 165.0);
 
             return Center(
               child: Wrap(
@@ -55,10 +55,7 @@ class QuickActions extends StatelessWidget {
                 runSpacing: spacing,
                 alignment: WrapAlignment.center,
                 children: actionCards.map((card) {
-                  return SizedBox(
-                    width: cardWidth,
-                    child: card,
-                  );
+                  return SizedBox(width: cardWidth, child: card);
                 }).toList(),
               ),
             );
@@ -75,6 +72,7 @@ class ActionCard extends StatefulWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final Color? shadowColor;
 
   const ActionCard({
     super.key,
@@ -83,6 +81,7 @@ class ActionCard extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.shadowColor,
   });
 
   @override
@@ -102,13 +101,6 @@ class _ActionCardState extends State<ActionCard> {
   @override
   Widget build(BuildContext context) {
     final scale = _isTapped ? 0.95 : 1.0;
-    // NEW: Get theme-aware colors
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
-
-    // For content on a colorful gradient, a static white or a highly contrasting
-    // color from the theme is usually best. `appColors.surface` is often white
-    // in light mode and a dark color in dark mode. For gradients, we might
-    // want to stick with a light color for readability in both themes.
     final Color onGradientColor = Colors.white;
 
     return AnimatedScale(
@@ -129,12 +121,18 @@ class _ActionCardState extends State<ActionCard> {
             decoration: BoxDecoration(
               gradient: widget.gradient,
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
               boxShadow: [
                 BoxShadow(
-                  // CHANGED: Use a theme-aware shadow color or a semi-transparent black
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color:
+                      widget.shadowColor ??
+                      Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                  spreadRadius: -2,
                 ),
               ],
             ),
@@ -146,7 +144,18 @@ class _ActionCardState extends State<ActionCard> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(widget.icon, color: onGradientColor, size: showText ? 28 : 32),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: onGradientColor,
+                        size: showText ? 24 : 28,
+                      ),
+                    ),
                     if (showText) ...[
                       const SizedBox(height: 12),
                       Text(
@@ -156,6 +165,13 @@ class _ActionCardState extends State<ActionCard> {
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: onGradientColor,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -163,7 +179,7 @@ class _ActionCardState extends State<ActionCard> {
                         widget.subtitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
                           color: onGradientColor.withValues(alpha: 0.9),
                         ),
                       ),
