@@ -298,21 +298,16 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
   }
 
   Widget _buildUploadButton() {
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return Container(
       height: 54,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: isLight ? Colors.white24 : appColors.outline),
+        border: Border.all(color: Colors.white24),
         gradient: LinearGradient(
-          colors: isLight
-              ? const [Color(0x335E6A75), Color(0x115E6A75)]
-              : [
-                  appColors.surface.withValues(alpha: 0.8),
-                  appColors.surface.withValues(alpha: 0.5),
-                ],
+          colors: [
+            Color(0x99000000), // Dark black/grey
+            Color(0x66000000),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -326,15 +321,12 @@ class _ScanPageTemplateState extends State<ScanPageTemplate>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.upload,
-                  color: isLight ? Colors.white : appColors.text,
-                ),
+                Icon(Icons.upload, color: Colors.white),
                 const SizedBox(width: 8),
                 Text(
                   'อัพโหลดรูปภาพ',
                   style: TextStyle(
-                    color: isLight ? Colors.white : appColors.text,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -380,9 +372,6 @@ class _RoundIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
     return InkResponse(
       onTap: onTap,
       customBorder: const CircleBorder(),
@@ -392,9 +381,7 @@ class _RoundIconButton extends StatelessWidget {
         height: 38,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: isLight
-              ? const Color(0x335E6A75)
-              : appColors.surface.withValues(alpha: 0.5),
+          color: Colors.black.withValues(alpha: 0.5),
         ),
         child: Icon(icon, color: Colors.white),
       ),
@@ -417,39 +404,32 @@ class _PlainHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
-    final isLight = Theme.of(context).brightness == Brightness.light;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isLight
-            ? const Color(0x335E6A75)
-            : appColors.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          _RoundIconButton(icon: CupertinoIcons.back, onTap: onBack),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-              ),
+    return Row(
+      children: [
+        _RoundIconButton(icon: CupertinoIcons.back, onTap: onBack),
+        Expanded(
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              shadows: [
+                Shadow(
+                  offset: Offset(0, 1),
+                  blurRadius: 4,
+                  color: Colors.black54,
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 8),
-          _RoundIconButton(
-            icon: isTorchOn ? Icons.flash_on : Icons.flash_off,
-            onTap: onToggleTorch,
-          ),
-        ],
-      ),
+        ),
+        _RoundIconButton(
+          icon: isTorchOn ? Icons.flash_on : Icons.flash_off,
+          onTap: onToggleTorch,
+        ),
+      ],
     );
   }
 }

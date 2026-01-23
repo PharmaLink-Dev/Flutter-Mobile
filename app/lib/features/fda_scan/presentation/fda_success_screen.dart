@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app/shared/app_colors.dart';
 import 'widgets/fda_result_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -11,8 +12,8 @@ class FdaSuccessScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    // Use a specific green color that works well in both light and dark themes.
-    final successColor = Colors.green.shade600;
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+    final successColor = appColors.primary;
 
     return Scaffold(
       backgroundColor: successColor, // A consistent background color
@@ -23,7 +24,7 @@ class FdaSuccessScreen extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [successColor.withOpacity(0.8), successColor],
+                colors: [successColor.withValues(alpha: 0.8), successColor],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -41,7 +42,7 @@ class FdaSuccessScreen extends StatelessWidget {
                     left: 28,
                     child: _SoftShape.circle(
                       18,
-                      colorScheme.onPrimary.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                     ),
                   ),
                   Positioned(
@@ -50,7 +51,7 @@ class FdaSuccessScreen extends StatelessWidget {
                     child: _SoftShape.rounded(
                       44,
                       14,
-                      colorScheme.onPrimary.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                     ),
                   ),
                   Positioned(
@@ -59,7 +60,7 @@ class FdaSuccessScreen extends StatelessWidget {
                     child: _SoftShape.rounded(
                       56,
                       12,
-                      colorScheme.onPrimary.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                     ),
                   ),
                   Positioned(
@@ -67,48 +68,52 @@ class FdaSuccessScreen extends StatelessWidget {
                     right: 40,
                     child: _SoftShape.circle(
                       12,
-                      colorScheme.onPrimary.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                     ),
                   ),
 
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Use onPrimary for the circle to contrast with the green background
-                      Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colorScheme
-                              .onPrimary, // White in light, dark in dark
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.check_circle_outline_rounded,
-                            size: 72,
-                            color: successColor,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 60,
+                    ), // Push content up
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Use onPrimary for the circle to contrast with the green background
+                        Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white, // White in light, dark in dark
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle_outline_rounded,
+                              size: 72,
+                              color: successColor,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'ผลิตภัณฑ์ขึ้นทะเบียน !',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: colorScheme
-                              .onPrimary, // Text color contrasts with background
-                          fontWeight: FontWeight.w800,
+                        const SizedBox(height: 24),
+                        Text(
+                          'ผลิตภัณฑ์ขึ้นทะเบียน !',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors
+                                .white, // Text color contrasts with background
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'ข้อมูลตรวจสอบจากฐานข้อมูล\nสำนักงานคณะกรรมการอาหารและยา กระทรวงสาธารณสุข',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onPrimary.withOpacity(0.95),
+                        const SizedBox(height: 8),
+                        Text(
+                          'ข้อมูลตรวจสอบจากฐานข้อมูล\nสำนักงานคณะกรรมการอาหารและยา กระทรวงสาธารณสุข',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.95),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -153,18 +158,19 @@ class FdaSuccessScreen extends StatelessWidget {
 }
 
 class _SoftShape {
-  static Widget circle(double size, Color color) => Container(
+  static Widget circle(double size, {required Color color}) => Container(
     width: size,
     height: size,
     decoration: BoxDecoration(shape: BoxShape.circle, color: color),
   );
 
-  static Widget rounded(double width, double height, Color color) => Container(
-    width: width,
-    height: height,
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: BorderRadius.circular(height / 2),
-    ),
-  );
+  static Widget rounded(double width, double height, {required Color color}) =>
+      Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(height / 2),
+        ),
+      );
 }

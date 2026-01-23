@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -44,18 +43,13 @@ class _ResultPageState extends State<ResultPage> {
     // แสดงคำเตือนสำหรับผู้ป่วยโรคไตเมื่อพบส่วนผสมกลุ่มสีแดง
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final redIngredients = widget.ingredients
-          .where(
-            (ingredient) => ingredient.riskLevel.toLowerCase() == 'red',
-          )
+          .where((ingredient) => ingredient.riskLevel.toLowerCase() == 'red')
           .map((ingredient) => ingredient.name)
           .toSet()
           .toList();
 
       if (redIngredients.isNotEmpty) {
-        showWarningDialog(
-          context,
-          riskyIngredients: redIngredients,
-        );
+        showWarningDialog(context, riskyIngredients: redIngredients);
       }
     });
   }
@@ -66,10 +60,7 @@ class _ResultPageState extends State<ResultPage> {
 
     Widget imageWidget;
     if (widget.imageBytes != null && widget.imageBytes!.isNotEmpty) {
-      imageWidget = Image.memory(
-        widget.imageBytes!,
-        fit: BoxFit.cover,
-      );
+      imageWidget = Image.memory(widget.imageBytes!, fit: BoxFit.cover);
     } else if (widget.imagePath != null && widget.imagePath!.isNotEmpty) {
       imageWidget = Image.file(
         File(widget.imagePath!),
@@ -88,24 +79,15 @@ class _ResultPageState extends State<ResultPage> {
 
     Widget content = ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: AspectRatio(
-        aspectRatio: 4 / 3,
-        child: imageWidget,
-      ),
+      child: AspectRatio(aspectRatio: 4 / 3, child: imageWidget),
     );
 
     final heroTag = widget.heroTag;
     if (heroTag != null && heroTag.isNotEmpty) {
-      content = Hero(
-        tag: heroTag,
-        child: content,
-      );
+      content = Hero(tag: heroTag, child: content);
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: content,
-    );
+    return Container(margin: const EdgeInsets.only(bottom: 16), child: content);
   }
 
   @override
@@ -113,7 +95,8 @@ class _ResultPageState extends State<ResultPage> {
     final appColors = Theme.of(context).extension<AppColorExtension>()!;
 
     // จัดเรียงส่วนผสมตามระดับความเสี่ยง: อันตราย (red) > ระมัดระวัง (yellow) > ปลอดภัย (green / อื่น ๆ)
-    final ingredients = [...widget.ingredients]..sort((a, b) {
+    final ingredients = [...widget.ingredients]
+      ..sort((a, b) {
         int score(String level) {
           switch (level.toLowerCase()) {
             case 'red':
@@ -134,27 +117,28 @@ class _ResultPageState extends State<ResultPage> {
       });
 
     // หา index สุดท้ายของแต่ละโซนความเสี่ยง
-    int lastRedIndex = ingredients.lastIndexWhere((ing) => ing.riskLevel.toLowerCase() == 'red');
-    int lastYellowIndex = ingredients.lastIndexWhere((ing) => ing.riskLevel.toLowerCase() == 'yellow');
+    int lastRedIndex = ingredients.lastIndexWhere(
+      (ing) => ing.riskLevel.toLowerCase() == 'red',
+    );
+    int lastYellowIndex = ingredients.lastIndexWhere(
+      (ing) => ing.riskLevel.toLowerCase() == 'yellow',
+    );
 
     return Scaffold(
       backgroundColor: appColors.background,
       appBar: AppBar(
-        backgroundColor: appColors.primary,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppGradients.primaryHeader),
+        ),
+        backgroundColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          decoration: BoxDecoration(
-            color: appColors.surface,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Text(
-            'ผลการวิเคราะห์ส่วนผสม',
-            style: TextStyle(
-              color: appColors.primaryDark,
-              fontWeight: FontWeight.w600,
-            ),
+        title: Text(
+          'ผลการวิเคราะห์ส่วนผสม',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
         ),
       ),
@@ -189,9 +173,7 @@ class _ResultPageState extends State<ResultPage> {
 
                 return Column(
                   children: [
-                    IngredientResultCard(
-                      ingredient: ingredient,
-                    ),
+                    IngredientResultCard(ingredient: ingredient),
                     if (isZoneBoundary && index != ingredients.length - 1)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),

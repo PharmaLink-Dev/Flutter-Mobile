@@ -61,8 +61,8 @@ class HeaderWithSearchBox extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      // Increased height to account for status bar
-      height: size.height * 0.2 + topPadding,
+      // Increased height to account for status bar and extra padding
+      height: size.height * 0.2 + topPadding + 20,
       child: Stack(
         children: <Widget>[
           Container(
@@ -70,9 +70,9 @@ class HeaderWithSearchBox extends StatelessWidget {
               left: 20,
               right: 20,
               bottom: 36 + 20,
-              top: topPadding + 80, // Added extra padding to move text down
+              top: topPadding + 60, // Added extra padding to move text down
             ),
-            height: size.height * 0.2 - 27 + topPadding,
+            height: size.height * 0.2 - 27 + topPadding + 20,
             decoration: BoxDecoration(
               gradient: AppGradients.primaryHeader,
               borderRadius: const BorderRadius.only(

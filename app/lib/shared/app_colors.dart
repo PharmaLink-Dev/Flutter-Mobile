@@ -87,34 +87,34 @@ class AppColorExtension extends ThemeExtension<AppColorExtension> {
 
   /// Light Theme Color Scheme
   static const light = AppColorExtension(
-    primary: Color(0xFF17C5A3),
-    primaryDark: Color(0xFF0FAE8F),
-    primaryLight: Color(0xFF66E0CC),
+    primary: Color(0xFF0ABAB5), // Vibrant Teal
+    primaryDark: Color(0xFF008F99), // Darker Teal
+    primaryLight: Color(0xFF56DFCF), // Light Teal
     text: Color(0xFF22303C),
     textSecondary: Color(0xFF6B7B8A),
     surface: Colors.white,
-    background: Color(0xFFF2FBF8),
+    background: Color(0xFFFFEDF3), // Pale Pink
     error: Color(0xFFEF5350),
-    outline: Color(0xFFE3F0EC),
-    success: Color(0xFF2E7D32), // Green 800
-    warning: Color(0xFFFDD835), // Yellow 600 - ระมัดระวัง
-    neutral: Color(0xFF6B7B8A), // Same as textSecondary
+    outline: Color(0xFFADEED9), // Pale Teal
+    success: Color(0xFFA8FBD3), // Light Green
+    warning: Color(0xFFFDD835), // Yellow 600
+    neutral: Color(0xFF7AC6D2), // Muted Blue
   );
 
   /// Dark Theme Color Scheme
   static const dark = AppColorExtension(
-    primary: Color(0xFF17C5A3), // Keep primary vibrant
-    primaryDark: Color(0xFF66E0CC), // Lighter for contrast
-    primaryLight: Color(0xFF0FAE8F), // Darker for contrast
-    text: Color(0xFFF2FBF8), // Light text for dark background
-    textSecondary: Color(0xFFB0BEC5), // Muted light gray
-    surface: Color(0xFF263238), // Dark surface
-    background: Color(0xFF121212), // Near black background
-    error: Color(0xFFCF6679), // Material standard dark error
-    outline: Color(0xFF37474F), // Dark outline
-    success: Color(0xFF66BB6A), // Green 300
-    warning: Color(0xFFFFEB3B), // Yellow 500 - ระมัดระวัง
-    neutral: Color(0xFFB0BEC5), // Same as textSecondary
+    primary: Color(0xFF0ABAB5),
+    primaryDark: Color(0xFF56DFCF),
+    primaryLight: Color(0xFF008F99),
+    text: Color(0xFFF2FBF8),
+    textSecondary: Color(0xFFB0BEC5),
+    surface: Color(0xFF263238),
+    background: Color(0xFF121212),
+    error: Color(0xFFCF6679),
+    outline: Color(0xFF37474F),
+    success: Color(0xFF66BB6A),
+    warning: Color(0xFFFFEB3B),
+    neutral: Color(0xFFB0BEC5),
   );
 
   // Glow Colors
@@ -130,12 +130,12 @@ class AppGradients {
   static const LinearGradient button = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF6EE7B7), Color(0xFF17C5A3), Color(0xFF0D9488)],
+    colors: [Color(0xFF56DFCF), Color(0xFF0ABAB5), Color(0xFF008F99)],
   );
 
   // A cooler, minty green gradient
   static const LinearGradient actionCardSecondary = LinearGradient(
-    colors: [Color(0xFF5EEAD4), Color(0xFF2DD4BF), Color(0xFF14B8A6)],
+    colors: [Color(0xFF77E4C8), Color(0xFF36C2CE), Color(0xFF3D90D7)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -144,11 +144,11 @@ class AppGradients {
   static const LinearGradient buttonDark = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF17C5A3), Color(0xFF0FAE8F), Color(0xFF263238)],
+    colors: [Color(0xFF0ABAB5), Color(0xFF008F99), Color(0xFF263238)],
   );
 
   static const LinearGradient actionCardSecondaryDark = LinearGradient(
-    colors: [Color(0xFF2DD4BF), Color(0xFF14B8A6), Color(0xFF263238)],
+    colors: [Color(0xFF36C2CE), Color(0xFF3D90D7), Color(0xFF263238)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -158,8 +158,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF42A5F5), // Blue 400
-      Color(0xFF26A69A), // Teal 400
+      Color(0xFF3D90D7), // Blue
+      Color(0xFF77E4C8), // Aqua
     ],
   );
 
@@ -167,8 +167,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF66BB6A), // Green 400
-      Color(0xFFFDD835), // Yellow 600
+      Color(0xFF77E4C8), // Aqua (Darker than Light Green for contrast)
+      Color(0xFFFDD835), // Yellow
     ],
   );
 
@@ -177,8 +177,8 @@ class AppGradients {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF17C5A3), // Primary
-      Color(0xFF0D9488), // Darker Teal
+      Color(0xFF0ABAB5), // Primary Teal
+      Color(0xFF36C2CE), // Cyan
     ],
   );
 }

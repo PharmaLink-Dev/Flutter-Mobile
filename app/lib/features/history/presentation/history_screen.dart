@@ -34,8 +34,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
       backgroundColor: appColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: appColors.primary,
-        foregroundColor: appColors.surface, // Automatically colors title and icons
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(gradient: AppGradients.primaryHeader),
+        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor:
+            appColors.surface, // Automatically colors title and icons
         title: Text(
           'History',
           style: TextStyle(
@@ -273,12 +277,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
         content: Text(
           'This will permanently delete all your scan history. This action cannot be undone.',
-           style: TextStyle(color: appColors.textSecondary),
+          style: TextStyle(color: appColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('Cancel', style: TextStyle(color: appColors.textSecondary)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: appColors.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),

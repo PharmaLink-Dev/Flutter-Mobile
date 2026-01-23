@@ -53,11 +53,11 @@ class RecentScanList extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         // *หมายเหตุ: คุณต้อง import ResultPage มาด้วย*
-          builder: (_) => ResultPage(
-            ingredients: ingredientsForDisplay,
-            imageBytes: item.imageBytes,
-            imagePath: item.imagePath,
-          ),
+        builder: (_) => ResultPage(
+          ingredients: ingredientsForDisplay,
+          imageBytes: item.imageBytes,
+          imagePath: item.imagePath,
+        ),
       ),
     );
   }
@@ -140,7 +140,11 @@ class RecentScanList extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18, color: appColors.text),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            color: appColors.text,
+          ),
         ),
         TextButton(
           // *ใช้ GoRouter เพื่อนำทางไปยังหน้า History หลัก*
@@ -185,23 +189,23 @@ class _IngredientCardRecent extends StatelessWidget {
   // Helper function เพื่อคำนวณ Status และ Color
   Map<String, dynamic> _getDisplayData(AppColorExtension appColors) {
     final highRiskCount = item.ingredients
-        .where((i) => i.riskLevel == 'High')
+        .where((i) => i.riskLevel.toLowerCase() == 'red')
         .length;
     final mediumRiskCount = item.ingredients
-        .where((i) => i.riskLevel == 'Medium')
+        .where((i) => i.riskLevel.toLowerCase() == 'yellow')
         .length;
 
     String statusText;
     Color statusColor;
 
     if (highRiskCount > 0) {
-      statusText = 'High Risk ($highRiskCount)';
+      statusText = 'อันตราย ($highRiskCount)';
       statusColor = appColors.error;
     } else if (mediumRiskCount > 0) {
-      statusText = 'Medium Risk ($mediumRiskCount)';
+      statusText = 'ระมัดระวัง ($mediumRiskCount)';
       statusColor = appColors.warning;
     } else {
-      statusText = 'Safe';
+      statusText = 'ปลอดภัย';
       statusColor = appColors.success;
     }
 
@@ -265,7 +269,10 @@ class _IngredientCardRecent extends StatelessWidget {
                   ),
                   Text(
                     '${DateFormatter.formatTime(item.scanDate)} | ${item.ingredients.length} ingredients',
-                    style: TextStyle(fontSize: 12, color: appColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: appColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -368,7 +375,10 @@ class _FdaCardRecent extends StatelessWidget {
                   ),
                   Text(
                     'FDA Ref: ${item.scanName}',
-                    style: TextStyle(fontSize: 12, color: appColors.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: appColors.textSecondary,
+                    ),
                   ),
                 ],
               ),

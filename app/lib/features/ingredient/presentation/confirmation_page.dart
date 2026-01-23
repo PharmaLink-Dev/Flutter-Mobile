@@ -218,24 +218,22 @@ class _ConfirmationAppBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    final appColors = Theme.of(context).extension<AppColorExtension>()!;
 
     return AppBar(
-      backgroundColor: appColors.primary,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: AppGradients.primaryHeader,
+        ),
+      ),
+      backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      title: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-        decoration: BoxDecoration(
-          color: appColors.surface, // Use surface color for the chip
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Text(
-          'ตรวจสอบผลการสแกน',
-          style: TextStyle(
-            color: appColors.primaryDark, // Contrasting text on surface
-            fontWeight: FontWeight.w600,
-          ),
+      title: Text(
+        'ตรวจสอบผลการสแกน',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
         ),
       ),
     );
@@ -487,22 +485,38 @@ class _ConfirmationFooter extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        SizedBox(
+        Container(
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: canAnalyze ? onAnalyze : null,
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              backgroundColor: appColors.primary,
-              disabledBackgroundColor: appColors.textSecondary.withValues(alpha: 0.5),
-              foregroundColor: appColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: canAnalyze ? AppGradients.button : null,
+            color: canAnalyze ? null : appColors.textSecondary.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: canAnalyze
+                ? [
+                    BoxShadow(
+                      color: appColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: canAnalyze ? onAnalyze : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: Text(
+                  'วิเคราะห์ผล',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: appColors.surface,
+                  ),
+                ),
               ),
-            ),
-            child: const Text(
-              'วิเคราะห์ผล',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
         ),
