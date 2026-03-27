@@ -1,84 +1,64 @@
+import 'package:app/shared/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:app/shared/app_colors.dart';
 
-/// QuickActions: กล่องรวมปุ่มลัด (แสดงปุ่มลัด 2 ปุ่มใน GridView)
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // List of action cards
+    final appColors = Theme.of(context).extension<AppColorExtension>()!;
+
     final actionCards = [
       ActionCard(
-        gradient: AppGradients.scanLabel, // สีพื้นหลังแบบ gradient
-        icon: FontAwesomeIcons.camera, // ไอคอนกล้อง
-        title: "Scan Label", // ชื่อปุ่ม
-        subtitle: "Camera scan", // คำอธิบาย
-        onTap: () => context.go('/scan'), // นำทางไปหน้า /scan
+        gradient: AppGradients.scanLabel,
+        icon: FontAwesomeIcons.camera,
+        title: "สแกนฉลาก",
+        subtitle: "วิเคราะห์ส่วนผสม",
+        onTap: () => context.go('/scan'),
+        shadowColor: const Color(0xFF42A5F5).withValues(alpha: 0.4),
       ),
       ActionCard(
-        gradient: AppGradients.fdaNumber, // สีพื้นหลังแบบ gradient
-        icon: FontAwesomeIcons.qrcode, // ไอคอน QR
-        title: "FDA Number", // ชื่อปุ่ม
-        subtitle: "Quick lookup", // คำอธิบาย
-        onTap: () {
-          // แสดง SnackBar แจ้งว่าฟีเจอร์ยังไม่เปิดใช้งาน
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Coming soon: FDA Number page")),
-          );
-        },
+        gradient: AppGradients.searchFda,
+        icon: FontAwesomeIcons.barcode,
+        title: "ค้นหา FDA",
+        subtitle: "ตรวจสอบใบอนุญาต",
+        onTap: () => context.go('/scan-fda'),
+        shadowColor: const Color(0xFFFDD835).withValues(alpha: 0.4),
       ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title ส่วนหัว "Quick Action"
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 10),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             "Quick Action",
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text, // ใช้สี text จากธีมกลาง
+              fontWeight: FontWeight.w600,
+              color: appColors.text,
             ),
           ),
         ),
-        // Use LayoutBuilder to build a responsive layout
         LayoutBuilder(
           builder: (context, constraints) {
-            // Define a fixed width for each card
-            const cardWidth = 160.0;
-            // Calculate the number of columns that can fit
-            final crossAxisCount = (constraints.maxWidth / cardWidth).floor();
+            const double spacing = 12.0;
+            final double cardWidth = ((constraints.maxWidth - spacing) / 2)
+                .clamp(140.0, 165.0);
 
-            // If it can fit more than one column, use a Row/Wrap like layout.
-            // Otherwise, use a Column.
-            if (crossAxisCount > 1) {
-              return Wrap(
-                spacing: 12, // Horizontal spacing
-                runSpacing: 12, // Vertical spacing
-                alignment: WrapAlignment.spaceEvenly,
-                children: actionCards
-                    .map((card) => SizedBox(
-                          width: cardWidth,
-                          child: card,
-                        ))
-                    .toList(),
-              );
-            } else {
-              return Column(
-                children: actionCards
-                    .map((card) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: card,
-                        ))
-                    .toList(),
-              );
-            }
+            return Center(
+              child: Wrap(
+                spacing: spacing,
+                runSpacing: spacing,
+                alignment: WrapAlignment.center,
+                children: actionCards.map((card) {
+                  return SizedBox(width: cardWidth, child: card);
+                }).toList(),
+              ),
+            );
           },
         ),
       ],
@@ -86,13 +66,13 @@ class QuickActions extends StatelessWidget {
   }
 }
 
-/// ActionCard: ปุ่มลัด 1 ใบ (มี animation ตอน hover และ tap)
 class ActionCard extends StatefulWidget {
-  final LinearGradient gradient; // สีพื้นหลังแบบ gradient
-  final IconData icon; // ไอคอน
-  final String title; // ชื่อปุ่ม
-  final String subtitle; // คำอธิบาย
-  final VoidCallback onTap; // ฟังก์ชันเมื่อกดปุ่ม
+  final LinearGradient gradient;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Color? shadowColor;
 
   const ActionCard({
     super.key,
@@ -101,6 +81,7 @@ class ActionCard extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.shadowColor,
   });
 
   @override
@@ -108,72 +89,104 @@ class ActionCard extends StatefulWidget {
 }
 
 class _ActionCardState extends State<ActionCard> {
-  bool _hover = false; // state สำหรับ hover (mouse over)
-  bool _tap = false; // state สำหรับ tap (คลิก)
+  bool _isTapped = false;
 
-  /// ฟังก์ชันสำหรับ animate ตอน tap (ย่อ scale แล้วกลับมา)
-  void _animateTap(VoidCallback action) async {
-    setState(() => _tap = true); // ย่อ scale
-    await Future.delayed(const Duration(milliseconds: 120));
-    setState(() => _tap = false); // scale กลับมาเหมือนเดิม
-    action(); // เรียกฟังก์ชันที่ส่งมา
+  void _handleTap() async {
+    setState(() => _isTapped = true);
+    await Future.delayed(const Duration(milliseconds: 150));
+    setState(() => _isTapped = false);
+    widget.onTap();
   }
 
   @override
   Widget build(BuildContext context) {
-    // คำนวณ scale: ถ้า tap = 0.95, hover = 1.05, ปกติ = 1.0
-    final scale = _tap ? 0.95 : (_hover ? 1.05 : 1.0);
+    final scale = _isTapped ? 0.95 : 1.0;
+    final Color onGradientColor = Colors.white;
 
-    return MouseRegion(
-      // เมื่อ mouse เข้า widget ให้ set _hover = true
-      onEnter: (_) => setState(() => _hover = true),
-      // เมื่อ mouse ออกจาก widget ให้ set _hover = false
-      onExit: (_) => setState(() => _hover = false),
-      child: AnimatedScale(
-        scale: scale, // ขยาย/ย่อ widget ตาม state
-        duration: const Duration(milliseconds: 120), // ระยะเวลา animation
-        curve: Curves.easeOut, // รูปแบบการเคลื่อนไหว
-        child: Material(
-          color: AppColors.surface, // สีพื้นหลังอ่อนนอกสุด
-          borderRadius: BorderRadius.circular(18),
-          child: InkWell(
-            onTap: () => _animateTap(widget.onTap), // เรียก animation + ฟังก์ชันเมื่อ tap
-            borderRadius: BorderRadius.circular(18),
-            splashColor: Colors.white24, // สีคลื่นน้ำตอน tap
-            highlightColor: Colors.white10, // สี highlight ตอน tap
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: widget.gradient, // สีพื้นหลังแบบ gradient
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.overlay, // เงาโปร่งใส
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+    return AnimatedScale(
+      scale: scale,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: _handleTap,
+          borderRadius: BorderRadius.circular(20),
+          splashColor: onGradientColor.withValues(alpha: 0.2),
+          highlightColor: onGradientColor.withValues(alpha: 0.1),
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 140),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: widget.gradient,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
               ),
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // ไอคอนสีขาวบนพื้น gradient
-                  Icon(widget.icon, color: Colors.white, size: 28),
-                  const SizedBox(height: 12),
-                  // ชื่อปุ่ม
-                  Text(widget.title,
-                      style: const TextStyle(
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      widget.shadowColor ??
+                      Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                  spreadRadius: -2,
+                ),
+              ],
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool showText = constraints.maxWidth > 100;
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        widget.icon,
+                        color: onGradientColor,
+                        size: showText ? 24 : 28,
+                      ),
+                    ),
+                    if (showText) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                  const SizedBox(height: 4),
-                  // คำอธิบายปุ่ม
-                  Text(widget.subtitle,
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white.withOpacity(0.85))),
-                ],
-              ),
+                          color: onGradientColor,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              offset: const Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.subtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: onGradientColor.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         ),
